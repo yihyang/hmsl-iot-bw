@@ -1,0 +1,22 @@
+{
+  "name": "hmsl-iot",
+  "version": "0.0.1",
+  "description": "HMSL IoT Repo",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yihyang/hmsl-iot.git"
+  },
+  "author": "Yih Yang",
+  "license": "UNLICENSED",
+  "bugs": {
+    "url": "https://github.com/yihyang/hmsl-iot/issues"
+  },
+  "homepage": "https://github.com/yihyang/hmsl-iot#readme",
+  "dependencies": {
+    "dotenv": "^8.2.0"
+  }
+}
