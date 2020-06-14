@@ -1,0 +1,13 @@
+html
+  head
+    title HMSL
+    link(rel='stylesheet' href='/assets/bootstrap/css/bootstrap.min.css')
+    link(rel='stylesheet' href='/dist/stylesheets/styles.css')
+    script(src='/assets/jquery/jquery.min.js')
+    script(src='/assets/bootstrap/js/bootstrap.min.js')
+    script(src='/assets/socket.io-client/socket.io.slim.js')
+  body
+    include header
+    block content
+    include footer
+    block footer_scripts

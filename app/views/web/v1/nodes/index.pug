@@ -1,0 +1,75 @@
+extends ./../../../layouts/default
+
+block content
+  .container
+    .row.my-3
+      .col.text-center
+        p Welcome to HSML IOT Portal
+        = currentUser
+
+    .row
+      .col.col-md-8
+        .row
+          .col
+            .card
+              .card-body.nodes-map
+                for n in nodes
+                  .node-item.text-center(class=`node-${n.id}`, data-status=n.current_status)
+                    p= n.id
+                    p= n.nane
+                    p.status= n.current_status
+
+      .col.col-md-4
+        .card
+          .card-body
+            table.table.table-status-count
+              tr
+                th Status
+                th Count
+              tr
+                td.node-color-running RUNNING
+                td.cell-status-count.running 0
+              tr
+                td.node-color-stopped STOPPED
+                td.cell-status-count.stopped 0
+              tr
+                td.node-color-unknown UNKNOWN
+                td.cell-status-count.unknown 0
+
+block footer_scripts
+  script.
+    let socket = io.connect('#{socketIoHost}')
+    socket.on('connect', function() {
+      console.log('Socket connected')
+    })
+    socket.on('nodeStatusUpdate', function(data) {
+      $(`.node-item.node-${data.id} > .status`).html(data.status);
+      $(`.node-item.node-${data.id}`).attr('data-status', data.status);
+      updateStatusCountTable();
+      console.log('Broadcast received: ' + JSON.stringify(data));
+    })
+
+    //- refresh on page load
+    updateStatusCountTable();
+
+    //- perform update to the status count table
+    function updateStatusCountTable()
+    {
+      let result = $('.node-item')
+        .get()
+        .reduce(function(carry, item) {
+          if (carry[$(item).attr('data-status')]) {
+            carry[$(item).attr('data-status')]++;
+          } else {
+            carry[$(item).attr('data-status')] = 1;
+          }
+
+          return carry;
+        }, {})
+
+      $('.cell-status-count').html(0);
+      for (const key in result) {
+        let lowerCaseStatus = key.toLowerCase();
+        $(`.cell-status-count.${lowerCaseStatus}`).html(result[key]);
+      }
+    }

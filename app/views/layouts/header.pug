@@ -1,0 +1,15 @@
+navbar.navbar.navbar-expand-lg.navbar-dark.bg-dark
+  a.navbar-brand(href="/") HMSL IOT
+  button.navbar-toggler(type="button" data-toggle="collapse" data-target="#navbar-collapse" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation")
+    .navbar-toggler-icon
+  .collapse.navbar-collapse#navbar-collapse
+    ul.navbar-nav.mr-auto
+      if signedIn
+        li.nav-item
+          a(href='/sign-out') Sign Out
+      else
+        li.nav-item
+          a(href='/sign-in') Sign In
+    form.form-inline.my-2.my-lg-0
+      if signedIn && currentUser.name
+        | Hi #{currentUser.name}

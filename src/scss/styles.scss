@@ -1,0 +1,55 @@
+@mixin status-style-unknown {
+  background-color: #212121;
+    color: white;
+}
+@mixin status-style-error {
+  background-color: #9C27B0;
+  color: white;
+}
+@mixin status-style-running {
+  background-color: #4CAF50;
+  color: white;
+}
+@mixin status-style-stopped {
+  background-color: #EF5350;
+  color: white;
+}
+
+.node-color-unknown {
+  @include status-style-unknown
+}
+
+.node-color-error {
+  @include status-style-error
+}
+
+.node-color-running {
+  @include status-style-running
+}
+
+.node-color-stopped {
+  @include status-style-stopped
+}
+
+.nodes-map {
+  .node-item {
+    padding: 1em;
+    max-width: 8em;
+
+    &[data-status="UNKNOWN"] {
+      @include status-style-unknown
+    }
+
+    &[data-status="ERROR"] {
+      @include status-style-error
+    }
+
+    &[data-status="RUNNING"] {
+      @include status-style-running
+    }
+
+    &[data-status="STOPPED"] {
+      @include status-style-stopped
+    }
+  }
+}
