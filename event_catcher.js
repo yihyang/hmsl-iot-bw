@@ -41,7 +41,7 @@ function statusMapper(rawData) {
   }
 }
 
-async function insertNewEvent(nodeId, protocol, status, rawData) {
+async function insertNewEvent(nodeId, method, status, rawData) {
   console.log(`Insert New event ${status} to node with ID: ${nodeId}`);
 
   new Event({
@@ -49,16 +49,16 @@ async function insertNewEvent(nodeId, protocol, status, rawData) {
     start_time: moment(),
     status: status,
     raw_data: rawData,
-    start_time: protocol,
+    start_time_fetch_method: method,
   }).save();
 }
 
-async function updateEventEndTime(event, protocol) {
+async function updateEventEndTime(event, method) {
   let currentTime = moment();
   console.log(`Set event ${event.id} end time to ${currentTime}`);
 
   event.set('end_time', currentTime);
-  event.set('end_time_fetch_protocol', protocol);
+  event.set('end_time_fetch_method', method);
   await event.save();
 }
 
@@ -72,7 +72,7 @@ async function updateNodeCurrentStatus(nodeId, status) {
   });
 }
 
-async function processNodeStatus(node, protocol, status, rawData) {
+async function processNodeStatus(node, method, status, rawData) {
   let nodeCurrentEvent = node.current_event;
   let nodeObject = node.toJSON();
   nodeCurrentStatus = nodeObject.current_status;
@@ -84,8 +84,8 @@ async function processNodeStatus(node, protocol, status, rawData) {
   });
   // not event existed insert first event
   if (lastEvent === null) {
-    await updateNodeCurrentStatus(node.id, protocol, status, rawData);
-    await insertNewEvent(node.id, protocol, status, rawData);
+    await updateNodeCurrentStatus(node.id, status);
+    await insertNewEvent(node.id, method, status, rawData);
 
     return;
   }
@@ -97,10 +97,10 @@ async function processNodeStatus(node, protocol, status, rawData) {
 
   // update event that has not been closed
   if (lastEvent.end_time == null) {
-    updateEventEndTime(lastEvent, protocol);
+    updateEventEndTime(lastEvent, method);
   }
-  await updateNodeCurrentStatus(node.id, protocol, status, rawData);
-  await insertNewEvent(node.id, protocol, status, rawData);
+  await updateNodeCurrentStatus(node.id, method, status, rawData);
+  await insertNewEvent(node.id, method, status, rawData);
 }
 
 // start server
