@@ -15,3 +15,18 @@ svc.on('uninstall',function(){
 
 // Uninstall the service.
 svc.uninstall();
+
+var svc2 = new Service({
+  name:'HMSL IOT Event Catcher',
+  description: 'HMSL IOT Event Catcher',
+  script: 'C:\\hmsl-iot\\repo\\hmsl-iot\\event_catcher.js'
+});
+
+// Listen for the "uninstall" event so we know when it's done.
+svc2.on('uninstall',function(){
+  console.log('Uninstall complete.');
+  console.log('The service exists: ',svc2.exists);
+});
+
+// Uninstall the service.
+svc2.uninstall();

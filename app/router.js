@@ -6,21 +6,18 @@ const mapApiRoutes = require('./routers/api');
 const { apiAuthentication, webAuthentication } = require('./helpers/authentication');
 var passport = require('../config/passport-initialize');
 
-module.exports = (app) => {
-  // Inject areas into all requests for all to use
-  // TODO: Consider moving this into cache
-  // async function insertArea(req, res, next) {
-  //   // res.locals.areas = (await new Area().fetchAll()).toJSON()
-  //   next()
-  // }
+module.exports = (app, tmpUpload) => {
 
   app.post('/auth', )
+  app.use('/oee', webAuthentication);
+  app.use('/nodes', webAuthentication);
   app.use('/portal', webAuthentication);
+  app.use('/po-outputs', webAuthentication);
 
   app.get('/', web.v1.home.index)
-  app.prefix('/portal', function(portal) {
-    mapWebV1PortalRoutes(portal)
-  });
+
+  mapWebV1PortalRoutes(app, tmpUpload)
+
   app.prefix('/api', function(api) {
     mapApiRoutes(api)
   });

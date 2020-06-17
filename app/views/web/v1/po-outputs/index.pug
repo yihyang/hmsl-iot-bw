@@ -1,0 +1,68 @@
+extends ./../../../layouts/default
+include ./../../../shared/mixins
+
+block content
+  .container
+    .row
+      .col
+        a.btn.btn-link.my-2(href="/portal")
+          i.fa.fa-arrow-left
+          | &nbsp;Back to Home Page
+
+    .row.my-3
+      .col
+        h2 PO Outputs
+
+    .row
+      .col.text-right
+        input#file-upload(type="file", accept=".csv")
+
+    .row.mt-3
+      .col
+        table.table
+          tr
+            th id
+            th Uploaded By
+            th PO Number
+            th Material Number
+            th Material Description
+            th Target Quantity
+            th Unit
+            th Target Completion Date
+            th Created At
+
+          for p in poOutputs
+            tr
+              td= p.id
+              td= p.user ? p.user.name : ''
+              td= p.po_number
+              td= p.material_number
+              td= p.material_description
+              td= p.target_quantity
+              td= p.unit
+              td
+                +format_date(p.target_completion_date)
+              td
+                +format_datetime(p.created_at)
+
+  script.
+    $('#file-upload').on('change', function() {
+      // The Javascript
+      var fileInput = document.getElementById('file-upload');
+      var file = fileInput.files[0];
+      var formData = new FormData();
+      formData.append('file', file);
+
+      var xhr = new XMLHttpRequest();
+      // Add any event handlers here...
+      xhr.open('POST', '/po-outputs/shortfall', true);
+      xhr.send(formData)
+
+      xhr.onreadystatechange = function() {
+        if (xhr.readyState == XMLHttpRequest.DONE) {
+          if (xhr.status === 200) {
+            location.reload;
+          }
+        }
+      }
+    })

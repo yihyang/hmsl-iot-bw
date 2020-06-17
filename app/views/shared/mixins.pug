@@ -1,0 +1,19 @@
+mixin format_date(date)
+  if date != null
+    =date.getDate() + "/" + (date.getMonth()+1) +  "/" + date.getFullYear()
+
+
+mixin format_datetime(date)
+  if date != null
+    - hours = date.getHours();
+    - minutes = date.getMinutes();
+    - seconds = date.getSeconds();
+    //- force format into 2 digit
+    - seconds = ("0" + seconds).slice(-2)
+
+    - ampm = hours >= 12 ? 'PM' : 'AM';
+    - hours = hours % 12;
+    - hours = hours ? hours : 12; // the hour '0' should be '12'
+    - minutes = minutes < 10 ? '0'+minutes : minutes;
+    - strTime = hours + ':' + minutes + ':' + seconds + ampm;
+    =date.getDate() + "/" + (date.getMonth()+1) +  "/" + date.getFullYear() + "  " + strTime

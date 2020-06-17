@@ -1,5 +1,7 @@
 const express = require('express')
+const multer  = require('multer')
 const router = require('./app/router')
+const tmpUpload = multer({ dest: 'tmp/uploads/' });
 const path = require('path')
 const http = require('http')
 const socketIo = require('socket.io')
@@ -49,7 +51,7 @@ app.use(bodyParser.urlencoded({
 app.locals.signedIn = false;
 
 // setting routes
-router(app)
+router(app, tmpUpload)
 
 app.set('view engine', 'pug')
 app.set('views', './app/views')
@@ -57,7 +59,12 @@ app.set('views', './app/views')
 app.use('/dist', express.static(path.join(__dirname, 'dist')));
 app.use('/assets/bootstrap', express.static(path.join(__dirname, 'node_modules/bootstrap/dist')));
 app.use('/assets/jquery', express.static(path.join(__dirname, 'node_modules/jquery/dist')));
-app.use('/assets/socket.io-client', express.static(__dirname + '/node_modules/socket.io-client/dist/'));
+app.use('/assets/socket.io-client', express.static(__dirname + '/node_modules/socket.io-client/dist'));
+app.use('/assets/font-awesome/css', express.static(__dirname + '/node_modules/font-awesome/css'));
+app.use('/assets/font-awesome/fonts', express.static(__dirname + '/node_modules/font-awesome/fonts'));
+app.use('/assets/bootstrap-daterangepicker', express.static(__dirname + '/node_modules/bootstrap-daterangepicker'));
+app.use('/assets/moment', express.static(__dirname + '/node_modules/moment/dist'));
+app.use('/assets/noty', express.static(__dirname + '/node_modules/noty/lib'));
 
 
 // io

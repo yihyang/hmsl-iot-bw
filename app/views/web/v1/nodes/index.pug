@@ -5,7 +5,6 @@ block content
     .row.my-3
       .col.text-center
         p Welcome to HSML IOT Portal
-        = currentUser
 
     .row
       .col.col-md-8
@@ -13,11 +12,12 @@ block content
           .col
             .card
               .card-body.nodes-map
-                for n in nodes
-                  .node-item.text-center(class=`node-${n.id}`, data-status=n.current_status)
-                    p= n.id
-                    p= n.nane
-                    p.status= n.current_status
+                .row
+                  for n in nodes
+                    .col
+                      .node-item.text-center(class=`node-${n.id}`, data-status=n.current_status)
+                        p= n.name
+                        p.status= n.current_status
 
       .col.col-md-4
         .card

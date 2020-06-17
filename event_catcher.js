@@ -30,32 +30,35 @@ const {
 
 
 
-function statusMapper(rawStatus) {
-  switch (rawStatus) {
-    case '1000':
+function statusMapper(rawData) {
+  switch (rawData) {
+    case '0010':
       return 'RUNNING';
-    case '0100':
+    case '1000':
       return 'STOPPED';
     default:
       return 'UNKNOWN';
   }
 }
 
-async function insertNewEvent(nodeId, status) {
+async function insertNewEvent(nodeId, protocol, status, rawData) {
   console.log(`Insert New event ${status} to node with ID: ${nodeId}`);
 
   new Event({
     node_id: nodeId,
     start_time: moment(),
-    status: status
+    status: status,
+    raw_data: rawData,
+    start_time: protocol,
   }).save();
 }
 
-async function updateEventEndTime(event) {
+async function updateEventEndTime(event, protocol) {
   let currentTime = moment();
   console.log(`Set event ${event.id} end time to ${currentTime}`);
 
   event.set('end_time', currentTime);
+  event.set('end_time_fetch_protocol', protocol);
   await event.save();
 }
 
@@ -65,11 +68,11 @@ async function updateNodeCurrentStatus(nodeId, status) {
   new Node({
     id: nodeId
   }).save({
-    current_status: status
+    current_status: status,
   });
 }
 
-async function processNodeStatus(node, status) {
+async function processNodeStatus(node, protocol, status, rawData) {
   let nodeCurrentEvent = node.current_event;
   let nodeObject = node.toJSON();
   nodeCurrentStatus = nodeObject.current_status;
@@ -81,8 +84,8 @@ async function processNodeStatus(node, status) {
   });
   // not event existed insert first event
   if (lastEvent === null) {
-    await updateNodeCurrentStatus(node.id, status);
-    await insertNewEvent(node.id, status);
+    await updateNodeCurrentStatus(node.id, protocol, status, rawData);
+    await insertNewEvent(node.id, protocol, status, rawData);
 
     return;
   }
@@ -94,10 +97,10 @@ async function processNodeStatus(node, status) {
 
   // update event that has not been closed
   if (lastEvent.end_time == null) {
-    updateEventEndTime(lastEvent);
+    updateEventEndTime(lastEvent, protocol);
   }
-  await updateNodeCurrentStatus(node.id, status);
-  await insertNewEvent(node.id, status);
+  await updateNodeCurrentStatus(node.id, protocol, status, rawData);
+  await insertNewEvent(node.id, protocol, status, rawData);
 }
 
 // start server
@@ -147,13 +150,14 @@ app.post('/io_log', function(req, res) {
     }
 
     let record = data['Record'];
-    let rawStatus = record.map((item) => {
+    let rawData = record.map((item) => {
       return item[3];
     }).join('');
-    let status = statusMapper(rawStatus);
+    rawData = rawData.substr(0, 4);  // remove DO
+    let status = statusMapper(rawData);
 
     console.log(`[${moment()}] [PUSH] Node "${node.toJSON().name}" (id: ${node.id}), status: ${status}`);
-    await processNodeStatus(node, status);
+    await processNodeStatus(node, 'PUSH', status, rawData);
 
     res.sendStatus(200);
   })
@@ -173,12 +177,12 @@ schedule.scheduleJob('0,10,20,30,40,50 * * * * *', async () => {
     let url = 'http://' + jsonNode.ip_address + '/di_value/slot_0';
 
     let response = await axios.get(url, options);
-    let rawStatus = response.data['DIVal'].map((item) => item['Val']).join('');
-    let status = statusMapper(rawStatus);
+    let rawData = response.data['DIVal'].map((item) => item['Val']).join('');
+    let status = statusMapper(rawData);
 
-    let node = await new Node(jsonNode.id).fetch();
+    let node = await new Node({id: jsonNode.id}).fetch();
     console.log(`[${moment()}] [PULL] Node "${node.toJSON().name}" (id: ${node.id}), status: ${status}`);
-    processNodeStatus(node, status);
+    processNodeStatus(node, 'PULL', status, rawData);
   });
 });
 

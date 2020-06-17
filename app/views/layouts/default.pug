@@ -3,9 +3,18 @@ html
     title HMSL
     link(rel='stylesheet' href='/assets/bootstrap/css/bootstrap.min.css')
     link(rel='stylesheet' href='/dist/stylesheets/styles.css')
+    link(rel='stylesheet' href='/assets/font-awesome/css/font-awesome.min.css')
+    link(rel='stylesheet' href='/assets/bootstrap-daterangepicker/daterangepicker.css')
+    link(rel='stylesheet', href='/assets/noty/noty.css')
+    link(rel='stylesheet', href='/assets/noty/themes/bootstrap-v4.css')
+
     script(src='/assets/jquery/jquery.min.js')
     script(src='/assets/bootstrap/js/bootstrap.min.js')
+    script(src='/assets/bootstrap-daterangepicker/moment.min.js')
+    script(src='/assets/bootstrap-daterangepicker/daterangepicker.js')
     script(src='/assets/socket.io-client/socket.io.slim.js')
+    script(src='/assets/noty/noty.min.js')
+
   body
     include header
     block content

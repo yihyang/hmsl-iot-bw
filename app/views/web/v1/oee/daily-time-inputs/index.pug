@@ -1,0 +1,199 @@
+extends ./../../../../layouts/default
+
+block content
+  .container
+    .row
+      .col
+        a.btn.btn-link.my-2(href="/oee")
+          i.fa.fa-arrow-left
+          | &nbsp;Back to OEE Page
+
+    .row
+      .col-12
+        h1
+          i.fa.fa-calendar
+          | &nbsp;
+          | Daily Time Input
+        br
+
+    .row
+      .col-md-6
+        input.form-control(type="text", name="selected-date")
+
+    .row
+      .col
+        button.btn.btn-primary.btn-set-default.mx-2.my-2(data-area=area, data-value=0, data-type="availability") Set All Availability to 0 hours
+        button.btn.btn-primary.btn-set-default.mx-2.my-2(data-area=area, data-value=12, data-type="availability") Set All Availability to 12 hours
+
+    .row
+      .col
+        table.table
+          tr
+            th Machine Name
+            th AM
+            th PM
+          for n in nodes
+            tr
+              td= n.name
+              td
+                input.form-control.input-values(id=`node-${n.id}-am-availability`, type="number", name="n.id", min="0", max="12", required="true", value=n.am_availablitity, data-node_id=n.id, data-node_area=n.area, data-type="am_availability")
+              td
+                input.form-control.input-values(id=`node-${n.id}-pm-availability`, type="number", name="n.id", min="0", max="12", required="true", value=n.pm_availability, data-node_id=n.id, data-node_area=n.area, data-type="pm_availability")
+
+  script.
+    $(function() {
+      $('input[name="selected-date"]').daterangepicker({
+        singleDatePicker: true,
+        showDropdowns: true,
+        minYear: 2020,
+        maxYear: parseInt(moment().format('YYYY'),1),
+        locale: {
+          format: 'DD/MM/YYYY'
+        }
+      }, function(start, end, label) {
+        clearAndResetValues(start.format('DD/MM/YYYY'));
+      });
+    });
+
+    $( document ).ready(function() {
+      clearAndResetValues(moment().format('DD/MM/YYYY'));
+    });
+
+    function clearAndResetValues(date) {
+      $.ajax({
+        url: '/oee/daily-time-inputs/fetch-by-date?date=' + date,
+        type: 'GET',
+        success: function(response) {
+          $('.input-values').val('');
+
+          response.forEach(function(item) {
+            $(`#node-${item.node_id}-am-availability`).val(item.am_availability);
+            $(`#node-${item.node_id}-pm-availability`).val(item.pm_availability);
+          })
+          console.log(response.data)
+        }
+      })
+    }
+
+    function updateValues(type, area, node_id, value, date) {
+      let schedule = ''
+      if (type = "am_availability") {
+        schedule = 'am';
+      } else if (type = "pm_availability") {
+        schedule = 'pm';
+      }
+      let data = {
+        value: value,
+        date: date
+      };
+
+      $.ajax({
+        url: '/oee/daily-time-inputs/' + node_id + '/' + schedule,
+        data: data,
+        type: 'PUT',
+        success: function(response) {
+          new Noty({
+            type: 'success',
+            text: response.message,
+            theme: 'bootstrap-v4',
+            timeout: 2000,
+          }).show()
+        },
+        error: function(response) {
+          let {
+            errors
+          } = JSON.parse(response.responseText);
+          errors.forEach((error) => {
+            new Noty({
+              type: 'error',
+              text: error.message,
+              theme: 'bootstrap-v4',
+              timeout: 2000,
+            }).show()
+
+            //- fixed values
+            let domName = `#node-${node_id}-${type}`;
+            $(domName).val(error.corrected_value);
+          });
+
+        }
+      });
+    }
+
+
+    $('.input-values').on('change', function() {
+      let dom = $(this);
+      let type = dom.data('type');
+      let area = dom.data('area');
+      let node_id = dom.data('node_id');
+      let value = dom.val();
+      let date = $('input[name="selected-date"]').val();
+
+      updateValues(type, area, node_id, value, date);
+    });
+
+    function clearAndResetValues(date) {
+      $.ajax({
+        url: '/oee/daily-time-inputs/fetch-by-date?date=' + date,
+        type: 'GET',
+        success: function(response) {
+          $('.input-values').val('');
+
+          response.forEach(function(item) {
+            $(`#node-${item.node_id}-am-availability`).val(item.am_availability);
+            $(`#node-${item.node_id}-pm-availability`).val(item.pm_availability);
+          })
+          console.log(response.data)
+        }
+      })
+    }
+
+    $('.btn-set-default').on('click', function() {
+
+      let area = $(this).data('area');
+      let value = $(this).data('value');
+      let type = $(this).data('type');
+
+      if (!confirm(`Are you sure you want to set all ${type} to ${value} hours?`)) {
+        return;
+      }
+
+      let url = `/oee/daily-time-inputs/set-default-values`;
+      let date = $('input[name="selected-date"]').val();
+      let data = {
+        type,
+        area,
+        date,
+        value,
+      };
+
+      $.ajax({
+        url: url,
+        data: data,
+        type: 'PUT',
+        success: function(response) {
+          new Noty({
+            type: 'success',
+            text: response.message,
+            theme: 'bootstrap-v4',
+            timeout: 2000,
+          }).show()
+          clearAndResetValues(date);
+
+        },
+        error: function(response) {
+          console.log('failure');
+          let {
+            errors
+          } = JSON.parse(response.responseText);
+          errors.forEach((error) => {
+            new Noty({
+              type: 'error',
+              text: error.message,
+              theme: 'bootstrap-v4',
+              timeout: 2000,
+            }).show()
+          });
+        }
+      });
+    });
