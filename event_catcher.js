@@ -99,7 +99,7 @@ async function processNodeStatus(node, method, status, rawData) {
   if (lastEvent.end_time == null) {
     updateEventEndTime(lastEvent, method);
   }
-  await updateNodeCurrentStatus(node.id, method, status, rawData);
+  await updateNodeCurrentStatus(node.id, status);
   await insertNewEvent(node.id, method, status, rawData);
 }
 
