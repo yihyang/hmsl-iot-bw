@@ -4,8 +4,8 @@ const web = require('./../../../controllers/web')
 module.exports = (app, tmpUpload) => {
     app.get('/portal', web.v1.home.index)
 
-    app.get('/po-outputs', web.v1.poOutputs.index)
-    app.post('/po-outputs/shortfall', tmpUpload.single('file'), web.v1.poOutputs.shortfall.upload)
+    app.get('/po-records', web.v1.poRecords.index)
+    app.post('/po-records/shortfall', tmpUpload.single('file'), web.v1.poRecords.shortfall.upload)
 
     app.get('/nodes', web.v1.nodes.index)
 

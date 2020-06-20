@@ -1,17 +1,22 @@
 
 exports.up = function(knex, Promise) {
-  return knex.schema.createTable('po_outputs', function(t) {
+  return knex.schema.createTable('po_records', function(t) {
     t.increments('id').unsigned().primary();
+
+    t.string('status').nullable();
     t.integer('user_id').nullable();
 
     t.string('po_number').nullable();
     t.string('material_number').nullable();
     t.string('material_description').nullable();
-    t.integer('target_quantity').nullable();
-    t.string('unit').nullable();
+    t.double('target_quantity').notNullable().defaultTo(0);
+    t.double('produced_quantity').notNullable().defaultTo(0);
     t.date('target_completion_date').nullable();
 
     t.index(['user_id'], 'index_user_id');
+
+    t.dateTime('ended_at').nullable().defaultTo(null);
+    t.integer('ended_by').nullable().defaultTo(null);
 
     t.dateTime('created_at').notNullable().defaultTo(knex.raw('now()'));
     t.dateTime('updated_at').nullable().defaultTo(null);
@@ -20,5 +25,5 @@ exports.up = function(knex, Promise) {
 };
 
 exports.down = function(knex, Promise) {
-  return knex.schema.dropTable('po_outputs');
+  return knex.schema.dropTable('po_records');
 };

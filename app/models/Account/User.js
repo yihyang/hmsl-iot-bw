@@ -56,7 +56,7 @@ var User = bookshelf.Model.extend({
     return await new User({
       id: user.id
     }).fetch({
-      columns: ['id', 'username', 'employee_id', 'name']
+      columns: ['id', 'username', 'employee_id', 'name', 'access_token']
     })
   },
   async authenticateWithEmployeeId(employeeId) {
@@ -75,7 +75,7 @@ var User = bookshelf.Model.extend({
     return await new User({
       id: user.id
     }).fetch({
-      columns: ['id', 'username', 'employee_id', 'name']
+      columns: ['id', 'username', 'employee_id', 'name', 'access_token']
     })
   }
 });

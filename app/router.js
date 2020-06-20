@@ -8,11 +8,12 @@ var passport = require('../config/passport-initialize');
 
 module.exports = (app, tmpUpload) => {
 
-  app.post('/auth', )
+  app.post('/auth')
+  app.use('/gwo', webAuthentication);
   app.use('/oee', webAuthentication);
   app.use('/nodes', webAuthentication);
   app.use('/portal', webAuthentication);
-  app.use('/po-outputs', webAuthentication);
+  app.use('/po-records', webAuthentication);
 
   app.get('/', web.v1.home.index)
 

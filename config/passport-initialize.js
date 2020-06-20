@@ -1,6 +1,7 @@
 const rootPath = '..';
 const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
+var BearerStrategy = require('passport-http-bearer').Strategy;
 const User = require(`${rootPath}/app/models/Account/User`);
 
 passport.use(new LocalStrategy({
@@ -8,7 +9,6 @@ passport.use(new LocalStrategy({
     passwordField: 'password'
   },
   function(username, password, done) {
-    console.log('test')
     User.where('username', username)
       .fetch({
         require: false
@@ -29,6 +29,22 @@ passport.use(new LocalStrategy({
       .catch(err => {
         return done(err);
       })
+  }
+));
+
+/**
+ * Find the Operator and authorize
+ */
+passport.use('userHttpBearer', new BearerStrategy(
+  async function(token, done) {
+
+    let user = await User.where({access_token: token}).fetch({require: false});
+
+    if(!user) {
+      return done(null, false);
+    }
+
+    return done(null, user);
   }
 ));
 

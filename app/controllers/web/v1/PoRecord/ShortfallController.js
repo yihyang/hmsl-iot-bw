@@ -1,7 +1,7 @@
 const rootPath = './../../../../..';
 const fs = require('fs');
 const moment = require('moment')
-const PoOutput = require(`${rootPath}/app/models/PoOutput/PoOutput`)
+const PoRecord = require(`${rootPath}/app/models/PoRecord/PoRecord`)
 const csv = require('csv-parser');
 
 let upload = async function(req, res) {
@@ -18,13 +18,13 @@ let upload = async function(req, res) {
       if(data['PO Number'] == '' || data['Material Number'] == '') {
         return;
       }
-      let existingPoOutput = await new PoOutput({
+      let existingPoRecord = await new PoRecord({
           po_number: data['PO Number'],
           material_number: data['Material Number']
       }).fetch({require: false});
 
 
-      if(!existingPoOutput) {
+      if(!existingPoRecord) {
         let targetCompletionDate = moment(data['Target Completion Date'], "DD/MM/YYYY").toISOString();
 
         let savingData = {
@@ -32,12 +32,11 @@ let upload = async function(req, res) {
           po_number: data['PO Number'],
           material_number: data['Material Number'],
           material_description: data['Material Description'],
-          target_quantity: data['Target Quantity'],
-          unit: data['Unit'],
+          target_quantity: parseInt(data['Target Quantity']) / 1000,
           target_completion_date: targetCompletionDate
         }
 
-        await new PoOutput(savingData).save();
+        await new PoRecord(savingData).save();
       }
     })
     .on('end', function() {

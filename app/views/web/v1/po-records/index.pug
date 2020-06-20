@@ -11,7 +11,7 @@ block content
 
     .row.my-3
       .col
-        h2 PO Outputs
+        h2 PO Records
 
     .row
       .col.text-right
@@ -26,12 +26,11 @@ block content
             th PO Number
             th Material Number
             th Material Description
-            th Target Quantity
-            th Unit
+            th Target Quantity (KG)
             th Target Completion Date
             th Created At
 
-          for p in poOutputs
+          for p in poRecords
             tr
               td= p.id
               td= p.user ? p.user.name : ''
@@ -39,7 +38,6 @@ block content
               td= p.material_number
               td= p.material_description
               td= p.target_quantity
-              td= p.unit
               td
                 +format_date(p.target_completion_date)
               td
@@ -55,13 +53,13 @@ block content
 
       var xhr = new XMLHttpRequest();
       // Add any event handlers here...
-      xhr.open('POST', '/po-outputs/shortfall', true);
+      xhr.open('POST', '/po-records/shortfall', true);
       xhr.send(formData)
 
       xhr.onreadystatechange = function() {
         if (xhr.readyState == XMLHttpRequest.DONE) {
           if (xhr.status === 200) {
-            location.reload;
+            location.reload();
           }
         }
       }
