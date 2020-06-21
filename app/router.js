@@ -1,12 +1,20 @@
+const rootPath = './..';
 const mapWebV1PortalRoutes = require('./routers/web/v1/portal')
 const mapUsersRoutes = require('./routers/web/v1/users');
 const web = require('./controllers/web')
 const mapApiRoutes = require('./routers/api');
 // const Area = require('./models/Node/Area/Area')
 const { apiAuthentication, webAuthentication } = require('./helpers/authentication');
-var passport = require('../config/passport-initialize');
+const passport = require(`${rootPath}/config/passport-initialize`);
+const settings = require(`${rootPath}/config/settings`);
 
 module.exports = (app, tmpUpload) => {
+
+  // site settings
+  app.use('/', function(req, res, next) {
+    res.locals.SITE_NAME = settings.SITE_NAME;
+    next()
+  });
 
   app.post('/auth')
   app.use('/gwo', webAuthentication);
