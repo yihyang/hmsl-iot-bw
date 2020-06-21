@@ -28,7 +28,7 @@ const app = express()
 const server = http.createServer(app)
 const io = socketIo(server);
 
-const APP_PORT_NUMBER = process.env.APP_PORT_NUMBER || 8080
+const PORT = process.env.PORT || 8080
 
 // passport
 app.use(session({
@@ -79,6 +79,6 @@ io.on('connection', function(socket) {
   })
 })
 
-server.listen(APP_PORT_NUMBER, function() {
-  console.log(`Server started at Port ${APP_PORT_NUMBER}`)
+server.listen(PORT, function() {
+  console.log(`Server started at Port ${PORT}`)
 })
