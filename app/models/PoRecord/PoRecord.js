@@ -8,7 +8,7 @@ const PoRecord = bookshelf.model('PoRecord', {
   hasTimestamps: true,
   tableName: 'po_records',
   jobs() {
-    return this.hasMany(PoJob)
+    return this.hasMany(require('./PoJob'))
   },
   user() {
     return this.belongsTo(User)

@@ -1,0 +1,52 @@
+extends ./../../../layouts/default
+include ./../../../shared/mixins
+
+block content
+  .container
+    .row
+      .col
+        a.btn.btn-link.my-2(href="/gwo")
+          i.fa.fa-arrow-left
+          | &nbsp;
+          | Back to GWO
+
+    .row
+      h2 GWO
+
+    .row
+      .col
+        table.table
+          tr
+            th ID
+            td= gwo.id
+          tr
+            th Type
+            td= gwo.type
+          tr
+            th Reason
+            td= gwo.reason ? gwo.reason.name : ''
+          tr
+            th Start Time
+            td
+              + format_datetime(gwo.start_time)
+          tr
+            th End Time
+            td
+              + format_datetime(gwo.end_time)
+    .row
+      .col
+        h3 Machines
+        for i in gwo.gwo_items
+          table.table
+            th Machine Name
+            td= i.node.name
+          h4 Spare Part Usages
+          table.table
+            tr
+              th Name
+              th Quantity
+            for sp in i.spare_part_usages
+              if sp.spare_part
+                tr
+                  td= sp.spare_part.name
+                  td= sp.spare_part_quantity

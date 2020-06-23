@@ -1,0 +1,46 @@
+extends ./../../../layouts/default
+include ./../../../shared/mixins
+
+block content
+  .container
+    .row.mt-5
+      .col
+        h1 GWO
+      .col.text-right
+        a(href="/gwo/settings")
+          i.fa.fa-cog(aria-hidden="true")
+          | &nbsp;Settings
+
+    .row
+      include ./../../../shared/pagination
+    .row
+      .col
+        a.btn.btn-primary.my-2(href="/gwo/new")
+          i.fa.fa-plus-circle
+          | &nbsp;Add New GWO
+
+    .row.my-3
+      table.table
+        tr
+          th ID
+          th Type
+          th Start Time
+          th End Time
+          th Duration
+          th Machines
+          th Reason
+          th Created By
+        for g in gwos
+          tr
+            td= g.id
+            td= g.type
+            td
+              +format_datetime(g.start_time)
+            td
+              +format_datetime(g.end_time)
+            td
+              if g.duration
+                +format_time_from_seconds(g.duration)
+            td= g.gwo_items == [] ? '' : g.gwo_items.map((x) => { return x.node ? x.node.name : '' }).join(', ')
+            td= g.reason ? g.reason.name : ''
+            td= g.user ? g.user.name : ''

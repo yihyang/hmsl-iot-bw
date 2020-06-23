@@ -8,8 +8,7 @@ exports.up = function(knex, Promise) {
     t.double('output_quantity').nullable().defaultTo(0);
     t.integer('user_id').nullable();
 
-    t.dateTime('created_at').notNullable().defaultTo(knex.raw('now()'));
-    t.dateTime('updated_at').nullable().defaultTo(null);
+    t.timestamps();
     t.dateTime('deleted_at').nullable().defaultTo(null);
   })
 };

@@ -17,3 +17,19 @@ mixin format_datetime(date)
     - minutes = minutes < 10 ? '0'+minutes : minutes;
     - strTime = hours + ':' + minutes + ':' + seconds + ampm;
     =date.getDate() + "/" + (date.getMonth()+1) +  "/" + date.getFullYear() + "  " + strTime
+
+
+mixin format_time_from_seconds(seconds)
+    - hh = Math.floor(seconds / 60 / 60)
+    - seconds -= hh * 60 * 60
+    - mm = Math.floor(seconds / 60)
+    - seconds -= mm * 60
+    - ss = seconds
+    - result = ''
+    if hh!= 0
+      - result += hh + ' hours '
+    if mm!= 0
+      - result += mm + ' minutes '
+    if ss!= 0
+      - result += ss + ' seconds'
+    =result

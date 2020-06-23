@@ -11,8 +11,7 @@ exports.up = function(knex) {
 
     t.unique(['node_id', 'date']);
 
-    t.dateTime('created_at').notNullable().defaultTo(knex.raw('now()'));
-    t.dateTime('updated_at').nullable().defaultTo(knex.raw('now()'));
+    t.timestamps();
     t.dateTime('deleted_at').nullable();
   });
 };

@@ -11,8 +11,7 @@ exports.up = function(knex, Promise) {
     t.dateTime('ended_at').nullable().defaultTo(null);
     t.integer('ended_by').nullable().defaultTo(null);
 
-    t.dateTime('created_at').notNullable().defaultTo(knex.raw('now()'));
-    t.dateTime('updated_at').nullable().defaultTo(null);
+    t.timestamps();
     t.dateTime('deleted_at').nullable().defaultTo(null);
   })
 };

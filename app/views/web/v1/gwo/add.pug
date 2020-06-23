@@ -1,0 +1,141 @@
+extends ./../../../layouts/default
+
+block content
+  .container
+    .row
+      .col
+        a.btn.btn-link.my-2(href="/gwo")
+          i.fa.fa-arrow-left
+          | &nbsp;
+          | Back to GWO
+    .row.mt-5
+      .col
+        h1 Add New GWO
+    .row
+      .col
+        //- form
+        form#form(action="/gwo" method="POST")
+          .form-group.row
+            .col-md-4
+              label(for="start_time") Start Time
+            .col-md-8
+              input.form-control(type="datetime" name="start_time" required="true")
+          .form-group.row
+            .col-md-4
+              label(for="end_time") End Time
+            .col-md-8
+              input.form-control(type="datetime" name="end_time" required="true")
+
+          .form-group.row
+            .col-md-4
+              label(for="type") Type
+            .col-md-8
+              select.form-control(name="type")
+                option(value="planned") planned
+                option(value="unplanned") unplanned
+
+          .form-group.row
+            .col-md-4
+              label(for="gwo_reason_id") Reason
+            .col-md-8
+              select.form-control(name="gwo_reason_id")
+                for r in reasons
+                  option(value=r.id)
+                    = r.name
+
+          .form-group.row
+            .col-12
+              h4 Machines
+          .form-group.row
+            .col-12
+              button.btn.btn-primary(v-on:click="addGwoItem()", onclick="return false;") Add Gwo Item
+          .form-group.row#gwo-items(ref="gwoItems")
+            .col
+              .card.card-body
+                div(v-for="(gwoItem, index) in gwoItems")
+                  .row
+                    .col-md-6
+                      label(:name="'gwo_items[' + index + '][node_id]'") Machine
+                      //- select.form-control(:name="'gwo_items[' + index + '][node_id]'")
+                      //-   option(:value="node.id", v-for="node in nodes") {{node.name}}
+                      select-2(:options="nodes", :name="'gwo_items[' + index + '][node_id]'", required="true")
+                    //- .col-md-6
+                    //-   button.btn.btn-danger(v-on:click="removeCurrentGwoItem(index)", onclick="return false;") Remove this item
+                  button.btn.btn-primary.my-3(v-on:click="addSparePart(index)", onclick="return false;") Add Spare Part
+                  div(v-for="(sparePart, sparePartIndex) in gwoItems[index].spareParts")
+                    .row
+                      .col-md-6
+                        label(:name="'gwo_items[' + index + '][spare_parts][' + sparePartIndex + '][gwo_spare_part_id]'") SparePart
+                        //- select.form-control(:name="'gwo_items[' + index + '][spare_parts][' + sparePartIndex + '][gwo_spare_part_id]'" required="true")
+                        //-   option(:value="sparePart.id", v-for="sparePart in spareParts") {{sparePart.title}}
+                        select-2(:options="spareParts", :name="'gwo_items[' + index + '][spare_parts][' + sparePartIndex + '][gwo_spare_part_id]'", required="true")
+                      .col-md-6
+                        label(:for="'gwo_items[' + index + '][spare_parts][' + sparePartIndex + '][spare_part_quantity]'") Quantity
+                        input.form-control(type="number" :name="'gwo_items[' + index + '][spare_parts][' + sparePartIndex + '][spare_part_quantity]'" required="true")
+
+                  .row
+                    .col-12
+                      label(:for="'gwo_items[' + index + '][notes]'") Notes
+                      textarea.form-control(type="number" :name="'gwo_items[' + index + '][notes]'")
+
+                  hr
+
+          button.btn.btn-primary(type="submit") Save
+  style.
+    #gwo-items {
+      display: none;
+    }
+
+  script.
+    //- vue js
+    var vm;
+    $(document).ready(function() {
+      vm = new Vue({
+        el: '#form',
+        data: {
+          nodes: !{JSON.stringify(nodes)},
+          spareParts: !{JSON.stringify(spareParts)},
+          gwoItems: []
+        },
+        methods: {
+          addSparePart: function(index) {
+            this.gwoItems[index].spareParts.push({});
+          },
+          addGwoItem: function() {
+            this.gwoItems.push({spareParts: []});
+          },
+          removeCurrentGwoItem: function(index) {
+            this.gwoItems.splice(index, 1);
+          },
+        }
+      });
+    });
+
+    let dateTimeFormat = 'YYYY-MM-DD hh:mm:ss A'
+    $(function() {
+      $('input[name="start_time"]').daterangepicker(
+        {
+          singleDatePicker: true,
+          timePicker: true,
+          locale: {
+            format: dateTimeFormat
+          }
+        },
+        function(start, end, label) {}
+      );
+
+      $('input[name="end_time"]').daterangepicker(
+        {
+          singleDatePicker: true,
+          timePicker: true,
+          locale: {
+            format: dateTimeFormat
+          }
+        },
+        function(start, end, label) {}
+      );
+
+      document.getElementById('gwo-items').style.display = "block";
+    });
+
+  include ../../../shared/components/vue-select-2.pug

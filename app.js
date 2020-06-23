@@ -65,6 +65,8 @@ app.use('/assets/font-awesome/fonts', express.static(__dirname + '/node_modules/
 app.use('/assets/bootstrap-daterangepicker', express.static(__dirname + '/node_modules/bootstrap-daterangepicker'));
 app.use('/assets/moment', express.static(__dirname + '/node_modules/moment/dist'));
 app.use('/assets/noty', express.static(__dirname + '/node_modules/noty/lib'));
+app.use('/assets/select2', express.static(__dirname + '/node_modules/select2/dist'));
+app.use('/assets/vue', express.static(__dirname + '/node_modules/vue/dist'));
 
 
 // io

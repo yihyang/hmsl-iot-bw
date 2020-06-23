@@ -33,19 +33,22 @@ let showByPoNumber = async function(req, res) {
 
 let save = async function (req, res) {
   let userId = req.user.id;
-  let {po_number, target_quantity, material_number} = req.body;
+  let {po_number, target_quantity, material_number, target_completion_date} = req.body;
 
-  let poRecord = (await new PoRecord({po_number, material_number}).fetch({require: false}));
+  let poRecord = (await new PoRecord({po_number}).fetch({require: false}));
 
   if (poRecord) {
     return res
       .status(422)
       .json(
-        respondError("Duplicated Record", "PO Record with the same po number and material number found", 422)
+        respondError("Duplicated Record", "PO Record with the same po number found", 422)
       )
   }
 
-  poRecord = await new PoRecord({po_number, material_number, target_quantity, user_id: userId, status: 'Created'}).save();
+  // target_completion_date = moment(target_completion_date);
+  // console.log(target_completion_date);
+
+  poRecord = await new PoRecord({po_number, material_number, target_quantity, target_completion_date, user_id: userId, status: 'Created'}).save();
 
   poRecord = poRecord.toJSON();
 
@@ -73,7 +76,7 @@ let end = async function(req, res) {
       )
   }
 
-  if (poRecord.toJSON().status === 'Ende2d') {
+  if (poRecord.toJSON().status === 'Ended') {
     return res
       .status(422)
       .json(

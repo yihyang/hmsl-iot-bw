@@ -10,6 +10,6 @@ module.exports = {
     poRecord,
     poJob,
     poBatch,
-    node
+    node,
   }
 }

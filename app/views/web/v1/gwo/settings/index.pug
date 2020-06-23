@@ -1,0 +1,22 @@
+extends ./../../../../layouts/default
+
+block content
+  .container
+    .row
+      .col
+        a.btn.btn-link.mt-2(href="/gwo")
+          i.fa.fa-arrow-left
+          | &nbsp;Back to GWO
+
+    .row.mt-5
+      .col
+        h1 GWO
+    .row.my-3
+      .col-md-6.col-sm-12
+        .card.card-body
+          h2 Settings
+          ul
+            a(href="/gwo/settings/spare-parts")
+              li Spare Parts
+            a(href="/gwo/settings/reasons")
+              li Reasons

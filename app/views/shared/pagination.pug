@@ -1,0 +1,40 @@
+//- need 3 variables: current_path, current_page and total_page
+//- get current page
+
+- two_page_before = current_page - 2
+- one_page_before = current_page - 1
+- one_page_after = current_page + 1
+- two_page_after = current_page + 2
+
+nav(aria-label="Page navigation example")
+  ul.pagination
+    li.page-item(class=(current_page == 1 ? 'disabled' : ''))
+      a.page-link(href=current_path + "?page=" + 1)
+        span(aria-hidden="true") &laquo;
+        span.sr-only Previous
+
+    //- current page - 2
+    if two_page_before > 0
+      li.page-item
+        a.page-link(href=current_path + "?page=" + two_page_before )= two_page_before
+
+    if one_page_before > 0
+      li.page-item
+        a.page-link(href=current_path + "?page=" + one_page_before )= one_page_before
+
+    //- current page
+    li.page-item.active
+      a.page-link(href="#")= current_page
+
+    //- current page - 2
+    if one_page_after <= total_page
+      li.page-item
+        a.page-link(href=current_path + "?page=" + one_page_after )= one_page_after
+
+    if two_page_after < total_page
+      li.page-item
+        a.page-link(href=current_path + "?page=" + two_page_after )= two_page_after
+    li.page-item(class=(current_page == (total_page) ? 'disabled' : ''))
+      a.page-link(href=current_path + "?page=" + total_page)
+        span(aria-hidden="true") &raquo;
+        span.sr-only Next
