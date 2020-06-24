@@ -1,6 +1,6 @@
 const rootPath = './../../..';
 const bookshelf = require(`${rootPath}/config/bookshelf`);
-const GwoItem = require('./Gwoitem');
+const GwoItem = require('./GwoItem');
 const SparePart = require('./GwoSparePart');
 
 // General Work Order
