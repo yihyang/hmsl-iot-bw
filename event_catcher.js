@@ -153,8 +153,8 @@ app.post('/io_log', function(req, res) {
     let rawData = record.map((item) => {
       return item[3];
     }).join('');
-    rawData = rawData.substr(0, 4);  // remove DO
-    let status = statusMapper(rawData);
+    let sanitizedRawData = rawData.substr(0, 4);  // remove DO
+    let status = statusMapper(sanitizedRawData);
 
     console.log(`[${moment()}] [PUSH] Node "${node.toJSON().name}" (id: ${node.id}), status: ${status}`);
     await processNodeStatus(node, 'PUSH', status, rawData);
