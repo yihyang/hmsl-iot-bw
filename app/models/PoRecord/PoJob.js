@@ -11,7 +11,7 @@ const PoJob = bookshelf.model('PoJob', {
     return this.belongsTo(PoRecord)
   },
   node() {
-    return this.belongsTo(Node)
+    return this.belongsTo(require('./../Node/Node'))
   },
   user() {
     return this.belongsTo(User)
