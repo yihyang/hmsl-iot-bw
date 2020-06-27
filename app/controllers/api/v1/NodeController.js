@@ -4,7 +4,7 @@ const {respondError, respondSuccessWithData} = require(`${rootPath}/app/helpers/
 
 let showByName = async function(req, res) {
   let {name} = req.params;
-  let node = (await new Node({name}).fetch({require: false, withRelated: ['active_po_job']}));
+  let node = (await new Node({name}).fetch({require: false, withRelated: ['active_po_job.po_record']}));
 
   if (!node) {
     return res
