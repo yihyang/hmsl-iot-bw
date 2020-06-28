@@ -18,8 +18,8 @@ let showByName = async function(req, res) {
   res.status(200)
     .json(
       respondSuccessWithData(
-        "Object found",
-        "Found PO with provided PO Number",
+        "Machine found",
+        "Found Machine with provided Machine Name",
         node
       )
     )

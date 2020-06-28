@@ -86,7 +86,11 @@ let end = async function(req, res) {
 
   poRecord = (await new PoRecord({id}).save({status: 'Ended', ended_by: userId, ended_at: moment()}, {patch: true}));
 
-  await PoJob.where({po_record_id: id}).save({status: 'Ended', ended_by: userId, ended_at: moment()}, {patch: true});
+  let poJobs = await PoJob.where({po_record_id: id}).fetch({require: false});
+
+  if (poJobs) {
+    await PoJob.where({po_record_id: id}).save({status: 'Ended', ended_by: userId, ended_at: moment()}, {patch: true});
+  }
 
   poRecord = poRecord.toJSON();
   res.status(200)
