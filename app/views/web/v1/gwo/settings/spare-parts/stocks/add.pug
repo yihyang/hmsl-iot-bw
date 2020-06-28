@@ -1,0 +1,22 @@
+extend ./../../../../../../layouts/default
+
+block content
+  .container
+    .row
+      .col
+        a.btn.btn-link.mt-2(href="/gwo/settings/spare-parts/")
+          i.fa.fa-arrow-left
+          | &nbsp;Back to GWO Spare Parts Stocks
+
+    .row.text-center
+      h1 Add GWO Spare Part
+
+    .row
+      .col-md-6.col-sm-12
+        //- form
+        form(method="POST" action=`/gwo/settings/spare-parts/${gwoSparePart.id}/stocks`)
+          .form-group
+            label(for="quantity") Quantity
+            input.form-control(type="text" name="quantity" required="true")
+
+          button.btn.btn-primary(type="submit") Save

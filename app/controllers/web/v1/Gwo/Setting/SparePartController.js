@@ -3,6 +3,7 @@ const {
   getPaginationAttributes,
 } = require(`${rootPath}/app/helpers/route`);
 const GwoSparePart = require(`${rootPath}/app/models/Gwo/GwoSparePart`);
+const stocks = require('./SparePart/StockController');
 
 let index = async function(req, res) {
   let paginationAttribute = getPaginationAttributes(req);
@@ -13,7 +14,7 @@ let index = async function(req, res) {
         .limit(paginationAttribute.items_per_page)
     })
     .orderBy('id', 'ASC')
-    .fetchAll();
+    .fetchAll({withRelated: ['user']});
 
   gwoSpareParts = gwoSpareParts.toJSON();
 
@@ -33,18 +34,23 @@ let edit = async (req, res) => {
 }
 
 let update = async (req, res) => {
-  let {name, quantity} = req.body;
+  let {sp, spc, item, area, minimum_quantity} = req.body;
   let gwoSparePart = await new GwoSparePart({id: req.params.id}).fetch()
 
-  gwoSparePart.save({name, quantity}, {patch: true})
+  gwoSparePart.save({sp, spc, item, area, minimum_quantity}, {patch: true})
 
   res.redirect('/gwo/settings/spare-parts')
 }
 
 let save = async (req, res) => {
-  let {name, quantity} = req.body;
+  let user = req.user;
+  let userId = null;
+  if (user) {
+    userId = user.id;
+  }
+  let {sp, spc, item, area, minimum_quantity} = req.body;
 
-  await new GwoSparePart({name, quantity}).save()
+  await new GwoSparePart({sp, spc, item, area, minimum_quantity, user_id: userId}).save()
 
   res.redirect('/gwo/settings/spare-parts')
 }
@@ -63,5 +69,6 @@ module.exports = {
   edit,
   update,
   save,
-  show
+  show,
+  stocks
 }

@@ -14,12 +14,21 @@ block content
     .row
       .col-md-6.col-sm-12
         //- form
-        form(method="POST" action='/gwo/settings/spare-parts/'+ sparePart.id + '/update')
+        form(method="POST" action='/gwo/settings/spare-parts/'+ gwoSparePart.id + '/update')
           .form-group
-            label(for="name") Name
-            input.form-control(type="text" name="name" value=sparePart.name)
+            label(for="sp") SP
+            input.form-control(type="text" name="sp" value=gwoSparePart.sp)
           .form-group
-            label(for="quantity") Quantity
-            input.form-control(type="number" name="quantity" value=sparePart.quantity)
+            label(for="spc") SPC
+            input.form-control(type="text" name="spc" value=gwoSparePart.spc)
+          .form-group
+            label(for="item") Item
+            input.form-control(type="text" name="item" value=gwoSparePart.item)
+          .form-group
+            label(for="area") Area
+            input.form-control(type="text" name="area" value=gwoSparePart.area)
+          .form-group
+            label(for="quantity") Minimum Quantity
+            input.form-control(type="number" name="quantity" value=gwoSparePart.minimum_quantity)
 
           button.btn.btn-primary(type="submit") Update

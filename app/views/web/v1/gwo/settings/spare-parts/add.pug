@@ -16,11 +16,20 @@ block content
         //- form
         form(method="POST" action='/gwo/settings/spare-parts')
           .form-group
-            label(for="name") Name
-            input.form-control(type="text" name="name")
+            label(for="sp") SP
+            input.form-control(type="text" name="sp")
+          .form-group
+            label(for="spc") SPC
+            input.form-control(type="text" name="spc")
+          .form-group
+            label(for="item") Item
+            input.form-control(type="text" name="item")
+          .form-group
+            label(for="area") Area
+            input.form-control(type="text" name="area")
 
           .form-group
-            label(for="quantity") Quantity
-            input.form-control(type="number" name="quantity")
+            label(for="minimum_quantity") Minimum Quantity
+            input.form-control(type="number" name="minimum_quantity")
 
           button.btn.btn-primary(type="submit") Save

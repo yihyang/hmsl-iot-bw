@@ -22,15 +22,30 @@ block content
       table.table
         tr
           th ID
-          th Name
-          th Quantity
+          th SP
+          th SPC
+          th Item
+          th Area
+          th Status
+          th Added By
+          th Minimum Quantity
+          th Current Quantity
           th Actions
         for sp in gwoSpareParts
           tr
             td= sp.id
-            td= sp.name
-            td= sp.quantity
+            td= sp.sp
+            td= sp.spc
+            td= sp.item
+            td= sp.area
+            td= sp.status
+            td= sp.user ? sp.user.name : ''
+            td= sp.minimum_quantity
+            td= sp.current_quantity
             td
               a.btn.btn-link(href=`/gwo/settings/spare-parts/${sp.id}/edit`)
                 i.fa.fa-pencil-square-o
                 | &nbsp;Edit
+              a.btn.btn-link(href=`/gwo/settings/spare-parts/${sp.id}/stocks`)
+                i.fa.fa-list-alt
+                | &nbsp;Stock

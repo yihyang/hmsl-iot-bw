@@ -9,7 +9,7 @@ const PoBatch = bookshelf.model('PoBatch', {
   tableName: 'po_batches',
   initialize() {
     this.on('saved', (model) => {
-      PoRecord.updateOutputQuantity(model.id);;
+      PoRecord.updateOutputQuantity(model.id);
     })
   },
   po_job() {

@@ -24,6 +24,7 @@ module.exports = (app, tmpUpload) => {
     app.get('/gwo/settings/reasons/new', web.v1.gwo.settings.reasons.add)
     app.get('/gwo/settings/reasons/:id/edit', web.v1.gwo.settings.reasons.edit)
     app.post('/gwo/settings/reasons/:id/update', web.v1.gwo.settings.reasons.update)
+    app.post('/gwo/settings/reasons/:id/update', web.v1.gwo.settings.reasons.update)
     app.post('/gwo/settings/reasons', web.v1.gwo.settings.reasons.save)
 
     app.get('/gwo/settings/spare-parts', web.v1.gwo.settings.spareParts.index)
@@ -31,6 +32,9 @@ module.exports = (app, tmpUpload) => {
     app.get('/gwo/settings/spare-parts/:id/edit', web.v1.gwo.settings.spareParts.edit)
     app.post('/gwo/settings/spare-parts/:id/update', web.v1.gwo.settings.spareParts.update)
     app.post('/gwo/settings/spare-parts', web.v1.gwo.settings.spareParts.save)
+    app.get('/gwo/settings/spare-parts/:sparePartId/stocks/new', web.v1.gwo.settings.spareParts.stocks.add)
+    app.get('/gwo/settings/spare-parts/:sparePartId/stocks', web.v1.gwo.settings.spareParts.stocks.index)
+    app.post('/gwo/settings/spare-parts/:sparePartId/stocks', web.v1.gwo.settings.spareParts.stocks.save)
 
     app.get('/oee', web.v1.oee.index)
     app.get('/oee/daily-time-inputs', web.v1.oee.dailyTimeInputs.index)
