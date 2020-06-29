@@ -27,6 +27,7 @@ block content
             th Material Number
             th Material Description
             th Target Quantity (KG)
+            th Produced Quantity (KG)
             th Target Completion Date
             th Created At
 
@@ -38,6 +39,7 @@ block content
               td= p.material_number
               td= p.material_description
               td= p.target_quantity
+              td= p.produced_quantity
               td
                 +format_date(p.target_completion_date)
               td
