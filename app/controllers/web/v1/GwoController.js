@@ -44,11 +44,11 @@ let add = async (req, res) => {
 
   let spareParts = await GwoSparePart
     .query((query) => {
-      query.orderBy('name', 'ASC')
+      query.orderBy('item', 'ASC')
     })
     .fetchAll();
   spareParts = spareParts.toJSON();
-  spareParts = mapOptionsForSelect2(spareParts, 'id', 'name');
+  spareParts = mapOptionsForSelect2(spareParts, 'id', 'item');
 
   let reasons = await GwoReason
     .query((query) => {
