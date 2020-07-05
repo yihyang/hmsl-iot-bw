@@ -6,6 +6,13 @@ block content
       .col.text-center
         p= `Welcome to ${SITE_NAME} Portal`
 
+    if signedIn
+      .row.mt-5
+        .col.text-right
+          a(href="/settings")
+            i.fa.fa-cog(aria-hidden="true")
+            | &nbsp;Settings
+
     .card.my-4
       .card-body
         .row.my-4

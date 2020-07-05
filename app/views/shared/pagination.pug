@@ -34,6 +34,7 @@ nav(aria-label="Page navigation example")
     if two_page_after < total_page
       li.page-item
         a.page-link(href=current_path + "?page=" + two_page_after )= two_page_after
+
     li.page-item(class=(current_page == (total_page) ? 'disabled' : ''))
       a.page-link(href=current_path + "?page=" + total_page)
         span(aria-hidden="true") &raquo;

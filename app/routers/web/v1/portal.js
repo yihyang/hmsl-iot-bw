@@ -42,4 +42,9 @@ module.exports = (app, tmpUpload) => {
     app.get('/oee/daily-time-inputs/update', web.v1.oee.dailyTimeInputs.update)
     app.put('/oee/daily-time-inputs/:nodeId/:schedule(am|pm)', web.v1.oee.dailyTimeInputs.update)
     app.put('/oee/daily-time-inputs/set-default-values', web.v1.oee.dailyTimeInputs.setDefaultValues)
+
+    app.get('/settings', web.v1.settings.index)
+    app.get('/settings/users', web.v1.settings.users.index)
+    app.get('/settings/users/:id/edit', web.v1.settings.users.edit)
+    app.post('/settings/users/:id/update', web.v1.settings.users.update)
 }

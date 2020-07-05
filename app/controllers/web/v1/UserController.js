@@ -28,7 +28,6 @@ function sign_in(req, res) {
 }
 
 function new_session(req, res, next) {
-  console.log('new_session');
   passport.authenticate('local', function(err, user, info) {
     if (err) { return next(err); }
     if (!user) { return res.redirect('/sign-in'); }

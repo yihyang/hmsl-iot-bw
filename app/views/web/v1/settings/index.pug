@@ -1,0 +1,21 @@
+extends ./../../../layouts/default
+
+block content
+  .container
+    .row
+      .col
+        a.btn.btn-link.my-2(href="/portal")
+          i.fa.fa-arrow-left(aria-hidden="true")
+          | &nbsp;
+          | Back to Home Page
+
+    .row.my-3
+      .col
+        h1 Settings
+
+
+    .card.my-4
+      .card-body
+        .row.my-4
+          .col-4
+            a.btn.btn-primary.btn-block(href="/settings/users") Users

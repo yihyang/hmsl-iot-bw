@@ -1,0 +1,40 @@
+extends ./../../../../layouts/default
+
+block content
+  .container
+    .row
+      .col
+        a.btn.btn-link.my-2(href="/settings/users")
+          i.fa.fa-arrow-left(aria-hidden="true")
+          | &nbsp;
+          | Back to Users
+    .row.mt-5
+      .col
+        h1
+          i.fa.fa-user(aria-hidden="true")
+          | &nbsp;Edit User
+    .row
+      .col
+        form#form(action=`/settings/users/${user.id}/update` method="POST")
+          .form-group.row
+            .col-md-4
+              label(for="id") ID
+            .col-md-8
+              = user.id
+          .form-group.row
+            .col-md-4
+              label(for="username") Username
+            .col-md-8
+              = user.username
+          .form-group.row
+            .col-md-4
+              label(for="name") Name
+            .col-md-8
+              input.form-control(type="text" name="name" required="true" value=user.name)
+          .form-group.row
+            .col-md-4
+              label(for="employee_id") Employee ID
+            .col-md-8
+              input.form-control(type="text" name="employee_id" required="true" value=user.employee_id)
+
+          button.btn.btn-primary(type="submit") Update
