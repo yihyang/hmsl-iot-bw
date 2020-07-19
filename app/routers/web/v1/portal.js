@@ -8,6 +8,7 @@ module.exports = (app, tmpUpload) => {
     app.post('/po-records/shortfall', tmpUpload.single('file'), web.v1.poRecords.shortfall.upload)
 
     app.get('/nodes', web.v1.nodes.index)
+    app.get('/nodes/:id', web.v1.nodes.show)
 
     app.get('/gwo', web.v1.gwo.index)
     app.get('/gwo/new', web.v1.gwo.add)

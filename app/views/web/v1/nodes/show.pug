@@ -1,0 +1,27 @@
+extends ./../../../layouts/default
+
+block content
+  .container
+    .row.my-3
+      .col
+        table.table
+          tr
+            th ID
+            td= node.id
+          tr
+            th Name
+            td= node.name
+
+        h2 Recent Events
+        table.table
+          tr
+            th ID
+            th Status
+            th Start Time
+            th End Time
+          for e in recentEvents
+            tr
+              td= e.id
+              td= e.status
+              td= e.start_time
+              td= e.end_time
