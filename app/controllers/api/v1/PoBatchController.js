@@ -6,6 +6,7 @@ const {respondError, respondSuccessWithData} = require(`${rootPath}/app/helpers/
 let save = async function (req, res) {
   let userId = req.user.id;
   let {po_job_id, output_quantity} = req.body;
+  output_quantity = output_quantity / 1000; // adjust from gram to kg
 
   // validate po_job exists
   let poJob = (await new PoJob({id: po_job_id}).fetch({require: false}))

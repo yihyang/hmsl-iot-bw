@@ -23,11 +23,12 @@ block content
           tr
             th id
             th Uploaded By
+            th Status
             th PO Number
             th Material Number
             th Material Description
-            th Target Quantity (KG)
-            th Produced Quantity (KG)
+            th Target Quantity (g)
+            th Produced Quantity (g)
             th Target Completion Date
             th Created At
 
@@ -35,6 +36,7 @@ block content
             tr
               td= p.id
               td= p.user ? p.user.name : ''
+              td= p.status
               td= p.po_number
               td= p.material_number
               td= p.material_description
