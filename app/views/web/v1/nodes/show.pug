@@ -1,9 +1,17 @@
 extends ./../../../layouts/default
+include ./../../../shared/mixins
 
 block content
   .container
+    .row
+      .col
+        a.btn.btn-link(href=`/nodes`)
+          i.fa.fa-arrow-left
+          | &nbsp;Back to All Machines Page
     .row.my-3
       .col
+        h2 Machine #{node.name}
+        br
         table.table
           tr
             th ID
@@ -11,7 +19,7 @@ block content
           tr
             th Name
             td= node.name
-
+        br
         h2 Recent Events
         table.table
           tr
@@ -23,5 +31,12 @@ block content
             tr
               td= e.id
               td= e.status
-              td= e.start_time
-              td= e.end_time
+              td
+                + format_datetime(e.start_time)
+              td
+                + format_datetime(e.end_time)
+    .row
+      .col.text-right
+        a(href=`/nodes/${node.id}/events`)
+          | View more Machine #{node.name} Events&nbsp;
+          i.fa.fa-arrow-right(aria-hidden="true")

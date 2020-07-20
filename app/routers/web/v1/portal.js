@@ -9,6 +9,7 @@ module.exports = (app, tmpUpload) => {
 
     app.get('/nodes', web.v1.nodes.index)
     app.get('/nodes/:id', web.v1.nodes.show)
+    app.get('/nodes/:id/events', web.v1.nodes.events.index)
 
     app.get('/gwo', web.v1.gwo.index)
     app.get('/gwo/new', web.v1.gwo.add)

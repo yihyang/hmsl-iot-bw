@@ -15,9 +15,10 @@ block content
                 .row
                   for n in nodes
                     .col
-                      .node-item.text-center(class=`node-${n.id}`, data-status=n.current_status)
-                        p= n.name
-                        p.status= n.current_status
+                      a(href=`/nodes/${n.id}`)
+                        .node-item.text-center(class=`node-${n.id}`, data-status=n.current_status)
+                          p= n.name
+                          p.status= n.current_status
 
       .col.col-md-4
         .card

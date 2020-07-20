@@ -2,6 +2,7 @@ const rootPath = './../../..'
 // const Area = require(`${rootPath}/models/Node/Area/Area`)
 const Node = require(`${rootPath}/models/Node/Node`)
 const Event = require(`${rootPath}/models/Node/Event`)
+const events = require('./Node/EventController')
 
 let index = async function(req, res) {
   let nodes = (await new Node().fetchAll()).toJSON();
@@ -13,9 +14,11 @@ let show = async function(req, res) {
   let {id} = req.params;
   let node = (await new Node({id}).fetch({require: false})).toJSON();
   let recentEvents = (
-    await new Event({node_id: id})
+    await new Event()
       .query(function (qb) {
-        qb.orderBy('id', 'DESC')
+        qb
+          .where('node_id', id)
+          .orderBy('id', 'DESC')
           .limit(10)
       })
       .fetchAll()
@@ -26,5 +29,6 @@ let show = async function(req, res) {
 
 module.exports = {
   index,
-  show
+  show,
+  events
 }
