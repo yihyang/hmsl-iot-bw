@@ -1,0 +1,22 @@
+script.
+  function utility_format_datetime(date) {
+    if(date != null) {
+      date = new Date(date);
+      let hours = date.getHours();
+      let minutes = date.getMinutes();
+      let seconds = date.getSeconds();
+      // let force format into 2 digit
+      seconds = ("0" + seconds).slice(-2)
+
+      let ampm = (hours >= 12) ? 'PM' : 'AM';
+      hours = hours % 12;
+      hours = hours ? hours : 12; // the hour '0' should be '12'
+      minutes = minutes < 10 ? '0'+minutes : minutes;
+      let strTime = hours + ':' + minutes + ':' + seconds + ampm;
+      return date.getDate() + "/" + (date.getMonth()+1) +  "/" + date.getFullYear() + "  " + strTime;
+    }
+  }
+  function roundToDecimalPoint(num, precision = 2) {
+    let roundUp = Math.pow(10, precision);
+    return Math.round(num * roundUp) / roundUp;
+  }
