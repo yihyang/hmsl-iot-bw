@@ -57,6 +57,7 @@ app.set('view engine', 'pug')
 app.set('views', './app/views')
 
 app.use('/dist', express.static(path.join(__dirname, 'dist')));
+app.use('/public', express.static(path.join(__dirname, 'public')));
 app.use('/assets/bootstrap', express.static(path.join(__dirname, 'node_modules/bootstrap/dist')));
 app.use('/assets/jquery', express.static(path.join(__dirname, 'node_modules/jquery/dist')));
 app.use('/assets/socket.io-client', express.static(__dirname + '/node_modules/socket.io-client/dist'));
@@ -67,6 +68,7 @@ app.use('/assets/moment', express.static(__dirname + '/node_modules/moment/dist'
 app.use('/assets/noty', express.static(__dirname + '/node_modules/noty/lib'));
 app.use('/assets/select2', express.static(__dirname + '/node_modules/select2/dist'));
 app.use('/assets/vue', express.static(__dirname + '/node_modules/vue/dist'));
+app.use('/assets/chart.js', express.static(__dirname + '/node_modules/chart.js/dist'));
 
 
 // io

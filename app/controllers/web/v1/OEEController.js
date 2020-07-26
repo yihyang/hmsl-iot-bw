@@ -1,5 +1,6 @@
 const rootPath = './../../..'
 let dailyTimeInputs = require('./OEE/DailyTimeInputController')
+let dashboard = require('./OEE/DashboardController')
 
 let index = async function(req, res) {
   res.render('web/v1/oee/index')
@@ -7,5 +8,6 @@ let index = async function(req, res) {
 
 module.exports = {
   index,
-  dailyTimeInputs
+  dailyTimeInputs,
+  dashboard
 }

@@ -31,6 +31,8 @@ block content
             th Produced Quantity (g)
             th Target Completion Date
             th Created At
+            th Start Time
+            th End Time
 
           for p in poRecords
             tr
@@ -46,6 +48,10 @@ block content
                 +format_date(p.target_completion_date)
               td
                 +format_datetime(p.created_at)
+              td
+                +format_datetime(p.start_time)
+              td
+                +format_datetime(p.end_time)
 
   script.
     $('#file-upload').on('change', function() {

@@ -1,3 +1,5 @@
+const moment = require('moment');
+
 const rootPath = './../../..';
 const bookshelf = require(`${rootPath}/config/bookshelf`);
 const Node = require('./../Node/Node');
@@ -7,6 +9,26 @@ const PoJob = require('./PoJob');
 const PoRecord = bookshelf.model('PoRecord', {
   hasTimestamps: true,
   tableName: 'po_records',
+  initialize() {
+    this.on('creating', function(model, attrs, options) {
+      if (attrs.status == null) {
+        attrs.status = 'Created'
+      }
+    }),
+    this.on('saving', function(model, attrs, options) {
+      // insert duration if the PO Record has been set to ended
+      let {
+        status,
+        start_time,
+        end_time,
+      } = attrs;
+      if (status === 'Ended' && (start_time && !end_time)) {
+        let endTime = moment()
+        attrs.end_time = endTime
+        attrs.duration = endTime.diff(moment(start_time))
+      }
+    })
+  },
   jobs() {
     return this.hasMany(require('./PoJob'))
   },

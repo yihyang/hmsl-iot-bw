@@ -39,6 +39,8 @@ module.exports = (app, tmpUpload) => {
     app.post('/gwo/settings/spare-parts/:sparePartId/stocks', web.v1.gwo.settings.spareParts.stocks.save)
 
     app.get('/oee', web.v1.oee.index)
+    app.get('/oee/dashboard', web.v1.oee.dashboard.index)
+    app.get('/oee/dashboard/refresh', web.v1.oee.dashboard.refresh)
     app.get('/oee/daily-time-inputs', web.v1.oee.dailyTimeInputs.index)
     app.get('/oee/daily-time-inputs/fetch-by-date', web.v1.oee.dailyTimeInputs.fetchByDate)
     app.get('/oee/daily-time-inputs/update', web.v1.oee.dailyTimeInputs.update)
