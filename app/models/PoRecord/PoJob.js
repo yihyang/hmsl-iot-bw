@@ -5,6 +5,7 @@ const bookshelf = require(`${rootPath}/config/bookshelf`);
 const Node = require('./../Node/Node');
 const User = require('./../Account/User');
 const PoRecord = require('./PoRecord');
+const PoBatch = require('./PoBatch');
 
 const PoJob = bookshelf.model('PoJob', {
   hasTimestamps: true,
@@ -20,8 +21,14 @@ const PoJob = bookshelf.model('PoJob', {
       }
     })
   },
+  ended_by() {
+    return this.belongsTo(User, 'ended_by')
+  },
   po_record() {
     return this.belongsTo(PoRecord)
+  },
+  po_batches() {
+    return this.hasMany(PoBatch)
   },
   node() {
     return this.belongsTo(require('./../Node/Node'))

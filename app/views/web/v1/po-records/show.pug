@@ -1,0 +1,70 @@
+extends ./../../../layouts/default
+include ./../../../shared/mixins
+
+block content
+  .container
+    .row
+      .col
+        a.btn.btn-link.my-2(href="/po-records")
+          i.fa.fa-arrow-left
+          | &nbsp;Back to PO Records Page
+    .row
+      .col
+        h2 PO Records #{poRecord.id}
+    .row
+      .col
+        table.table
+          tr
+            th ID
+            td= poRecord.id
+          tr
+            th Status
+            td= poRecord.status
+          tr
+            th PO Number
+            td= poRecord.po_number
+          tr
+            th Material Number
+            td= poRecord.material_number
+          tr
+            th Target Quantity (g)
+            td= poRecord.target_quantity
+          tr
+            th Produced Quantity (g)
+            td= poRecord.produced_quantity
+
+    .row
+      .col
+        h3 Jobs
+        table.table
+          tr
+            th ID
+            th Ended At
+            th Ended By
+            th Created At
+            th Batches
+          for j in poJobs
+            tr
+              td= j.id
+              td
+                + format_datetime(j.ended_at)
+              td
+                if j.ended_by
+                  = j.ended_by.name
+              td
+                + format_datetime(j.created_at)
+              td
+                if j.po_batches.length > 1
+                  table.table
+                    tr
+                      th Output Quantity
+                      th User
+                      th Created At
+                    for b in j.po_batches
+                      tr
+                        td= b.output_quantity
+                        td
+                          if b.user
+                            = b.user.name
+                        td
+                          + format_datetime(b.created_at)
