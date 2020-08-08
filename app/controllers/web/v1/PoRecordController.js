@@ -23,7 +23,16 @@ let show = async function(req, res) {
 
   let poJobs = (await new PoJob({po_record_id: id}).query(qb => {
     qb.orderBy('id', 'DESC')
-  }).fetchAll({withRelated: ['ended_by', 'po_batches.user']})).toJSON()
+  }).fetchAll({withRelated: [
+    'ended_by',
+    'node',
+    {
+      'po_batches': function(qb) {
+        qb.orderBy('created_at', 'DESC')
+      }
+    },
+    'po_batches.user'
+  ]})).toJSON()
 
   res.render('web/v1/po-records/show', {poRecord, poJobs})
 }

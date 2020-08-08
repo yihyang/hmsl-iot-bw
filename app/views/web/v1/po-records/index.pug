@@ -43,8 +43,10 @@ block content
               td= p.po_number
               td= p.material_number
               td= p.material_description
-              td= p.target_quantity
-              td= p.produced_quantity
+              td
+                +convert_to_thousand(p.target_quantity)
+              td
+                +convert_to_thousand(p.produced_quantity)
               td
                 +format_date(p.target_completion_date)
               td

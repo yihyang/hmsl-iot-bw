@@ -27,6 +27,7 @@ block content
             th Status
             th Start Time
             th End Time
+            th Duration
           for e in recentEvents
             tr
               td= e.id
@@ -35,6 +36,8 @@ block content
                 + format_datetime(e.start_time)
               td
                 + format_datetime(e.end_time)
+              td
+                + time_diff(e.start_time, e.end_time)
     .row
       .col.text-right
         a(href=`/nodes/${node.id}/events`)

@@ -28,10 +28,12 @@ block content
             td= poRecord.material_number
           tr
             th Target Quantity (g)
-            td= poRecord.target_quantity
+            td
+              +convert_to_thousand(poRecord.target_quantity)
           tr
             th Produced Quantity (g)
-            td= poRecord.produced_quantity
+            td
+              +convert_to_thousand(poRecord.produced_quantity)
 
     .row
       .col
@@ -39,6 +41,7 @@ block content
         table.table
           tr
             th ID
+            th Machine
             th Ended At
             th Ended By
             th Created At
@@ -48,6 +51,9 @@ block content
               td= j.id
               td
                 + format_datetime(j.ended_at)
+              td
+                if j.node
+                  = j.node.name
               td
                 if j.ended_by
                   = j.ended_by.name
@@ -62,7 +68,8 @@ block content
                       th Created At
                     for b in j.po_batches
                       tr
-                        td= b.output_quantity
+                        td
+                          +convert_to_thousand(b.output_quantity)
                         td
                           if b.user
                             = b.user.name
