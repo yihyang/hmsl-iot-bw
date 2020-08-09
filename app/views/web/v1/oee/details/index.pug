@@ -1,0 +1,255 @@
+extends ./../../../../layouts/default
+
+
+
+block content
+  .container
+    .row
+      .col
+        a.btn.btn-link.my-2(href="/oee")
+          i.fa.fa-arrow-left
+          | &nbsp;Back to OEE Page
+    .row.my-2
+      .col-12
+        h1 OEE Details
+    .row.my-2
+      .col-md-2
+        p Date
+      .col-md-6
+        input.form-control(type="text" name="selectedDate")
+    .row.my-2
+      .col-md-2
+        p Machines
+      .col-md-10
+        .row
+          for n in nodes
+            .form-group
+              .form-check
+                input.form-check.input(type="checkbox", value=n.id, name="nodes[]", id=`nodes-${n.id}`)
+                label.form-check-label(for=`nodes-${n.id}`)
+                  = n.name
+    .row.my-2
+      .col
+        h2 OEE
+        table.table#tableOEE
+    .row.my-2
+      .col
+        h2 OEE Components
+    .row.my-2
+      .col
+        h3 Availability
+        table.table#tableAvailability
+    .row.my-2
+      .col
+        h3 Performance
+        table.table#tablePerformance
+    .row.my-2
+      .col
+        h3 Quality
+        table.table#tableQuality
+
+  include ./../../../../shared/js-utilities
+
+  script.
+
+    let roundUpDecimalPoint = 4;
+    $(function() {
+      $('input[name="selectedDate"]').daterangepicker({
+        "autoApply": true,
+        "startDate": moment().subtract(1, 'day'),
+        "singleDatePicker": true,
+        "maxDate": moment().subtract(1, 'day'),
+        "locale": {
+          format: 'YYYY/MM/DD'
+        }
+      }, function(start, end, label) {
+        toggleTableUpdate()
+      });
+
+      toggleTableUpdate()
+    })
+
+
+    $('input[name="nodes[]"]').on('click', () => {
+      toggleTableUpdate()
+    });
+
+    function getFormData() {
+      let date = $('input[name="selectedDate"]').data('daterangepicker').startDate.format('YYYY-MM-DD');
+      var nodes = $('input[name="nodes[]"]:checked').map(function() { return $(this).val() }).get();
+
+      return {
+        date,
+        nodes,
+      };
+    }
+    function toggleTableUpdate() {
+      var formData = getFormData();
+      //- Send Ajax request
+      $.ajax({
+        url: '/oee/details/refresh',
+        data: formData,
+        success: function(response) {
+          console.log(response)
+          updateData(response);
+        },
+        error: function(error) {
+          console.log(error);
+        }
+      });
+    }
+
+    function updateData(response) {
+      let { oee, availability, performance, quality } = response;
+
+
+      //- OEE
+      $('#tableOEE').empty();
+      let result = ''
+      result += `<tr>
+        <th>ID</th>
+        <th>Machine</th>
+        <th>Start Time</th>
+        <th>End Time</th>
+        <th>Value</th>
+        <th>Availability</th>
+        <th>Performance</th>
+        <th>Quality</th>
+      </tr>`;
+      for(i = 0; i < oee.length; i++) {
+        let item = oee[i];
+        let nodeName = item.node ? item.node.name : '';
+        let startTime = utility_format_datetime(item.start_time);
+        let endTime = utility_format_datetime(item.end_time);
+        result += `<tr>
+          <td>${item.id}</td>
+          <td>${nodeName}</td>
+          <td>${startTime}</td>
+          <td>${endTime}</td>
+          <td>${roundToDecimalPoint(item.value, roundUpDecimalPoint)}</td>
+          <td>${roundToDecimalPoint(item.availability_value, roundUpDecimalPoint)}</td>
+          <td>${roundToDecimalPoint(item.performance_value, roundUpDecimalPoint)}</td>
+          <td>${roundToDecimalPoint(item.quality_value, roundUpDecimalPoint)}</td>
+        </tr>`;
+      }
+      $('#tableOEE').html(result);
+
+      //- Availablity
+      $('#tableAvailability').empty();
+      result = '';
+      result += `<tr>
+        <th>ID</th>
+        <th>Machine</th>
+        <th>Start Time</th>
+        <th>End Time</th>
+        <th>Value</th>
+      </tr>`;
+      for(i = 0; i < availability.length; i++) {
+        let item = availability[i];
+        let nodeName = item.node ? item.node.name : '';
+        let startTime = utility_format_datetime(item.start_time);
+        let endTime = utility_format_datetime(item.end_time);
+        result += `<tr>
+          <td>${item.id}</td>
+          <td>${nodeName}</td>
+          <td>${startTime}</td>
+          <td>${endTime}</td>
+          <td>${roundToDecimalPoint(item.value, roundUpDecimalPoint)}</td>
+        </tr>`;
+      }
+      $('#tableAvailability').html(result);
+
+      //- Performance
+      $('#tablePerformance').empty();
+      result = '';
+      result += `<tr>
+        <th>ID</th>
+        <th>Machine</th>
+        <th>Start Time</th>
+        <th>End Time</th>
+        <th>Value</th>
+        <th>Detail</th>
+      </tr>`;
+      for(i = 0; i < performance.length; i++) {
+        let item = performance[i];
+        let nodeName = item.node ? item.node.name : '';
+        let startTime = utility_format_datetime(item.start_time);
+        let endTime = utility_format_datetime(item.end_time);
+        let breakdown = item.value_breakdown;
+
+        let detail = `
+          <a class="btn btn-primary" data-toggle="collapse" href="#performance-${item.id}" role="button" aria-expanded="false" aria-controls="performance-${item.id}">Toggle detail</a>
+          <div class="collapse" id="performance-${item.id}">
+        `;
+        detail += `
+          <table class="table">
+            <tr>
+              <th>Group</th>
+              <th>Subgroup</th>
+              <th>Start Time</th>
+              <th>End Time</th>
+              <th>Duration</th>
+            </tr>
+        `;
+
+        for(j = 0; j < breakdown.length; j++) {
+          let breakDownItem = breakdown[j];
+          let breakDownStartTime = utility_format_datetime(breakDownItem.start_time);
+          let breakDownEndTime = utility_format_datetime(breakDownItem.end_time);
+          detail += `
+            <tr>
+              <td>${breakDownItem.main_group}</td>
+              <td>${breakDownItem.subgroup}</td>
+              <td>${breakDownStartTime}</td>
+              <td>${breakDownEndTime}</td>
+              <td>${breakDownItem.duration}</td>
+            </tr>
+          `;
+        }
+
+        detail += `
+          </table>
+        `;
+
+        detail += `
+          </div>
+        `;
+
+        result += `<tr>
+          <td>${item.id}</td>
+          <td>${nodeName}</td>
+          <td>${startTime}</td>
+          <td>${endTime}</td>
+          <td>${roundToDecimalPoint(item.value, roundUpDecimalPoint)}</td>
+          <td>${detail}</td>
+        </tr>`;
+      }
+      $('#tablePerformance').html(result);
+
+
+      //- Quality
+      $('#tableQuality').empty();
+      result = '';
+      result += `<tr>
+        <th>ID</th>
+        <th>Machine</th>
+        <th>Start Time</th>
+        <th>End Time</th>
+        <th>Value</th>
+      </tr>`;
+      for(i = 0; i < quality.length; i++) {
+        let item = quality[i];
+        let nodeName = item.node ? item.node.name : '';
+        let startTime = utility_format_datetime(item.start_time);
+        let endTime = utility_format_datetime(item.end_time);
+        result += `<tr>
+          <td>${item.id}</td>
+          <td>${nodeName}</td>
+          <td>${startTime}</td>
+          <td>${endTime}</td>
+          <td>${roundToDecimalPoint(item.value, roundUpDecimalPoint)}</td>
+        </tr>`;
+      }
+      $('#tableQuality').html(result);
+
+    }

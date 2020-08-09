@@ -1,20 +1,27 @@
 const _ = require('lodash')
+const moment = require('moment')
+
 const rootPath = './../../..';
+
 const bookshelf = require(`${rootPath}/config/bookshelf`);
 const OEE = require(`${rootPath}/app/models/OEE/OEE`);
+const Node = require(`${rootPath}/app/models/Node/Node`);
 
 const OEEPerformance = bookshelf.model('OEEPerformance', {
   hasTimestamps: true,
   tableName: 'oee_performances',
   oee() {
     return this.belongsTo(OEE)
+  },
+  node() {
+    return this.belongsTo(Node)
   }
 }, {
   async calculateHourSummary(nodeId, startTime, endTime) {
     let dateFormat = 'YYYY-MM-DD hh:mm:ss';
-    let formattedStartTime = startTime.format(dateFormat);
-    let formattedEndTime = endTime.format(dateFormat);
-    let formattedAWeekAgo = startTime.clone().subtract(1, 'week').format(dateFormat);
+    let formattedStartTime = startTime.format();
+    let formattedEndTime = endTime.format();
+    let formattedAWeekAgo = startTime.clone().subtract(1, 'week').format();
     let eventsQuery = `
       WITH
       shifts AS (
@@ -57,10 +64,10 @@ const OEEPerformance = bookshelf.model('OEEPerformance', {
           AND events.node_id = '${nodeId}'
       )
       SELECT
-        e.id,
+        e.id AS event_id,
         'event' AS main_group,
         e.status AS subgroup,
-        nodes.id,
+        nodes.id AS node_id,
         start_split_segment,
         end_split_segment,
         start_time,
@@ -122,10 +129,10 @@ const OEEPerformance = bookshelf.model('OEEPerformance', {
           AND gwo_items.node_id = '${nodeId}'
       )
       SELECT
-        g.id,
+        g.id AS event_id,
         'gwo' AS main_group,
         g.type AS subgroup,
-        nodes.id,
+        nodes.id AS node_id,
         start_split_segment,
         end_split_segment,
         start_time,
@@ -142,6 +149,7 @@ const OEEPerformance = bookshelf.model('OEEPerformance', {
       JOIN nodes ON gwo_items.node_id = nodes.id
       ORDER BY g.id ASC
     `;
+
 
 
     let events = (await bookshelf.knex.raw(eventsQuery)).rows;
@@ -210,7 +218,7 @@ const OEEPerformance = bookshelf.model('OEEPerformance', {
         main_group: gwoItem.main_group,
         subgroup: gwoItem.subgroup,
         originator_type: 'GwoItem',
-        originator_id: gwoItem.id,
+        originator_id: gwoItem.gwo_id,
         start_time: gwoItemStartTime,
         end_time: lastItemEndTime,
         duration: lastItemEndTime.diff(gwoItemStartTime) / 1000
@@ -248,7 +256,7 @@ const OEEPerformance = bookshelf.model('OEEPerformance', {
           main_group: item.main_group,
           subgroup: item.subgroup,
           originator_type: 'Event',
-          originator_id: item.id,
+          originator_id: item.event_id,
           start_time: itemStartTime,
           end_time: itemEndTime,
           duration: itemEndTime.diff(itemStartTime) / 1000

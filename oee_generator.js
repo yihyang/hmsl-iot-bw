@@ -2,6 +2,7 @@ const moment = require('moment');
 const Event = require('./app/models/Node/Event');
 const Node = require('./app/models/Node/Node')
 const _ = require('lodash');
+const schedule = require('node-schedule')
 const {
   asyncForEach
 } = require('./app/helpers/loop');
@@ -23,13 +24,10 @@ let getAllNodes = async() => {
 // calculate availability
 // calculate performance
 // calculate quality
-
-let startTime = moment('2020-07-25').startOf('day');
-
 /****************/
 /* availability */
 /****************/
-let runAvailabilityJob = async () => {
+let runAvailabilityJob = async (currentDate) => {
   return new Promise(async(resolve, reject) => {
     console.log('--- Running Availability Job ---')
     let nodes = await getAllNodes();
@@ -37,11 +35,11 @@ let runAvailabilityJob = async () => {
     await asyncForEach(nodes, async (node) => {
       console.log(`Started Inserting "availability" for ${node.name}`)
       const HOUR_PER_DAY = 24
-      let availabilityStartOfDay = startTime.clone().startOf('day')
-      let availabilityEndOfDay = startTime.clone().startOf('day')
+      let availabilityStartOfDay = currentDate.clone().startOf('day')
+      let availabilityEndOfDay = currentDate.clone().startOf('day')
 
       // set the values
-      let dailyValue = (await new NodeDailyInput({node_id: node.id, date: startTime.clone().format('YYYY-MM-DD')}).fetch({require: false}));
+      let dailyValue = (await new NodeDailyInput({node_id: node.id, date: currentDate.clone().format('YYYY-MM-DD')}).fetch({require: false}));
 
       if (dailyValue) {
         value = dailyValue['am_availability'] + dailyValue['pm_availability'];
@@ -74,7 +72,7 @@ let runAvailabilityJob = async () => {
 /***************/
 /* performance */
 /***************/
-let runPerformanceJob = async () => {
+let runPerformanceJob = async (currentDate) => {
   return new Promise(async(resolve, reject) => {
     console.log('--- Running Performance Job ---')
 
@@ -83,12 +81,12 @@ let runPerformanceJob = async () => {
     await asyncForEach(nodes, async (node) => {
       console.log(`Started inserting "performance" for ${node.name}`);
 
-      let performanceStartOfDay = startTime.clone().startOf('day')
-      let performanceEndOfDay = startTime.clone().endOf('day')
-      let currentTime = startTime.clone()
+      let performanceStartOfDay = currentDate.clone().startOf('day')
+      let performanceEndOfDay = currentDate.clone().endOf('day')
+      let currentTime = performanceStartOfDay.clone()
       let times = [];
       while (currentTime.isBefore(performanceEndOfDay)) {
-        times.push({startTime: currentTime.clone(), endTime: startTime.clone().endOf('hour')});
+        times.push({startTime: currentTime.clone(), endTime: currentTime.clone().endOf('hour')});
         currentTime = currentTime.add(1, 'hour');
       }
 
@@ -110,7 +108,7 @@ let runPerformanceJob = async () => {
 /***********/
 /* quality */
 /***********/
-let runQualityJob = async () => {
+let runQualityJob = async (currentDate) => {
   return new Promise(async(resolve, reject) => {
     const OEE_AVAILABILITY_DEFAULT_VALUE = 1;
     console.log('--- Running Quality Job ---')
@@ -118,8 +116,8 @@ let runQualityJob = async () => {
     let nodes = await getAllNodes();
 
     await asyncForEach(nodes, async (node) => {
-      let qualityStartOfDay = startTime.clone().startOf('day')
-      let qualityEndOfDay = startTime.clone().endOf('day')
+      let qualityStartOfDay = currentDate.clone().startOf('day')
+      let qualityEndOfDay = currentDate.clone().endOf('day')
 
       console.log(`Started inserting "quality" for ${node.name}`);
       let existingQuality = await new OEEQuality({node_id: node.id, start_time: qualityStartOfDay, end_time: qualityEndOfDay}).fetch({require: false})
@@ -137,15 +135,15 @@ let runQualityJob = async () => {
   })
 }
 
-let runOEEJob = async () => {
+let runOEEJob = async (currentDate) => {
   return new Promise(async(resolve, reject) => {
     console.log('--- Running OEE Job ---');
 
     let nodes = await getAllNodes();
 
     await asyncForEach(nodes, async (node) => {
-      let startOfDay = startTime.clone().startOf('day')
-      let endOfDay = startTime.clone().endOf('day')
+      let startOfDay = currentDate.clone().startOf('day')
+      let endOfDay = currentDate.clone().endOf('day')
 
       console.log(`Started inserting "OEE" for ${node.name}`);
 
@@ -195,23 +193,26 @@ let runOEEJob = async () => {
 
 
 
-let runAllJob = async () => {
-  await runAvailabilityJob();
-  await runPerformanceJob();
-  await runQualityJob();
-  await runOEEJob();
+let runAllJob = async (startTime) => {
+  let startTime = startTime.startOf('day');
+  let today = moment();
 
+  let dates = []
+
+  while (startTime.isBefore(today)) {
+    dates.push(startTime.clone())
+    startTime.add(1, 'day')
+  }
+  asyncForEach(dates, async (date) => {
+    console.log(date);
+    await runAvailabilityJob(date);
+    await runPerformanceJob(date);
+    await runQualityJob(date);
+    await runOEEJob(date);
+  })
 }
 
-runAllJob()
-
-// const PoRecord = require('./app/models/PoRecord/PoRecord')
-// const PoJob = require('./app/models/PoRecord/PoJob')
-// let test = async () => {
-//   let poRecord = await new PoRecord({id: 14}).fetch()
-//   poRecord.set('status', 'Ended')
-//   poRecord.save()
-//   // await new PoJob({po_record_id: 14, node_id: 1}).fetch()
-// }
-
-// test()
+schedule.scheduleJob('0 5 0 * * *'function() {
+  let date = moment().subtract(1, 'day')
+  runAllJob(date)
+})

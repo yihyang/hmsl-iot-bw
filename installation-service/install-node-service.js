@@ -28,3 +28,16 @@ svc2.on('install',function(){
 });
 
 svc2.install();
+
+var svc3 = new Service({
+  name:'HMSL OEE Generator',
+  description: 'HMSL OEE Generator',
+  script: 'C:\\hmsl-iot\\repo\\hmsl-iot\\oee_generator.js'
+});
+
+svc3.on('install',function(){
+  svc3.start();
+  console.log('installed HTML OEE Generator');
+});
+
+svc3.install();

@@ -8,7 +8,6 @@ const NodeDailyInput = require(`${rootPath}/app/models/OEE/NodeDailyInput`);
 const bookshelf = require(`${rootPath}/config/bookshelf`);
 
 let index = async function(req, res) {
-
   res.render('web/v1/oee/dashboard/index', {})
 }
 

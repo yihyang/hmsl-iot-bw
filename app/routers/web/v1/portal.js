@@ -40,6 +40,8 @@ module.exports = (app, tmpUpload) => {
     app.post('/gwo/settings/spare-parts/:sparePartId/stocks', web.v1.gwo.settings.spareParts.stocks.save)
 
     app.get('/oee', web.v1.oee.index)
+    app.get('/oee/details', web.v1.oee.details.index)
+    app.get('/oee/details/refresh', web.v1.oee.details.refresh)
     app.get('/oee/dashboard', web.v1.oee.dashboard.index)
     app.get('/oee/dashboard/refresh', web.v1.oee.dashboard.refresh)
     app.get('/oee/daily-time-inputs', web.v1.oee.dailyTimeInputs.index)

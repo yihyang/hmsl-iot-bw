@@ -30,3 +30,19 @@ svc2.on('uninstall',function(){
 
 // Uninstall the service.
 svc2.uninstall();
+
+
+var svc3 = new Service({
+  name:'HMSL OEE Generator',
+  description: 'HMSL OEE Generator',
+  script: 'C:\\hmsl-iot\\repo\\hmsl-iot\\oee_generator.js'
+});
+
+// Listen for the "uninstall" event so we know when it's done.
+svc3.on('uninstall',function(){
+  console.log('Uninstall complete.');
+  console.log('The service exists: ',svc3.exists);
+});
+
+// Uninstall the service.
+svc3.uninstall();

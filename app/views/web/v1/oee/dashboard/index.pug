@@ -4,6 +4,12 @@ extends ./../../../../layouts/default
 
 block content
   .container-fluid
+    .row
+      .col
+        a.btn.btn-link.my-2(href="/oee")
+          i.fa.fa-arrow-left
+          | &nbsp;Back to OEE Page
+
     .row.my-2
       .col-12
         h1 OEE Dashboard
@@ -392,5 +398,5 @@ block content
     });
 
     function roundToTwoDecimalPoint(num) {
-      return Math.round(num * 100) / 100;
+      return Math.round(num * 1) / 1;
     }
