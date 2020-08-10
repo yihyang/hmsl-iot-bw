@@ -51,27 +51,35 @@ block content
       .col-sm-12.col-md-8
         .row.my-2
           .col
+            h2 Key Performance Indicator
+        .row.my-2
+          .col-sm-12.col-md-4
             h2 OEE
-            canvas#chartOEE
-        .row.my-2
-          .col-md-9.col-sm-12
-            h2 OEE Components
-        .row.my-2
-          .col-md-4.col-sm-12
-            h3 Availability
-            canvas#chartOEEAvailability
-          .col-md-4.col-sm-12
-            h3 Performance
-            canvas#chartOEEPerformance
-          .col-md-4.col-sm-12
-            h3 Quality
-            canvas#chartOEEQuality
+            canvas#chartOEE(height="220%", width="220%")
+          .col-sm-12.col-md-8
+            .row.my-2
+              .col-md-4.col-sm-4
+                h3 Availability
+                canvas#chartOEEAvailability
+              .col-md-4.col-sm-4
+                h3 Performance
+                canvas#chartOEEPerformance
+              .col-md-4.col-sm-4
+                h3 Quality
+                canvas#chartOEEQuality
       .col-sm-12.col-md-4
-        .row.my-2
-          .col
-            h3 Schematic Explanation
-            img.img-fluid(src="/public/images/oee/schematic-explanation.png")
-
+        h3 Schematic Explanation
+        img.img-fluid(src="/public/images/oee/schematic-explanation.png")
+    .row
+      .col-sm-12.col-md-4
+        h4 Monthly OEE Trend
+        canvas#chartMonthlyOEE
+      .col-sm-12.col-md-4
+        h4 Output Trend
+        canvas#chartMonthlyOutputTrend
+      .col-sm-12.col-md-4
+        h4 Downtime Pareto
+        canvas#chartMonthlyDowntime
 
   script.
     $(function() {
@@ -310,6 +318,98 @@ block content
           }
         }
       }
+    });
+
+    //- #chartMonthlyOEE
+    var ctx = document.getElementById('chartMonthlyOEE').getContext('2d');
+    let monthlyOEEData = {
+      labels: ['Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
+      datasets: [{
+        label: 'OEE Target',
+        backgroundColor: ' #4272c7',
+        borderColor: ' #4272c7',
+        borderWidth: 1,
+        data: [70, 70, 70, 70, 70, 70],
+      }, {
+        label: 'Performance',
+        backgroundColor: '#f17b2a',
+        borderColor: '#f17b2a',
+        borderWidth: 1,
+        data: [0, 0, 0, 0, 0, 0],
+      }]
+    }
+    //- document.getElementById('chartMonthlyOEE').height = 80;
+    var chartMonthlyOEE = new Chart(ctx,{
+      type: 'bar',
+      data: monthlyOEEData,
+      options: {
+          responsive: true,
+          legend: {
+            position: 'bottom',
+          },
+        }
+    });
+
+    //- #chartMonthlyOutputTrend
+    var ctx = document.getElementById('chartMonthlyOutputTrend').getContext('2d');
+    let monthlyOutputData = {
+      labels: ['Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
+      datasets: [{
+        label: 'Output Target (kkm)',
+        backgroundColor: ' #fabe0a',
+        borderColor: ' #fabe0a',
+        borderWidth: 1,
+        data: [10, 10, 10, 10, 10, 10],
+      }, {
+        label: 'Performance (kkm)',
+        backgroundColor: '#6dae45',
+        borderColor: '#6dae45',
+        borderWidth: 1,
+        data: [0, 0, 0, 0, 0, 0],
+      }]
+    }
+    //- document.getElementById('chartMonthlyOutputTrend').height = 80;
+    var chartMonthlyOutputTrend = new Chart(ctx,{
+      type: 'bar',
+      data: monthlyOutputData,
+      options: {
+          responsive: true,
+          legend: {
+            position: 'bottom',
+          },
+        }
+    });
+
+    //- #chartMonthlyDowntime
+    var ctx = document.getElementById('chartMonthlyDowntime').getContext('2d');
+    let monthlyDowntimeData = {
+      labels: ['Preventive Maintainance', 'Breakdown', 'Setup'],
+      datasets: [{
+        label: 'Reason',
+        backgroundColor: ' #5c99cf',
+        borderColor: ' #5c99cf',
+        borderWidth: 1,
+        data: [10, 5, 2],
+      }]
+    }
+    //- document.getElementById('chartMonthlyDowntime').height = 80;
+    var chartMonthlyDowntime = new Chart(ctx,{
+      type: 'horizontalBar',
+      data: monthlyDowntimeData,
+      options: {
+          responsive: true,
+          legend: {
+            position: 'bottom',
+          },
+          scales: {
+            xAxes: [{
+              display: true,
+              ticks: {
+                min: 0
+              }
+            }]
+          }
+        }
     });
 
     //- show text inside pie chart

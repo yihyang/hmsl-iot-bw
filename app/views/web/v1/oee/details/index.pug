@@ -177,11 +177,11 @@ block content
         let endTime = utility_format_datetime(item.end_time);
         let breakdown = item.value_breakdown;
 
-        let detail = `
+        let detailToggle = `
           <a class="btn btn-primary" data-toggle="collapse" href="#performance-${item.id}" role="button" aria-expanded="false" aria-controls="performance-${item.id}">Toggle detail</a>
-          <div class="collapse" id="performance-${item.id}">
         `;
-        detail += `
+        let detail = `
+          <div>
           <table class="table">
             <tr>
               <th>Group</th>
@@ -221,8 +221,12 @@ block content
           <td>${startTime}</td>
           <td>${endTime}</td>
           <td>${roundToDecimalPoint(item.value, roundUpDecimalPoint)}</td>
-          <td>${detail}</td>
+          <td>${detailToggle}</td>
         </tr>`;
+
+        result += `<tr class="collapse" id="performance-${item.id}">
+          <td colspan="6">${detail}</td>
+        </tr>`
       }
       $('#tablePerformance').html(result);
 
