@@ -7,6 +7,8 @@ module.exports = (app, tmpUpload) => {
     app.get('/po-records', web.v1.poRecords.index)
     app.post('/po-records/shortfall', tmpUpload.single('file'), web.v1.poRecords.shortfall.upload)
     app.get('/po-records/:id', web.v1.poRecords.show)
+    app.get('/po-records/:id/edit', web.v1.poRecords.edit)
+    app.post('/po-records/:id/update', web.v1.poRecords.update)
 
     app.get('/nodes', web.v1.nodes.index)
     app.get('/nodes/:id', web.v1.nodes.show)

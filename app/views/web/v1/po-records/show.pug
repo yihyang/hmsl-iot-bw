@@ -10,7 +10,11 @@ block content
           | &nbsp;Back to PO Records Page
     .row
       .col
-        h2 PO Records #{poRecord.id}
+        h2
+          | PO Records #{poRecord.id}
+        a(href=`/po-records/${poRecord.id}/edit`)
+          i.fa.fa-edit
+          | &nbsp;Edit
     .row
       .col
         table.table
@@ -26,6 +30,10 @@ block content
           tr
             th Material Number
             td= poRecord.material_number
+          tr
+            th Target Completion Date
+            td
+              +format_date(poRecord.target_completion_date)
           tr
             th Target Quantity (g)
             td

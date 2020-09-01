@@ -1,0 +1,38 @@
+extends ./../../../layouts/default
+include ./../../../shared/mixins
+
+block content
+  .container
+    .row
+      .col
+        a.btn.btn-link.my-2(href="/po-records")
+          i.fa.fa-arrow-left
+          | &nbsp;Back to PO Records Page
+    .row
+      .col
+        h2
+          | PO Records #{poRecord.id}
+    .row
+      .col
+        form(method="POST" action='/po-records/'+ poRecord.id + '/update')
+          .form-group.row
+            .col-sm-2.col-form-label ID
+            .col-sm-10
+              input.form-control(type="text", name="id", value=poRecord.id, placeholder="ID", readonly="true")
+          .form-group.row
+            .col-sm-2.col-form-label PO Number
+            .col-sm-10
+              input.form-control(type="text", name="po_number", value=poRecord.po_number, placeholder="PO Number")
+          .form-group.row
+            .col-sm-2.col-form-label Material Number
+            .col-sm-10
+              input.form-control(type="text", name="material_number", value=poRecord.material_number, placeholder="Material Number")
+          .form-group.row
+            .col-sm-2.col-form-label Target Completion Date
+            .col-sm-10
+              +render_date_input('target_completion_date', poRecord.target_completion_date)
+          .form-group.row
+            .col-sm-2.col-form-label Target Quantity
+            .col-sm-10
+              input.form-control(type="number", name="target_quantity", value=poRecord.target_quantity)
+          button.btn.btn-primary(type="submit") Update

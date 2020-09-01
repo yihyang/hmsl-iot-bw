@@ -194,7 +194,7 @@ let runOEEJob = async (currentDate) => {
 
 
 let runAllJob = async (startTime) => {
-  let startTime = startTime.startOf('day');
+  startTime.startOf('day');
   let today = moment();
 
   let dates = []
@@ -212,7 +212,10 @@ let runAllJob = async (startTime) => {
   })
 }
 
-schedule.scheduleJob('0 5 0 * * *'function() {
-  let date = moment().subtract(1, 'day')
-  runAllJob(date)
-})
+// schedule.scheduleJob('0 5 0 * * *', function() {
+//   let date = moment().subtract(1, 'day')
+//   runAllJob(date)
+// })
+
+let date = moment().subtract(3, 'day')
+runAllJob(date)

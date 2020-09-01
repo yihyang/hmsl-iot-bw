@@ -26,13 +26,14 @@ let upload = async function(req, res) {
 
       if(!existingPoRecord) {
         let targetCompletionDate = moment(data['Target Completion Date'], "DD/MM/YYYY").toISOString();
+        let quantity = parseInt(String(data['Target Quantity']).replace(/,/g, ''));
 
         let savingData = {
           user_id: userId,
           po_number: data['PO Number'],
           material_number: data['Material Number'],
           material_description: data['Material Description'],
-          target_quantity: parseInt(data['Target Quantity']) / 1000,
+          target_quantity: quantity / 1000, // offset numbers
           target_completion_date: targetCompletionDate
         }
 

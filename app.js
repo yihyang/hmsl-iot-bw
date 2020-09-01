@@ -49,6 +49,7 @@ app.use(bodyParser.urlencoded({
 
 // global variable to determine login status
 app.locals.signedIn = false;
+app.locals.moment = moment;
 
 // setting routes
 router(app, tmpUpload)
