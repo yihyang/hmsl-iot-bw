@@ -63,6 +63,31 @@ const PoRecord = bookshelf.model('PoRecord', {
     `
 
     await bookshelf.knex.raw(query, poBatchId);
+  },
+  async updateInputQuantity(poJobInputId) {
+    let query = `
+      UPDATE po_records
+      SET input_quantity = reference.input_quantity
+      FROM
+      (
+        SELECT po_records.id, sum(po_job_inputs.quantity) AS input_quantity
+        FROM po_job_inputs
+        JOIN po_jobs ON po_job_inputs.po_job_id = po_jobs.id
+        JOIN po_records ON po_jobs.po_record_id = po_records.id
+        WHERE po_records.id IN
+        (
+          SELECT po_records.id
+          FROM po_job_inputs
+          JOIN po_jobs ON po_job_inputs.po_job_id = po_jobs.id
+          JOIN po_records ON po_jobs.po_record_id = po_records.id
+          WHERE po_job_inputs.id = ?
+        )
+        GROUP BY po_records.id
+      ) AS reference
+      WHERE po_records.id = reference.id
+    `;
+
+    await bookshelf.knex.raw(query, poJobInputId);
   }
 });
 

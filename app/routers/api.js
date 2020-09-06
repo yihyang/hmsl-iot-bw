@@ -33,6 +33,8 @@ module.exports = (app) => {
   app.post('/v1/po-records', api.v1.poRecord.save)
   app.get('/v1/po-records/po-number/:poNumber', api.v1.poRecord.showByPoNumber)
   app.post('/v1/po-records/:id/end', api.v1.poRecord.end)
+  app.get('/v1/po-records/latest/nodes/name/:name', api.v1.poRecord.latestPoByNodeNumber)
   app.post('/v1/po-jobs', api.v1.poJob.save)
+  app.post('/v1/po-job-inputs', api.v1.poJobInput.save)
   app.post('/v1/po-batches', api.v1.poBatch.save)
 }

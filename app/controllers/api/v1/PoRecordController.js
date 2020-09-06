@@ -1,6 +1,7 @@
 const rootPath = './../../../..'
 const PoRecord = require(`${rootPath}/app/models/PoRecord/PoRecord`)
 const PoJob = require(`${rootPath}/app/models/PoRecord/PoJob`)
+const Node = require(`${rootPath}/app/models/Node/Node`)
 const moment = require('moment')
 const {respondError, respondSuccessWithData} = require(`${rootPath}/app/helpers/response`)
 
@@ -27,6 +28,37 @@ let showByPoNumber = async function(req, res) {
         "Object found",
         "Found PO with provided PO Number",
         poRecord
+      )
+    )
+}
+
+let latestPoByNodeNumber = async function(req, res) {
+  let {name} = req.params;
+  let node = (await new Node({name: name}).fetch({require: false, withRelated: ['active_po_job.po_record']}));
+
+  if (!node) {
+    return res
+      .status(404)
+      .json(
+        respondError("Machine Not Found", "Unable to find Machine with provided Machine Name")
+      )
+  }
+
+  node = node.toJSON()
+  if (!node.active_po_job) {
+    return res
+      .status(404)
+      .json(
+        respondError("Active PO Job Not Found", "Unable to find Active PO Job on the machine")
+      )
+  }
+
+  res.status(200)
+    .json(
+      respondSuccessWithData(
+        "Object found",
+        "Found PO Job with provided Machine Name",
+        node.active_po_job
       )
     )
 }
@@ -105,6 +137,7 @@ let end = async function(req, res) {
 
 module.exports = {
   // index,
+  latestPoByNodeNumber,
   showByPoNumber,
   save,
   end

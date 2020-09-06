@@ -45,7 +45,9 @@ block content
 
     .row
       .col
-        h3 Jobs
+        h3
+          | Jobs
+          | (#{poJobs.length})
         table.table
           tr
             th ID
@@ -53,6 +55,7 @@ block content
             th Ended At
             th Ended By
             th Created At
+            th Batch Count
             th Batches
           for j in poJobs
             tr
@@ -68,7 +71,10 @@ block content
               td
                 + format_datetime(j.created_at)
               td
+                = j.po_batches.length
+              td
                 if j.po_batches.length > 1
+                  - total = 0
                   table.table
                     tr
                       th Output Quantity
@@ -78,8 +84,13 @@ block content
                       tr
                         td
                           +convert_to_thousand(b.output_quantity)
+                          - total = total + b.output_quantity
                         td
                           if b.user
                             = b.user.name
                         td
                           + format_datetime(b.created_at)
+                    tr
+                      td
+                        + convert_to_thousand(total)
+
