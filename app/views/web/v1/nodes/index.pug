@@ -25,6 +25,10 @@ block content
                         .node-item.text-center(class=`node-${n.id}`, data-status=n.current_status)
                           p= n.name
                           p.status= n.current_status
+                          if n.active_po_job && n.active_po_job.po_record
+                            p= n.active_po_job.po_record.po_number
+                          else
+                            p -
 
       .col.col-md-4
         .card

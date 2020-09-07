@@ -26,7 +26,7 @@ let save = async function (req, res) {
     .json(
       respondSuccessWithData(
         "Object created",
-        "Created new PO Job Input",
+        "Inserted material record",
         poJobInput,
         201
       )

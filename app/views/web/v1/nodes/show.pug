@@ -19,6 +19,12 @@ block content
           tr
             th Name
             td= node.name
+          if node.active_po_job && node.active_po_job.po_record
+            tr
+              th Active PO Record
+              td
+                a(href=`/po-records/${node.active_po_job.po_record.id}`)
+                  = node.active_po_job.po_record.po_number
         br
         h2 Recent Events
         table.table
