@@ -34,10 +34,10 @@ let refresh = async function(req, res) {
   if(oeeValues) {
     oeeValues = oeeValues.toJSON();
     result = {
-      value: _.meanBy(oeeValues, (o) => o.value),
-      availability_value: _.meanBy(oeeValues, (o) => o.availability_value),
-      performance_value: _.meanBy(oeeValues, (o) => o.performance_value),
-      quality_value: _.meanBy(oeeValues, (o) => o.quality_value),
+      value: _.meanBy(oeeValues, (o) => o.value || 0),
+      availability_value: _.meanBy(oeeValues, (o) => o.availability_value || 0),
+      performance_value: _.meanBy(oeeValues, (o) => o.performance_value || 0),
+      quality_value: _.meanBy(oeeValues, (o) => o.quality_value || 0),
     }
   }
 
