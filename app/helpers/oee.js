@@ -3,7 +3,6 @@ const moment = require('moment')
 const Event = require(`${rootPath}/app/models/Node/Event`)
 const Node = require(`${rootPath}/app/models/Node/Node`)
 const _ = require('lodash')
-const schedule = require('node-schedule')
 const {
   asyncForEach
 } = require(`${rootPath}/app/helpers/loop`)
@@ -220,13 +219,8 @@ let runAllJob = async (startTime) => {
 
 module.exports = {
   runAllJob,
-  runAllJob,
 }
 
-// schedule.scheduleJob('0 5 0 * * *', function() {
-//   let date = moment().subtract(1, 'day')
-//   runAllJob(date)
-// })
 
 let date = moment().subtract(3, 'day')
 runAllJob(date)
