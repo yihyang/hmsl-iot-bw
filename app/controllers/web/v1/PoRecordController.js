@@ -1,5 +1,6 @@
 const rootPath = './../../../..'
 let shortfall = require('./PoRecord/ShortfallController')
+let jobs = require('./PoRecord/PoJobController')
 const PoRecord = require(`${rootPath}/app/models/PoRecord/PoRecord`)
 const PoJob = require(`${rootPath}/app/models/PoRecord/PoJob`)
 const {
@@ -63,6 +64,7 @@ module.exports = {
   index,
   show,
   shortfall,
+  jobs,
   edit,
   update,
 }

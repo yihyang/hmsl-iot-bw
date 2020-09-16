@@ -59,7 +59,9 @@ block content
             th Batches
           for j in poJobs
             tr
-              td= j.id
+              td
+                a(href=`/po-records/${j.id}/jobs`)
+                  = j.id
               td
                 + format_datetime(j.ended_at)
               td

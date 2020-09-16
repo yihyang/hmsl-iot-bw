@@ -37,7 +37,7 @@ let runAvailabilityJob = async (currentDate) => {
     await asyncForEach(nodes, async (node) => {
       console.log(`Started Inserting "availability" for ${node.name}`)
       let availabilityStartOfDay = currentDate.clone().startOf('day')
-      let availabilityEndOfDay = currentDate.clone().startOf('day')
+      let availabilityEndOfDay = currentDate.clone().endOf('day')
 
 
       // set the values
@@ -45,24 +45,31 @@ let runAvailabilityJob = async (currentDate) => {
       let dailyValue = (await new NodeDailyInput({node_id: node.id, date: currentFormattedDate}).fetch({require: false}));
 
       if (dailyValue) {
-        value = dailyValue['am_availability'] + dailyValue['pm_availability'];
+        let {am_availability, pm_availability} = dailyValue.attributes;
+        value = (am_availability || 0) + (pm_availability || 0);
       } else {
         // insert default values if not found
         await new NodeDailyInput({node_id: node.id, date: currentFormattedDate, am_availability: DEFAULT_AVAILABILITY, pm_availability: DEFAULT_AVAILABILITY}).save();
         value = DEFAULT_AVAILABILITY * 2;
       }
 
+      value = value / 24;
+
+      console.log(value);
+
       // insert record
       let existingAvailability = await new OEEAvailability({node_id: node.id, start_time: availabilityStartOfDay, end_time: availabilityEndOfDay}).fetch({require: false})
       if (existingAvailability) {
         existingAvailability.set('value', value)
+        await existingAvailability.save()
+      } else {
+        await new OEEAvailability({
+          node_id: node.id,
+          start_time: availabilityStartOfDay,
+          end_time: availabilityEndOfDay,
+          value: value
+        }).save()
       }
-      await new OEEAvailability({
-        node_id: node.id,
-        start_time: availabilityStartOfDay,
-        end_time: availabilityEndOfDay,
-        value: value
-      }).save()
 
       console.log(`Completed Inserting "availability" for ${node.name}`)
     })
@@ -159,9 +166,11 @@ let runOEEJob = async (currentDate) => {
       // availability
       let availabilities = (await new OEEAvailability({node_id: node.id, start_time: startOfDay, end_time: endOfDay}).fetchAll()).toJSON();
 
+      console.log(availabilities);
       if (availabilities.length != 0) {
         availability = _.meanBy(availabilities, (a) => a.value)
       }
+      console.log(availability);
 
 
       let performances = (await new OEEPerformance({node_id: node.id, start_time: startOfDay, end_time: endOfDay}).fetchAll()).toJSON();
@@ -219,6 +228,8 @@ let runAllJob = async (startTime) => {
 
 module.exports = {
   runAllJob,
+  runOEEJob,
+  runAvailabilityJob,
 }
 
 

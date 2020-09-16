@@ -1,0 +1,31 @@
+extends ./../../../../layouts/default
+include ./../../../../shared/mixins
+
+block content
+  .container
+    .row
+      .col
+        a.btn.btn-link.my-2(href=`/po-records/${id}`)
+          i.fa.fa-arrow-left
+          | &nbsp;Back to PO Records #{id} Page
+
+    .row.my-3
+      .col
+        h2 PO Jobs
+
+    .row.mt-3
+      .col
+        for j in poJobs
+          p Machine&nbsp;
+            = j.node ? j.node.name : ''
+          table.table
+            tr
+              th ID
+              th Quantity
+              th User
+            for i in j.po_job_inputs
+              tr
+                td= i.id
+                td= i.quantity
+                td= i.user ? i.user.name : ''
+
