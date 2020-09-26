@@ -9,23 +9,50 @@ block content
           i.fa.fa-arrow-left
           | &nbsp;Back to PO Records #{id} Page
 
+    .row
+      include ./../../../../shared/pagination
+
     .row.my-3
       .col
         h2 PO Jobs
 
     .row.mt-3
       .col
-        for j in poJobs
-          p Machine&nbsp;
-            = j.node ? j.node.name : ''
-          table.table
+        table.table.table-bordered
+          tr
+            th ID
+            th Machine Name
+            th Input Quantity
+            th Produced Quantity
+            //- th Quantity
+            th User
+            th Created At
+          for j in poJobs
             tr
-              th ID
-              th Quantity
-              th User
-            for i in j.po_job_inputs
-              tr
-                td= i.id
-                td= i.quantity
-                td= i.user ? i.user.name : ''
+              td= j.id
+              td= j.node ? j.node.name : ''
+              td= j.input_quantity
+              td= j.produced_quantity
+              td= j.user ? j.user.name : ''
+              td
+                +format_datetime(j.created_at)
+            tr
+              td(colspan="4")
+                if j.po_job_inputs.length > 0
+                  table.table
+                    tr
+                      th ID
+                      th Quantity
+                      th User
+                      th Created At
+                    for i in j.po_job_inputs
+                      tr
+                        td= i.id
+                        td= i.quantity
+                        td= i.user ? i.user.name : ''
+                        td
+                          +format_datetime(i.created_at)
+
+          //- p Machine&nbsp;
+          //-   = j.node ? j.node.name : ''
 

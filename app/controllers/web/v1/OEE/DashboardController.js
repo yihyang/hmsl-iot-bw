@@ -44,6 +44,27 @@ let refresh = async function(req, res) {
   res.json(result)
 }
 
+let historyRefresh = async function(req, res) {
+  let today = moment();
+  let formattedSixMonthAgo = moment().subtract(6,'months').startOf('month').format('YYYY-MM-DD');
+
+  // get OEE since six months ago
+  let oeeQuery =`
+    SELECT EXTRACT(MONTH FROM start_time) AS month, avg(nullif(value, 'Nan'))
+      FROM oee
+      WHERE start_time >= ${formattedSixMonthAgo}
+      GROUP BY month
+  `;
+  let oeeResult = await bookshelf.knex.raw(oeeQuery);
+
+  console.log(oeeResult);
+
+  let oeePerformanceQuery = `
+  `;
+
+
+}
+
 module.exports = {
   index,
   refresh

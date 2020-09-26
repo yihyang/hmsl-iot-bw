@@ -39,18 +39,23 @@ block content
             td
               +convert_to_thousand(poRecord.target_quantity)
           tr
+            th Input Quantity (g)
+            td
+              +convert_to_thousand(poRecord.input_quantity)
+          tr
             th Produced Quantity (g)
             td
               +convert_to_thousand(poRecord.produced_quantity)
-
     .row
       .col
         h3
-          | Jobs
-          | (#{poJobs.length})
+          | Last 10 Jobs
         table.table
           tr
             th ID
+            th Machine
+            th Input Quantity
+            th Output Quantity
             th Machine
             th Ended At
             th Ended By
@@ -60,13 +65,14 @@ block content
           for j in poJobs
             tr
               td
-                a(href=`/po-records/${j.id}/jobs`)
-                  = j.id
-              td
-                + format_datetime(j.ended_at)
+                = j.id
               td
                 if j.node
                   = j.node.name
+              td= j.input_quantity
+              td= j.produced_quantity
+              td
+                + format_datetime(j.ended_at)
               td
                 if j.ended_by
                   = j.ended_by.name
@@ -96,3 +102,8 @@ block content
                       td
                         + convert_to_thousand(total)
 
+    .row
+      .col
+        a(href=`/po-records/${poRecord.id}/jobs`)
+          | View all PO #{poRecord.po_number} jobs&nbsp;
+          i.fa.fa-arrow-right(aria-hidden="true")

@@ -2,12 +2,15 @@ extends ./../../../layouts/default
 include ./../../../shared/mixins
 
 block content
-  .container
+  .container-fluid
     .row
       .col
         a.btn.btn-link.my-2(href="/portal")
           i.fa.fa-arrow-left
           | &nbsp;Back to Home Page
+
+    .row
+      include ./../../../shared/pagination
 
     .row.my-3
       .col
@@ -19,7 +22,7 @@ block content
 
     .row.mt-3
       .col
-        table.table
+        table.table.table-responsive
           tr
             th id
             th Uploaded By
@@ -28,6 +31,7 @@ block content
             th Material Number
             th Material Description
             th Target Quantity (g)
+            th Input Quantity (g)
             th Produced Quantity (g)
             th Target Completion Date
             th Created At
@@ -46,6 +50,8 @@ block content
               td
                 +convert_to_thousand(p.target_quantity)
               td
+                +convert_to_thousand(p.input_quantity)
+              td
                 +convert_to_thousand(p.produced_quantity)
               td
                 +format_date(p.target_completion_date)
@@ -55,6 +61,9 @@ block content
                 +format_datetime(p.start_time)
               td
                 +format_datetime(p.end_time)
+
+    .row
+      include ./../../../shared/pagination
 
   script.
     $('#file-upload').on('change', function() {

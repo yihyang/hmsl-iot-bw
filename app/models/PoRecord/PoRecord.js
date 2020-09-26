@@ -34,7 +34,18 @@ const PoRecord = bookshelf.model('PoRecord', {
   },
   user() {
     return this.belongsTo(User)
-  }
+  },
+  async total_input_quantity() {
+    let query = `
+      SELECT COALESCE(SUM(po_job_inputs.quantity), 0) AS result
+        FROM po_records
+        JOIN po_jobs ON po_records.id = po_jobs.po_record_id
+        JOIN po_job_inputs ON po_jobs.id = po_job_inputs.po_job_id
+        WHERE po_records.id = ?
+    `
+
+    return (await bookshelf.knex.raw(query, this.id)).rows;
+  },
 }, {
   statuses() {
     return ['Created', 'In Progress', 'Ended']

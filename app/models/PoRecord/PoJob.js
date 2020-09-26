@@ -39,10 +39,56 @@ const PoJob = bookshelf.model('PoJob', {
   },
   user() {
     return this.belongsTo(User)
-  }
+  },
 }, {
   statuses() {
     return ['In Progress', 'Completed']
+  },
+  async updateOutputQuantity(poBatchId) {
+    let query = `
+    UPDATE po_jobs
+    SET produced_quantity = reference.output_quantity
+    FROM
+    (
+      SELECT po_jobs.id, sum(output_quantity) AS output_quantity
+      FROM po_batches
+      JOIN po_jobs ON po_batches.po_job_id = po_jobs.id
+      WHERE po_jobs.id IN
+      (
+        SELECT po_jobs.id
+        FROM po_batches
+        JOIN po_jobs ON po_batches.po_job_id = po_jobs.id
+        WHERE po_batches.id = ?
+      )
+      GROUP BY po_jobs.id
+    ) AS reference
+    WHERE po_jobs.id = reference.id
+    `
+
+    await bookshelf.knex.raw(query, poBatchId);
+  },
+  async updateInputQuantity(poJobInputId) {
+    let query = `
+      UPDATE po_jobs
+      SET input_quantity = reference.input_quantity
+      FROM
+      (
+        SELECT po_jobs.id, sum(po_job_inputs.quantity) AS input_quantity
+        FROM po_job_inputs
+        JOIN po_jobs ON po_job_inputs.po_job_id = po_jobs.id
+        WHERE po_jobs.id IN
+        (
+          SELECT po_jobs.id
+          FROM po_job_inputs
+          JOIN po_jobs ON po_job_inputs.po_job_id = po_jobs.id
+          WHERE po_job_inputs.id = ?
+        )
+        GROUP BY po_jobs.id
+      ) AS reference
+      WHERE po_jobs.id = reference.id
+    `;
+
+    await bookshelf.knex.raw(query, poJobInputId);
   }
 });
 

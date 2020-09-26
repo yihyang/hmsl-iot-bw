@@ -38,6 +38,12 @@ let upload = async function(req, res) {
         }
 
         await new PoRecord(savingData).save();
+      } else {
+        let patchData = {
+          target_quantity: quantity / 1000, // offset numbers
+          target_completion_date: targetCompletionDate
+        };
+        await existingPoRecord.save(patchData, {patch: true})
       }
     })
     .on('end', function() {

@@ -10,8 +10,9 @@ const PoJobInput = bookshelf.model('PoJobInput', {
   hasTimestamps: true,
   tableName: 'po_job_inputs',
   initialize() {
-    this.on('saved', (model) => {
-      PoRecord.updateInputQuantity(model.id);
+    this.on('saved', async (model) => {
+      await PoRecord.updateInputQuantity(model.id);
+      await require('./../PoJob').updateInputQuantity(model.id);
     })
   },
   po_job() {

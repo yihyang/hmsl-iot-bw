@@ -156,6 +156,8 @@ let runOEEJob = async (currentDate) => {
     await asyncForEach(nodes, async (node) => {
       let startOfDay = currentDate.clone().startOf('day')
       let endOfDay = currentDate.clone().endOf('day')
+      let formattedStartOfDay = startOfDay.toISOString();
+      let formattedEndOfDay = endOfDay.toISOString();
 
       console.log(`Started inserting "OEE" for ${node.name}`);
 
@@ -164,7 +166,14 @@ let runOEEJob = async (currentDate) => {
       let quality = 0;
 
       // availability
-      let availabilities = (await new OEEAvailability({node_id: node.id, start_time: startOfDay, end_time: endOfDay}).fetchAll()).toJSON();
+      let availabilities = (await new OEEAvailability()
+        .query(function (qb) {
+          qb.where('node_id', '=', node.id)
+            .where('created_at', '>=', formattedStartOfDay)
+            .where('created_at', '<=', formattedEndOfDay)
+        })
+        .fetchAll()
+      ).toJSON();
 
       console.log(availabilities);
       if (availabilities.length != 0) {
@@ -173,13 +182,25 @@ let runOEEJob = async (currentDate) => {
       console.log(availability);
 
 
-      let performances = (await new OEEPerformance({node_id: node.id, start_time: startOfDay, end_time: endOfDay}).fetchAll()).toJSON();
+      let performances = (await new OEEPerformance()
+        .query(function (qb) {
+          qb.where('node_id', '=', node.id)
+            .where('created_at', '>=', formattedStartOfDay)
+            .where('created_at', '<=', formattedEndOfDay)
+        })
+        .fetchAll()).toJSON();
       if (performances.length != 0) {
         performance = _.meanBy(performances, (a) => a.value)
       }
 
 
-      let qualities = (await new OEEQuality({node_id: node.id, start_time: startOfDay, end_time: endOfDay}).fetchAll()).toJSON();
+      let qualities = (await new OEEQuality()
+        .query(function (qb) {
+          qb.where('node_id', '=', node.id)
+            .where('created_at', '>=', formattedStartOfDay)
+            .where('created_at', '<=', formattedEndOfDay)
+        })
+        .fetchAll()).toJSON();
       if (qualities.length != 0) {
         quality = _.meanBy(qualities, (a) => a.value)
       }
@@ -233,5 +254,5 @@ module.exports = {
 }
 
 
-let date = moment().subtract(3, 'day')
-runAllJob(date)
+// let date = moment().subtract(3, 'day')
+// runAllJob(date)
