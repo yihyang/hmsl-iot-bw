@@ -46,26 +46,77 @@ let refresh = async function(req, res) {
 
 let historyRefresh = async function(req, res) {
   let today = moment();
-  let formattedSixMonthAgo = moment().subtract(6,'months').startOf('month').format('YYYY-MM-DD');
+  let sixMonthAgo = moment().subtract(6,'months').startOf('month');
+  let formattedSixMonthAgo = sixMonthAgo.format('YYYY-MM-DD');
 
+  /*******
+   * OEE *
+   *******/
   // get OEE since six months ago
   let oeeQuery =`
-    SELECT EXTRACT(MONTH FROM start_time) AS month, avg(nullif(value, 'Nan'))
+    SELECT EXTRACT(MONTH FROM start_time) AS month, avg(nullif(value, 'NaN')) AS value
       FROM oee
-      WHERE start_time >= ${formattedSixMonthAgo}
+      WHERE start_time >= '${formattedSixMonthAgo}'
       GROUP BY month
   `;
   let oeeResult = await bookshelf.knex.raw(oeeQuery);
+  oeeResult = oeeResult.rows;
 
-  console.log(oeeResult);
+  // map result
+  oeeResult = _.reduce(oeeResult, function(carry, item) { carry[item.month] = item.value; return carry; }, {});
+  let oeeLabel = [];
+  let oeeValue = [];
+  let oeeDefaultValue = [];
+  let oeeSixMonthAgo = sixMonthAgo.clone()
+  while(oeeSixMonthAgo.isBefore(today)) {
+    let digitMonth = parseInt(oeeSixMonthAgo.format('MM'));
+    let labelMonth = oeeSixMonthAgo.format('MMM');
 
-  let oeePerformanceQuery = `
+    oeeLabel.push(labelMonth)
+    oeeValue.push(oeeResult[digitMonth] || 0)
+    oeeDefaultValue.push(0.7)
+
+    oeeSixMonthAgo.add(1, 'month')
+  }
+  let oee = { label: oeeLabel, value: oeeValue, default: oeeDefaultValue }
+
+
+  /**********
+   * Output *
+   **********/
+  let outputQuery = `
+    SELECT EXTRACT(MONTH FROM created_at) AS month, avg(nullif(produced_quantity, 'NaN')) AS value
+      FROM po_records
+      WHERE created_at >= '${formattedSixMonthAgo}'
+      GROUP BY month
   `;
+  let outputQueryResult = await bookshelf.knex.raw(outputQuery);
+  let outputResult = outputQueryResult.rows;
 
+  // map result
+  outputResult = _.reduce(outputResult, function(carry, item) { carry[item.month] = item.value; return carry; }, {});
+  let outputLabel = [];
+  let outputValue = [];
+  let outputDefaultValue = [];
+  let outputSixMonthAgo = sixMonthAgo.clone()
+  while(outputSixMonthAgo.isBefore(today)) {
+    let digitMonth = parseInt(oeeSixMonthAgo.format('MM'));
+    let labelMonth = oeeSixMonthAgo.format('MMM');
 
+    outputLabel.push(labelMonth)
+    outputValue.push(outputResult[digitMonth] || 0)
+    outputDefaultValue.push(100)
+
+    outputSixMonthAgo.add(1, 'month')
+  }
+
+  let output = { label: outputLabel, value: outputValue, default: outputDefaultValue }
+
+  res.json({oee, output})
 }
 
 module.exports = {
   index,
-  refresh
+  refresh,
+  historyRefresh
 }

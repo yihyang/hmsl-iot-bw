@@ -94,18 +94,19 @@ block content
           format: 'YYYY/MM/DD'
         }
       }, function(start, end, label) {
-        toggleChartEventUpdate()
+        toggleChartUpdate()
       });
 
       //- $('input[name="shifts[]"]').on('click', () => {
-      //-   toggleChartEventUpdate()
+      //-   toggleChartUpdate()
       //- });
 
       //- $('input[name="areas[]"]').on('click', () => {
-      //-   toggleChartEventUpdate()
+      //-   toggleChartUpdate()
       //- });
 
-      toggleChartEventUpdate();
+      toggleChartUpdate();
+      toggleHistoryChartUpdate();
     });
 
     function getFormData() {
@@ -122,20 +123,40 @@ block content
       };
     }
 
-    function toggleChartEventUpdate() {
+    function toggleChartUpdate() {
       var formData = getFormData();
       //- Send Ajax request
       $.ajax({
         url: '/oee/dashboard/refresh',
         data: formData,
         success: function(response) {
-        console.log(response)
+          console.log(response)
           updateOEECharts(response);
         },
         error: function(error) {
           console.log(error);
         }
       });
+    }
+
+    function toggleHistoryChartUpdate() {
+      $.ajax({
+        url: '/oee/dashboard/history-refresh',
+        success: function(response) {
+          chartMonthlyOEE.data.labels = response.oee.label
+          chartMonthlyOEE.data.datasets[0].data = response.oee.default;
+          chartMonthlyOEE.data.datasets[1].data = response.oee.value;
+          chartMonthlyOEE.update();
+
+          chartMonthlyOutputTrend.data.labels = response.output.label
+          chartMonthlyOutputTrend.data.datasets[0].data = response.output.default;
+          chartMonthlyOutputTrend.data.datasets[1].data = response.output.value;
+          chartMonthlyOutputTrend.update();
+        },
+        error: function(error) {
+          console.log(error);
+        }
+      })
     }
 
     function updateOEECharts(data)
