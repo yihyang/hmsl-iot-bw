@@ -73,8 +73,8 @@ let historyRefresh = async function(req, res) {
     let labelMonth = oeeSixMonthAgo.format('MMM');
 
     oeeLabel.push(labelMonth)
-    oeeValue.push(oeeResult[digitMonth] || 0)
-    oeeDefaultValue.push(0.7)
+    oeeValue.push((oeeResult[digitMonth] || 0) * 100)
+    oeeDefaultValue.push(70)
 
     oeeSixMonthAgo.add(1, 'month')
   }
@@ -100,12 +100,12 @@ let historyRefresh = async function(req, res) {
   let outputDefaultValue = [];
   let outputSixMonthAgo = sixMonthAgo.clone()
   while(outputSixMonthAgo.isBefore(today)) {
-    let digitMonth = parseInt(oeeSixMonthAgo.format('MM'));
-    let labelMonth = oeeSixMonthAgo.format('MMM');
+    let digitMonth = parseInt(outputSixMonthAgo.format('MM'));
+    let labelMonth = outputSixMonthAgo.format('MMM');
 
     outputLabel.push(labelMonth)
     outputValue.push(outputResult[digitMonth] || 0)
-    outputDefaultValue.push(100)
+    outputDefaultValue.push(130)
 
     outputSixMonthAgo.add(1, 'month')
   }

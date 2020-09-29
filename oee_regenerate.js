@@ -1,6 +1,7 @@
-const OEEHelper = require('./app/helpers/oee');
 const schedule = require('node-schedule')
 const moment = require('moment')
+
+const OEEHelper = require('./app/helpers/oee');
 const {
   asyncForEach
 } = require('./app/helpers/loop')
