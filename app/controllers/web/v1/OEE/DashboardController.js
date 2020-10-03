@@ -4,6 +4,7 @@ const _ = require('lodash')
 const rootPath = './../../../../..'
 const Node = require(`${rootPath}/app/models/Node/Node`);
 const OEE = require(`${rootPath}/app/models/OEE/OEE`);
+const GWO = require(`${rootPath}/app/models/Gwo/Gwo`);
 const NodeDailyInput = require(`${rootPath}/app/models/OEE/NodeDailyInput`);
 const bookshelf = require(`${rootPath}/config/bookshelf`);
 
@@ -42,6 +43,43 @@ let refresh = async function(req, res) {
   }
 
   res.json(result)
+}
+
+let reasonRefresh = async function(req, res) {
+  let {startDate, endDate} = req.query
+
+  let startTime = moment(startDate).startOf('day');
+  let endTime = moment(endDate).endOf('day');
+  let formattedStartDate = startTime.format('YYYY-MM-DD');
+  let formattedEndDate = startTime.format('YYYY-MM-DD');
+
+  let reasonQuery = `
+    SELECT gwo_reasons.name AS reason, count(*) AS count
+      FROM gwo
+      JOIN gwo_reasons ON gwo.gwo_reason_id = gwo_reasons.id
+      WHERE gwo.created_at >= ?
+      AND gwo.created_at <= ?
+      GROUP BY gwo_reasons.name
+      ORDER BY count(*);
+  `;
+
+  let reasonResult = (await bookshelf.knex.raw(reasonQuery, [formattedStartDate, formattedEndDate])).rows;
+
+  let reasonLabel = [];
+  let reasonValue = [];
+
+  reasonResult.forEach(function (item) {
+    reasonLabel.push(item.reason)
+    reasonValue.push(item.count)
+  })
+
+  let reasons = {
+    labels: reasonLabel,
+    values: reasonValue,
+  }
+
+  res.json({reasons})
+
 }
 
 let historyRefresh = async function(req, res) {
@@ -118,5 +156,6 @@ let historyRefresh = async function(req, res) {
 module.exports = {
   index,
   refresh,
-  historyRefresh
+  reasonRefresh,
+  historyRefresh,
 }

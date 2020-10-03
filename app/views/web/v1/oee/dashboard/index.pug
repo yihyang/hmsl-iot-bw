@@ -79,7 +79,7 @@ block content
         canvas#chartMonthlyOutputTrend
       .col-sm-12.col-md-4
         h4 Downtime Pareto
-        canvas#chartMonthlyDowntime
+        canvas#chartDowntimeReason
 
   script.
     $(function() {
@@ -95,6 +95,7 @@ block content
         }
       }, function(start, end, label) {
         toggleChartUpdate()
+        toggleReasonChartUpdate()
       });
 
       //- $('input[name="shifts[]"]').on('click', () => {
@@ -106,6 +107,7 @@ block content
       //- });
 
       toggleChartUpdate();
+      toggleReasonChartUpdate();
       toggleHistoryChartUpdate();
     });
 
@@ -132,6 +134,21 @@ block content
         success: function(response) {
           console.log(response)
           updateOEECharts(response);
+        },
+        error: function(error) {
+          console.log(error);
+        }
+      });
+    }
+
+    function toggleReasonChartUpdate() {
+      var formData = getFormData();
+
+      $.ajax({
+        url: '/oee/dashboard/reason-refresh',
+        data: formData,
+        success: function(response) {
+          updateReasonCharts(response.reasons);
         },
         error: function(error) {
           console.log(error);
@@ -193,6 +210,13 @@ block content
       chartOEE.data.datasets[0].data = oeeTotalData;
       chartOEE.options.elements.center.text = roundToTwoDecimalPoint(value * 100) + '%';
       chartOEE.update();
+    }
+
+    function updateReasonCharts(data)
+    {
+      chartDowntimeReason.data.datasets[0].data = data.values;
+      chartDowntimeReason.data.labels = data.labels;
+      chartDowntimeReason.update()
     }
 
     let backgroundColor = ['#49b431', '#e3e1e3']
@@ -376,13 +400,13 @@ block content
     let monthlyOutputData = {
       labels: ['Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep'],
       datasets: [{
-        label: 'Output Target (g)',
+        label: 'Output Target (kg)',
         backgroundColor: ' #fabe0a',
         borderColor: ' #fabe0a',
         borderWidth: 1,
         data: [10, 10, 10, 10, 10, 10],
       }, {
-        label: 'Actual (g)',
+        label: 'Actual (kg)',
         backgroundColor: '#6dae45',
         borderColor: '#6dae45',
         borderWidth: 1,
@@ -401,8 +425,8 @@ block content
         }
     });
 
-    //- #chartMonthlyDowntime
-    var ctx = document.getElementById('chartMonthlyDowntime').getContext('2d');
+    //- #chartDowntimeReason
+    var ctx = document.getElementById('chartDowntimeReason').getContext('2d');
     let monthlyDowntimeData = {
       labels: ['Preventive Maintainance', 'Breakdown', 'Setup'],
       datasets: [{
@@ -413,8 +437,8 @@ block content
         data: [10, 5, 2],
       }]
     }
-    //- document.getElementById('chartMonthlyDowntime').height = 80;
-    var chartMonthlyDowntime = new Chart(ctx,{
+    //- document.getElementById('chartDowntimeReason').height = 80;
+    var chartDowntimeReason = new Chart(ctx,{
       type: 'horizontalBar',
       data: monthlyDowntimeData,
       options: {

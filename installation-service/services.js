@@ -13,7 +13,7 @@ svc.on('install',function(){
 });
 
 svc.on('uninstall',function(){
-  console.log('Uninstall complete.');
+  console.log('Uninstall HTML IOT Service complete.');
   console.log('The service exists: ', svc.exists);
 });
 
@@ -31,7 +31,7 @@ svc2.on('install',function(){
 });
 
 svc2.on('uninstall',function(){
-  console.log('Uninstall complete.');
+  console.log('Uninstall HTML IOT Event Catcher complete.');
   console.log('The service exists: ',svc2.exists);
 });
 
@@ -49,7 +49,7 @@ svc3.on('install',function(){
 });
 
 svc3.on('uninstall',function(){
-  console.log('Uninstall complete.');
+  console.log('Uninstall HTML OEE Generator complete.');
   console.log('The service exists: ',svc3.exists);
 });
 
