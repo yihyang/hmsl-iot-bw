@@ -1,0 +1,84 @@
+extends ./../../../layouts/default
+include ./../../../shared/mixins
+
+block content
+  .container
+    .row
+      .col
+        a.btn.btn-link.mt-3(href="/portal")
+          i.fa.fa-arrow-left
+          | &nbsp;Back to Home Page
+    .row.mt-3
+      .col
+        h1 Extrusion Cycles
+    .row
+      .col
+        table.table
+          tr
+            td(colspan="4")
+            th(colspan="3").text-center min/ballet
+          tr
+            th Category
+            th Alloy
+            th Ballet Size
+            th Diameter (mm)
+            th Press 1
+            th Press 2
+            th Press 3
+
+          for c in extrusionCycles
+            tr
+              td
+                = c.category
+              td
+                = c.alloy
+              td
+                = c.ballet_size
+              td
+                = c.diameter
+              td
+                input.form-control.data-input(type="number", step="0.01", value=(c.data ? c.data.press_1 : ''), data-cycle-id=c.id, data-key="press_1")
+              td
+                input.form-control.data-input(type="number", step="0.01", value=(c.data ? c.data.press_2 : ''), data-cycle-id=c.id, data-key="press_2")
+              td
+                input.form-control.data-input(type="number", step="0.01", value=(c.data ? c.data.press_3 : ''), data-cycle-id=c.id, data-key="press_3")
+  script.
+    $('.data-input').on('change', function() {
+      let data = {
+        id: $(this).data('cycle-id'),
+        key: $(this).data('key'),
+        value: $(this).val(),
+      };
+
+      $.ajax({
+        url: '/extrusion-cycles',
+        data: data,
+        type: 'PUT',
+        success: function(response) {
+          new Noty({
+            type: 'success',
+            text: response.message,
+            theme: 'bootstrap-v4',
+            timeout: 2000,
+          }).show()
+        },
+        error: function(response) {
+          let {
+            errors
+          } = JSON.parse(response.responseText);
+          errors.forEach((error) => {
+            new Noty({
+              type: 'error',
+              text: error.message,
+              theme: 'bootstrap-v4',
+              timeout: 2000,
+            }).show()
+
+            //- fixed values
+            let domName = `#node-${node_id}-${type}`;
+            $(domName).val(error.corrected_value);
+          });
+
+        }
+      });
+    })

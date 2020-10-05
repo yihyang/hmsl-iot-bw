@@ -51,7 +51,7 @@ let reasonRefresh = async function(req, res) {
   let startTime = moment(startDate).startOf('day');
   let endTime = moment(endDate).endOf('day');
   let formattedStartDate = startTime.format('YYYY-MM-DD');
-  let formattedEndDate = startTime.format('YYYY-MM-DD');
+  let formattedEndDate = endTime.format('YYYY-MM-DD');
 
   let reasonQuery = `
     SELECT gwo_reasons.name AS reason, count(*) AS count
