@@ -2,7 +2,12 @@ const rootPath = './../../../..'
 const ExtrusionCycle = require(`${rootPath}/app/models/ExtrusionCycle/ExtrusionCycle`)
 
 let index = async (req, res) => {
-  let extrusionCycles = (await new ExtrusionCycle().fetchAll()).toJSON();
+  let extrusionCycles = (await new ExtrusionCycle().query(function(qb) {
+    qb.orderBy('category', 'asc')
+      .orderBy('alloy', 'asc')
+      .orderBy('billet_size', 'asc')
+      .orderBy('diameter', 'asc')
+  }).fetchAll()).toJSON();
 
   res.render('web/v1/extrusion-cycles/index', {extrusionCycles})
 }

@@ -7,7 +7,7 @@ exports.up = function(knex, Promise) {
     t.string('category').nullable();
     t.string('alloy').nullable();
     t.string('billet_size').nullable();
-    t.string('diamater').nullable();
+    t.double('diameter').nullable();
     t.json('data').nullable();
 
 
