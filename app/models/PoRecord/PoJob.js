@@ -15,7 +15,7 @@ const PoJob = bookshelf.model('PoJob', {
     this.on('saved', async (model) => {
       // let poRecord = await new PoRecord({id: model.po_record_id}).fetch({require: false});
       let poRecord = model.po_record({require: false});
-      if (poRecord && ((await poRecord.fetch({require: false})).toJSON().status != 'In Progress')) {
+      if (poRecord && ((await poRecord.fetch({require: false})).toJSON().status == 'Created')) {
         poRecord.set('status', 'In Progress')
         poRecord.set('start_time', moment())
         poRecord.save()

@@ -14,21 +14,21 @@ let step1 = async (req, res) => {
 let end = async (req, res) => {
   let userId = req.user.id
   let {po_number} = req.body
-  let poRecord = (await new PoRecord({po_number}).fetch({require: false}));
+  let poRecord = await PoRecord.where({po_number}).fetch({require: false});
 
   if (!poRecord) {
     req.flash('error', `Unable to find the PO with Number ${po_number}`)
     return res.redirect('/operators/po-end/step-1')
   }
 
-  if (poRecord.toJSON().status === 'Ended') {
+  poRecord = poRecord.toJSON()
+  if (poRecord.status === 'Ended') {
     req.flash('error', `Unable to end a PO Record that has been ended`)
     return res.redirect('/operators/po-end/step-1')
   }
 
-  await PoRecord.where({po_number}).save({status: 'Ended', ended_by: userId, ended_at: moment()}, {patch: true});
 
-  console.log('poRecord' + poRecord.id)
+  let result = await PoRecord.where({id: poRecord.id}).save({status: 'Ended', ended_by: userId, ended_at: moment()}, {patch: true});
 
   let poJobs = await PoJob.where({po_record_id: poRecord.id}).fetch({require: false});
 

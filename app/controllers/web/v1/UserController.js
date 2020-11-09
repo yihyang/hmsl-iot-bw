@@ -37,7 +37,12 @@ function new_session(req, res, next) {
       if (redirect) {
         res.redirect(redirect);
       } else {
-        return res.redirect('/portal');
+
+        let redirectUrl = '/portal'
+        if (user.attributes.role == 'operator') {
+          redirectUrl = '/operators'
+        }
+        return res.redirect(redirectUrl);
       }
     });
   })(req, res, next);

@@ -1,0 +1,74 @@
+extends ./../../../../../layouts/default
+include ./../../../../../shared/mixins
+
+block content
+  .container
+    .row
+      .col
+        a.btn.btn-link.my-2(href=`/operators/po-inputs/step-1`)
+          i.fa.fa-arrow-left
+          | &nbsp;Back to Previous Step
+    .row
+      .col
+        h2
+          | PO Records #{poRecord.id}
+    .row
+      .col
+        table.table
+          tr
+            th PO Number
+            td= poRecord.po_number
+          tr
+            th ID
+            td= poRecord.id
+          tr
+            th Status
+            td= poRecord.status
+          tr
+            th PO Number
+            td= poRecord.po_number
+          tr
+            th Material Number
+            td= poRecord.material_number
+          tr
+            th Target Completion Date
+            td
+              +format_date(poRecord.target_completion_date)
+          tr
+            th Target Quantity (g)
+            td
+              +convert_to_thousand(poRecord.target_quantity)
+          tr
+            th Input Quantity (g)
+            td
+              +convert_to_thousand(poRecord.input_quantity)
+              | &nbsp;&nbsp;&nbsp;
+          tr
+            th Produced Quantity (g)
+            td
+              +convert_to_thousand(poRecord.produced_quantity)
+
+    .row
+      .col
+        h2 Jobs
+        a.btn.btn-link.my-2(href=`/operators/po-inputs/po-records/${poRecord.id}/po-jobs/new`)
+          i.fa.fa-plus-circle
+          | &nbsp;Create new Jobs
+        table.table
+          tr
+            th ID
+            th Machine
+            th Created By
+            th Created At
+          if poRecord.jobs
+            for j in poRecord.jobs
+              tr
+                td= j.node.name
+                td= j.status
+                td
+                  if j.user
+                    = j.user.name
+
+                td
+                  +format_datetime(j.created_at)
+
