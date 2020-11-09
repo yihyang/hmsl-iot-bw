@@ -35,6 +35,8 @@
   .node-item {
     padding: 1em;
     max-width: 8em;
+    margin: 2px;
+    border: solid 1px;
 
     &[data-status="UNKNOWN"] {
       @include status-style-unknown

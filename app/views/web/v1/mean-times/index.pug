@@ -1,0 +1,218 @@
+extends ./../../../layouts/default
+
+block content
+  .container-fluid
+    .row
+      .col
+        a.btn.btn-link.my-2(href="/")
+          i.fa.fa-arrow-left
+          | &nbsp;Back to Home
+
+    .row.my-2
+      .col-12
+        h1 OEE Dashboard
+    .row.my-2
+      .col-md-2
+        p Date Range
+      .col-md-6
+        input.form-control(type="daterange" name="dateRange")
+
+    .row
+      .col-6
+        h3 MTBF
+        canvas#chartMTBF
+        .col-6
+        h3 MTTR
+        canvas#chartMTTR
+      .col-6
+        h3 Downtime Pareto By Case
+        canvas#chartDowntimeParetoByCase
+        .col-6
+        h3 Downtime Pareto By Time
+        canvas#chartDowntimeParetoByTime
+  script.
+    $('input[type="daterange"]').daterangepicker({
+        "autoApply": true,
+        "startDate": moment().subtract('7', 'days'),
+        "maxDate": moment(),
+        "locale": {
+          format: 'YYYY/MM/DD'
+        }
+      }, function(start, end, label) {
+        toggleChartUpdate()
+        //- toggleReasonChartUpdate()
+      });
+
+    toggleChartUpdate();
+
+
+    function toggleChartUpdate() {
+      var formData = getFormData();
+      //- Send Ajax request
+      $.ajax({
+        url: '/mean-times/refresh',
+        data: formData,
+        success: function(response) {
+          updateCharts(response)
+        },
+        error: function(error) {
+          console.log(error);
+        }
+      });
+    }
+
+
+    function getFormData() {
+      var startDate = $('input[name="dateRange"]').data('daterangepicker').startDate.format('YYYY-MM-DD');
+      var endDate = $('input[name="dateRange"]').data('daterangepicker').endDate.format('YYYY-MM-DD');
+
+      return {
+        startDate,
+        endDate,
+      };
+    }
+
+
+    //- chartMTBF
+    var ctx = document.getElementById('chartMTBF').getContext('2d');
+    let mTBFData = {
+      labels: ['Preventive Maintainance', 'Breakdown', 'Setup'],
+      datasets: [{
+        label: 'Reason',
+        backgroundColor: ' #5c99cf',
+        borderColor: ' #5c99cf',
+        borderWidth: 1,
+        data: [10, 5, 2],
+      }]
+    }
+    var chartMTBF = new Chart(ctx,{
+      type: 'bar',
+      data: mTBFData,
+      options: {
+          responsive: true,
+          legend: {
+            position: 'bottom',
+          },
+          scales: {
+            xAxes: [{
+              display: true,
+              ticks: {
+                min: 0
+              }
+            }]
+          }
+        }
+    });
+
+    //- chartMTTR
+    var ctx = document.getElementById('chartMTTR').getContext('2d');
+    let mTTRData = {
+      labels: ['Preventive Maintainance', 'Breakdown', 'Setup'],
+      datasets: [{
+        label: 'Reason',
+        backgroundColor: ' #5c99cf',
+        borderColor: ' #5c99cf',
+        borderWidth: 1,
+        data: [10, 5, 2],
+      }]
+    }
+    var chartMTTR = new Chart(ctx,{
+      type: 'bar',
+      data: mTTRData,
+      options: {
+          responsive: true,
+          legend: {
+            position: 'bottom',
+          },
+          scales: {
+            xAxes: [{
+              display: true,
+              ticks: {
+                min: 0
+              }
+            }]
+          }
+        }
+    });
+
+    //- chartDowntimeParetoByCase
+    var ctx = document.getElementById('chartDowntimeParetoByCase').getContext('2d');
+    let downtimeParetoByCaseData = {
+      labels: ['Preventive Maintainance', 'Breakdown', 'Setup'],
+      datasets: [{
+        label: 'Reason',
+        backgroundColor: ' #5c99cf',
+        borderColor: ' #5c99cf',
+        borderWidth: 1,
+        data: [10, 5, 2],
+      }]
+    }
+    var chartDowntimeParetoByCase = new Chart(ctx,{
+      type: 'horizontalBar',
+      data: downtimeParetoByCaseData,
+      options: {
+          responsive: true,
+          legend: {
+            position: 'bottom',
+          },
+          scales: {
+            xAxes: [{
+              display: true,
+              ticks: {
+                min: 0
+              }
+            }]
+          }
+        }
+    });
+
+    //- chartDowntimeParetoByTime
+    var ctx = document.getElementById('chartDowntimeParetoByTime').getContext('2d');
+    let downtimeParetoByTimeData = {
+      labels: ['Preventive Maintainance', 'Breakdown', 'Setup'],
+      datasets: [{
+        label: 'Reason',
+        backgroundColor: ' #5c99cf',
+        borderColor: ' #5c99cf',
+        borderWidth: 1,
+        data: [10, 5, 2],
+      }]
+    }
+    var chartDowntimeParetoByTime = new Chart(ctx,{
+      type: 'horizontalBar',
+      data: downtimeParetoByTimeData,
+      options: {
+          responsive: true,
+          legend: {
+            position: 'bottom',
+          },
+          scales: {
+            xAxes: [{
+              display: true,
+              ticks: {
+                min: 0
+              }
+            }]
+          }
+        }
+    });
+
+    function updateCharts(response) {
+      let { mtbr, mttr, downtimeByCase, downtimeByDuration } = response
+
+      chartMTBF.data.labels = mtbr.labels
+      chartMTBF.data.datasets[0].data = mtbr.values
+      chartMTBF.update()
+
+      chartMTTR.data.labels = mttr.labels
+      chartMTTR.data.datasets[0].data = mttr.values
+      chartMTTR.update()
+
+      chartDowntimeParetoByCase.data.labels = downtimeByCase.labels
+      chartDowntimeParetoByCase.data.datasets[0].data = downtimeByCase.values
+      chartDowntimeParetoByCase.update()
+
+      chartDowntimeParetoByTime.data.labels = downtimeByDuration.labels
+      chartDowntimeParetoByTime.data.datasets[0].data = downtimeByDuration.values
+      chartDowntimeParetoByTime.update()
+    }

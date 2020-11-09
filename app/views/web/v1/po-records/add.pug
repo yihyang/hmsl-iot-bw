@@ -1,0 +1,40 @@
+extends ./../../../layouts/default
+include ./../../../shared/mixins
+
+block content
+  .container
+    .row
+      .col
+        a.btn.btn-link.my-2(href="/po-records")
+          i.fa.fa-arrow-left
+          | &nbsp;Back to Po Record Page
+
+    .row.my-3
+      .col
+        h2 Add new PO Record
+
+    .row
+      .col
+        //- form
+        form#form(action="/po-records" method="POST")
+          .form-group.row
+            .col-md-4
+              label(for="po_number") PO Number
+            .col-md-8
+              input.form-control(type="text" name="po_number" required="true")
+          .form-group.row
+            .col-md-4
+              label(for="target_quantity") Target Quantity
+            .col-md-8
+              input.form-control(type="number" name="target_quantity" required="true")
+          .form-group.row
+            .col-md-4
+              label(for="material_number") Material Number
+            .col-md-8
+              input.form-control(type="number" name="material_number" required="true")
+          .form-group.row
+            .col-md-4
+              label(for="target_completion_date") Target Completion Date
+            .col-md-8
+              input.form-control(type="date" name="target_completion_date" required="true")
+          button.btn.btn-primary(type="submit") Save

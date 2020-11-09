@@ -1,5 +1,8 @@
+const moment = require('moment')
+
 function timeLogger(req, res, next) {
-  let label = `${req.method} ${req.originalUrl}`;
+  let time = moment()
+  let label = `${time} - ${req.method} ${req.originalUrl} ${JSON.stringify(req.body)}`
   console.time(label);
 
   function afterResponse() {

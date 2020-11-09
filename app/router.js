@@ -22,6 +22,9 @@ module.exports = (app, tmpUpload) => {
   app.use('/nodes', webAuthentication);
   app.use('/portal', webAuthentication);
   app.use('/po-records', webAuthentication);
+  app.use('/extrusion-cycles', webAuthentication);
+  app.use('/mean-times', webAuthentication);
+  app.use('/operators', webAuthentication);
 
   app.get('/', web.v1.home.index)
 

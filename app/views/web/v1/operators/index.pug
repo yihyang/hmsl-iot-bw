@@ -1,0 +1,27 @@
+extends ./../../../layouts/default
+include ./../../../shared/mixins
+
+block content
+  .container
+    .row
+      .col
+        h1 Operator's Portal
+    .row.my-4
+      .col.col-md-6.col-sm-12
+        .card
+          .card-body
+            .row
+              .col-12.my-3
+                a.btn.btn-primary.btn-block(href="/operators/po-inputs/step-1") PO Input
+              .col-12.my-3
+                a.btn.btn-primary.btn-block(href="/operators/input-materials/step-1") Input Material
+              .col-12.my-3
+                a.btn.btn-primary.btn-block(href="/operators/po-checkout/step-1") PO Checkout
+              .col-12.my-3
+                a.btn.btn-primary.btn-block(href="/operators/po-end/step-1") PO End
+      .col.col-md-6.col-sm-12
+        .card
+            img.img-fluid(src="/public/images/operators/flow.png")
+            //- .row
+            //-   .col-12.my-3
+            //-     a.btn.btn-primary.btn-block(href="/operators/po-end/step-1") Whole PO End

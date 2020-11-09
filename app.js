@@ -8,6 +8,7 @@ const socketIo = require('socket.io')
 const bodyParser = require('body-parser');
 const moment = require('moment');
 const session = require('express-session');
+const flash = require('connect-flash');
 const schedule = require('node-schedule');
 const passport = require('./config/passport-initialize');
 const {
@@ -39,13 +40,20 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
-app.use(timeLogger);
-
 // POST data
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
   extended: true
 }));
+
+app.use(timeLogger);
+
+// set flash messages
+app.use(flash());
+app.use(function(req, res, next) {
+  res.locals.messages = req.flash();
+  next();
+})
 
 // global variable to determine login status
 app.locals.signedIn = false;

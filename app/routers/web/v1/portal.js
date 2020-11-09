@@ -5,15 +5,24 @@ module.exports = (app, tmpUpload) => {
     app.get('/portal', web.v1.home.index)
 
     app.get('/po-records', web.v1.poRecords.index)
+    app.get('/po-records/new', web.v1.poRecords.add)
+    app.post('/po-records', web.v1.poRecords.save)
     app.post('/po-records/shortfall', tmpUpload.single('file'), web.v1.poRecords.shortfall.upload)
+    // app.get('/po-records/:id/po-inputs/new', web.v1.poRecords.poInputs.add)
+    // app.post('/po-records/:id/po-inputs', web.v1.poRecords.poInputs.save)
     app.get('/po-records/:id', web.v1.poRecords.show)
     app.get('/po-records/:id/edit', web.v1.poRecords.edit)
     app.post('/po-records/:id/update', web.v1.poRecords.update)
     app.get('/po-records/:id/jobs', web.v1.poRecords.jobs.index)
+    app.get('/po-records/:id/jobs/new', web.v1.poRecords.jobs.add)
+    app.post('/po-records/:id/jobs', web.v1.poRecords.jobs.save)
 
     app.get('/nodes', web.v1.nodes.index)
     app.get('/nodes/:id', web.v1.nodes.show)
     app.get('/nodes/:id/events', web.v1.nodes.events.index)
+
+    app.get('/mean-times', web.v1.meanTimes.index)
+    app.get('/mean-times/refresh', web.v1.meanTimes.refresh)
 
     app.get('/gwo', web.v1.gwo.index)
     app.get('/gwo/new', web.v1.gwo.add)
@@ -59,4 +68,18 @@ module.exports = (app, tmpUpload) => {
     app.get('/settings/users', web.v1.settings.users.index)
     app.get('/settings/users/:id/edit', web.v1.settings.users.edit)
     app.post('/settings/users/:id/update', web.v1.settings.users.update)
+
+    app.get('/operators', web.v1.operators.index)
+    app.get('/operators/input-materials/step-1', web.v1.operators.inputMaterials.step1)
+    app.post('/operators/input-materials/step-2', web.v1.operators.inputMaterials.step2)
+    app.post('/operators/input-materials', web.v1.operators.inputMaterials.save)
+    app.get('/operators/po-inputs/step-1', web.v1.operators.poInputs.step1)
+    app.post('/operators/po-inputs/step-2', web.v1.operators.poInputs.step2)
+    app.post('/operators/po-inputs', web.v1.operators.poInputs.save)
+    app.get('/operators/po-checkout/step-1', web.v1.operators.poCheckout.step1)
+    app.post('/operators/po-checkout/step-2', web.v1.operators.poCheckout.step2)
+    app.post('/operators/po-checkout', web.v1.operators.poCheckout.save)
+    app.get('/operators/po-end/step-1', web.v1.operators.poEnd.step1)
+    app.post('/operators/po-end', web.v1.operators.poEnd.end)
+
 }

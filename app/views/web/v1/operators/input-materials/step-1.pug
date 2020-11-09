@@ -1,0 +1,24 @@
+extends ./../../../../layouts/default
+include ./../../../../shared/mixins
+
+block content
+  .container
+    .row
+      .col
+        a.btn.btn-link.my-2(href=`/operators`)
+          i.fa.fa-arrow-left
+          | &nbsp;Back to Home Page
+    .row
+      .col
+        h3 Please select machine
+        form#form(action="/operators/input-materials/step-2" method="POST")
+          .form-group.row
+            .col-md-4
+              label(for="node_id") Machine
+            .col-md-8
+              select.form-control(name="node_id")
+                for n in nodes
+                  option(value=n.id)
+                    = n.name
+
+          button.btn.btn-primary(type="submit") Next

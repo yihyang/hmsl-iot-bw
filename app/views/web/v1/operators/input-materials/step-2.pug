@@ -1,0 +1,46 @@
+extends ./../../../../layouts/default
+include ./../../../../shared/mixins
+
+block content
+  .container
+    .row
+      .col
+        a.btn.btn-link.my-2(href=`/operators/input-materials/step-1`)
+          i.fa.fa-arrow-left
+          | &nbsp;Back to Previous Step
+    .row
+      .col
+        h3 Material Input Details
+        table.table
+          tr
+            th Machine
+            td= node.name
+
+          if node.active_po_job
+            tr
+              th Job Status
+              td= node.active_po_job.status
+            if node.active_po_job.po_record
+              tr
+                th PO Number
+                td= node.active_po_job.po_record.po_number
+              tr
+                th Target Quantity
+                td= node.active_po_job.po_record.target_quantity
+              tr
+                th Produced Quantity
+                td= node.active_po_job.po_record.produced_quantity
+
+    if node.active_po_job
+      .row
+        .col
+          h4 Insert new Input Quantity
+          form#form(action="/operators/input-materials" method="POST")
+            .form-group.row
+              .col-md-4
+                label(for="quantity") Input Quantity (g)
+              .col-md-8
+                input.form-control(type="number" name="quantity" required="true")
+              input(type="hidden", name="po_job_id", value=node.active_po_job_id)
+            .form-group.row
+              button.btn.btn-primary(type="submit") Save

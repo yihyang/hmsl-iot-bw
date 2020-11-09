@@ -15,6 +15,7 @@ block content
         a(href=`/po-records/${poRecord.id}/edit`)
           i.fa.fa-edit
           | &nbsp;Edit
+
     .row
       .col
         table.table
@@ -42,14 +43,19 @@ block content
             th Input Quantity (g)
             td
               +convert_to_thousand(poRecord.input_quantity)
+              | &nbsp;&nbsp;&nbsp;
           tr
             th Produced Quantity (g)
             td
               +convert_to_thousand(poRecord.produced_quantity)
+
     .row
       .col
         h3
           | Last 10 Jobs
+        a(href=`/po-records/${poRecord.id}/jobs/new`)
+          i.fa.fa-plus-circle
+          | &nbsp;Add New Job
         table.table
           tr
             th ID

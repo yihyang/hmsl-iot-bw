@@ -1,6 +1,7 @@
 const rootPath = './../../../..'
 let shortfall = require('./PoRecord/ShortfallController')
 let jobs = require('./PoRecord/PoJobController')
+let poInputs = require('./PoRecord/PoJobInputController')
 const PoRecord = require(`${rootPath}/app/models/PoRecord/PoRecord`)
 const PoJob = require(`${rootPath}/app/models/PoRecord/PoJob`)
 const {
@@ -23,6 +24,28 @@ let index = async function(req, res) {
   let total_page = Math.ceil(parseInt(totalCount) / paginationAttribute.items_per_page)
 
   res.render('web/v1/po-records/index', {poRecords, ...paginationAttribute, total_page})
+}
+
+let add = async function(req, res) {
+  res.render('web/v1/po-records/add')
+}
+
+let save = async function(req, res) {
+  let userId = req.user.id;
+  let {po_number, target_quantity, material_number, target_completion_date} = req.body;
+
+  let poRecord = (await new PoRecord({po_number}).fetch({require: false}));
+
+  if (poRecord) {
+    req.flash('error', "PO Record with the same PO Number exists")
+    return res.redirect('/po-records')
+  }
+
+  poRecord = await new PoRecord({po_number, material_number, target_quantity, target_completion_date, user_id: userId, status: 'Created'}).save()
+
+  poRecord = poRecord.toJSON()
+
+  res.redirect('/po-records')
 }
 
 let show = async function(req, res) {
@@ -83,9 +106,12 @@ let update = async function(req, res) {
 
 module.exports = {
   index,
+  add,
+  save,
   show,
   shortfall,
   jobs,
   edit,
   update,
+  poInputs,
 }

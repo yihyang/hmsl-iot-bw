@@ -1,5 +1,7 @@
-const rootPath = './../../../../..';
+const rootPath = './../../../../..'
+const PoRecord = require(`${rootPath}/app/models/PoRecord/PoRecord`)
 const PoJob = require(`${rootPath}/app/models/PoRecord/PoJob`)
+const Node = require(`${rootPath}/app/models/Node/Node`)
 const {
   filterParams,
   getPaginationAttributes,
@@ -39,6 +41,60 @@ let index = async function(req, res) {
     res.render('web/v1/po-records/po-jobs/index', {poJobs, id, ...paginationAttribute, total_page})
 }
 
+let add = async (req, res) => {
+  let { id } = req.params;
+  let poRecord = (await new PoRecord({id}).fetch({require: false}))
+
+  if (!poRecord) {
+    req.flash('error', 'Unable to find PO Record')
+    return res.redirect(`/po-records`)
+  }
+
+  let nodes = (await new Node().fetchAll())
+  nodes = nodes.toJSON()
+
+  res.render('web/v1/po-records/po-jobs/add', { nodes, id })
+}
+
+let save = async (req, res) => {
+  let userId = req.user.id;
+  let {id} = req.params;
+  let {node_id} = req.body;
+
+  // validate node exists
+  let node = (await new Node({id: node_id}).fetch({require: false}))
+
+  if (!node) {
+    req.flash('error', 'Unable to find Machine')
+    return res.redirect(`/po-records`)
+  }
+
+  // validate po record exists
+  let poRecord = await new PoRecord({id: id}).fetch({require: false})
+
+  if (!poRecord) {
+    req.flash('error', 'Unable to find PO Record')
+    return res.redirect(`/po-records/${id}`)
+  }
+
+  // create po job
+  let poJob = (await new PoJob({po_record_id: id, node_id}).fetch({require: false}))
+
+  if (poJob) {
+    req.flash('error', 'PO Job with the same po record and machine found')
+    return res.redirect(`/po-records/${id}`)
+  }
+
+  poJob = await new PoJob({po_record_id: id, node_id, user_id: userId, status: 'In Progress'}).save();
+
+  // update node to set active PO Job
+  await new Node({id: node_id}).save({active_po_job_id: poJob.id}, {patch: true})
+
+  res.redirect(`/po-records/${id}`)
+}
+
 module.exports = {
-  index
+  index,
+  add,
+  save
 }

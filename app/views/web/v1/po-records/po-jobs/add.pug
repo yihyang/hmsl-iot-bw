@@ -1,0 +1,26 @@
+extends ./../../../../layouts/default
+include ./../../../../shared/mixins
+
+block content
+  .container
+    .row
+      .col
+        a.btn.btn-link.my-2(href=`/po-records/${id}`)
+          i.fa.fa-arrow-left
+          | &nbsp;Back to PO Records #{id} Page
+    .row.mt-3
+      .col
+        h1 Add New PO Job
+    .row
+      .col
+        //- form
+        form#form(action=`/po-records/${id}/jobs` method="POST")
+          .form-group.row
+            .col-md-4
+              label(for="node_id") Machine
+            .col-md-8
+              select.form-control(name="node_id")
+                for r in nodes
+                  option(value=r.id)
+                    = r.name
+          button.btn.btn-primary(type="submit") Save

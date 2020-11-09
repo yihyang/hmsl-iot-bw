@@ -1,0 +1,5 @@
+- if (messages)
+  each key in Object.keys(messages)
+    - alert_class = "alert-" + (key == 'error' ? 'danger' : key)
+    .alert(class=alert_class)
+      = messages[key]

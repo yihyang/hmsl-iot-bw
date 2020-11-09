@@ -17,7 +17,7 @@ let update = async (req, res) => {
 
   let { id, key, value } = req.body;
 
-  let cycle = await new ExtrusionCycle(id).fetch({require: false});
+  let cycle = await new ExtrusionCycle({id}).fetch({require: false});
 
   if (!cycle) {
     return res.json({'message': `Cycle with ID ${id} not found`})
@@ -28,7 +28,7 @@ let update = async (req, res) => {
 
   await cycle.save({data}, {patch: true})
 
-  res.json({'message': `Updated Cycle with ID to "${value}"`})
+  res.json({'message': `Updated Cycle with ID ${cycle.id} to "${value}"`})
 }
 
 module.exports = {
