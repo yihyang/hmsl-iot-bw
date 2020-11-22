@@ -2,6 +2,7 @@ const rootPath = './../../..';
 const bookshelf = require(`${rootPath}/config/bookshelf`);
 const Event = require('./Event');
 const PoJob = require('../PoRecord/PoJob')
+const NodeGroup = require('./NodeGroup')
 const moment = require('moment');
 // const Area = require('./Area/Area');
 const io = require('socket.io-client')
@@ -34,6 +35,9 @@ const Node = bookshelf.model('Node', {
   },
   events() {
     return this.hasMany(Event)
+  },
+  node_group() {
+    return this.belongsTo(NodeGroup)
   }
 })
 

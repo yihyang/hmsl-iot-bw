@@ -44,7 +44,7 @@ const PoRecord = bookshelf.model('PoRecord', {
         WHERE po_records.id = ?
     `
 
-    return (await bookshelf.knex.raw(query, this.id)).rows;
+    return (await bookshelf.knex.raw(query, this.id)).rows[0].result;
   },
 }, {
   statuses() {

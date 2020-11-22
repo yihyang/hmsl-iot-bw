@@ -39,6 +39,8 @@ let save = async (req, res) => {
     return res.redirect('/operators/input-materials/step-1')
   }
 
+  console.log(poJob)
+
   let poBatch = await new PoBatch({po_job_id, output_quantity: quantity, user_id: userId, status: 'Created'}).save();
 
   res.redirect('/operators')

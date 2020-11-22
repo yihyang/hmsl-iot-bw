@@ -26,10 +26,16 @@ block content
                 td= node.active_po_job.po_record.po_number
               tr
                 th Target Quantity
-                td= node.active_po_job.po_record.target_quantity
+                td
+                  +convert_to_thousand(node.active_po_job.po_record.target_quantity)
+              tr
+                th Input Quantity
+                td
+                  +convert_to_thousand(node.active_po_job.po_record.input_quantity)
               tr
                 th Produced Quantity
-                td= node.active_po_job.po_record.produced_quantity
+                td
+                  +convert_to_thousand(node.active_po_job.po_record.produced_quantity)
 
     if node.active_po_job
       .row
@@ -40,7 +46,11 @@ block content
               .col-md-4
                 label(for="quantity") Output Quantity (g)
               .col-md-8
-                input.form-control(type="number" name="quantity" required="true")
+                if node.active_po_job.po_record
+                  - maxInput = (node.active_po_job.po_record.input_quantity - node.active_po_job.po_record.produced_quantity) * 1000
+                else
+                  - maxInput = 0
+                input.form-control(type="number", name="quantity", required="true", max=maxInput, step="0.001")
               input(type="hidden", name="po_job_id", value=node.active_po_job_id)
             .form-group.row
               button.btn.btn-primary(type="submit") Save

@@ -18,17 +18,22 @@ block content
           .col
             .card
               .card-body.nodes-map
-                .row
-                  for n in nodes
+                for g in nodeGroups
+                  .row
                     .col
-                      a(href=`/nodes/${n.id}`)
-                        .node-item.text-center(class=`node-${n.id}`, data-status=n.current_status)
-                          p= n.name
-                          p.status= n.current_status
-                          if n.active_po_job && n.active_po_job.po_record
-                            p= n.active_po_job.po_record.po_number
-                          else
-                            p -
+                      .card.my-2
+                        = g.name
+                        .row
+                          for n in g.nodes
+                            .col-2.col-md-4
+                              a(href=`/nodes/${n.id}`)
+                                .node-item.text-center(class=`node-${n.id}`, data-status=n.current_status)
+                                  p= n.name
+                                  p.status= n.current_status
+                                  if n.active_po_job && n.active_po_job.po_record
+                                    p= n.active_po_job.po_record.po_number
+                                  else
+                                    p -
 
       .col.col-md-4
         .card

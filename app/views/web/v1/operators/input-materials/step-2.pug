@@ -26,10 +26,16 @@ block content
                 td= node.active_po_job.po_record.po_number
               tr
                 th Target Quantity
-                td= node.active_po_job.po_record.target_quantity
+                td
+                  +convert_to_thousand(node.active_po_job.po_record.target_quantity)
+              tr
+                th Input Quantity
+                td
+                  +convert_to_thousand(node.active_po_job.po_record.input_quantity)
               tr
                 th Produced Quantity
-                td= node.active_po_job.po_record.produced_quantity
+                td
+                  +convert_to_thousand(node.active_po_job.po_record.produced_quantity)
 
     if node.active_po_job
       .row

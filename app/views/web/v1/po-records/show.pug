@@ -75,8 +75,10 @@ block content
               td
                 if j.node
                   = j.node.name
-              td= j.input_quantity
-              td= j.produced_quantity
+              td
+                +convert_to_thousand(j.input_quantity)
+              td
+                +convert_to_thousand(j.produced_quantity)
               td
                 + format_datetime(j.ended_at)
               td

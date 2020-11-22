@@ -56,10 +56,7 @@ let show = async function(req, res) {
       require: false,
     })
     .then(async (collection) => {
-      // let inputQuantity = (await collection.total_input_quantity())[0].result;
-      // console.log(inputQuantity);
       let result = collection.toJSON();
-      // result['total_input_quantity'] = inputQuantity;
       return result;
     })
   );
@@ -79,8 +76,6 @@ let show = async function(req, res) {
     },
     'po_batches.user'
   ]})).toJSON()
-
-  let totalPoInput =
 
   res.render('web/v1/po-records/show', {poRecord, poJobs})
 }
