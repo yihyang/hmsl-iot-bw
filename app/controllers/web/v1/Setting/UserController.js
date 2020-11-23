@@ -33,10 +33,18 @@ let edit = async function(req, res) {
 }
 
 let update = async function(req, res) {
-  let {name, employee_id} = req.body;
+  let {name, employee_id, password} = req.body;
   let user = await new User({id: req.params.id}).fetch()
 
-  user.save({name, employee_id}, {patch: true})
+  let updates = {name, employee_id};
+
+  user.save(updates, {patch: true})
+  if (password != '') {
+    user = await new User({id: req.params.id}).fetch()
+    console.log(password)
+    user.set('password', password)
+    user.save()
+  }
 
   res.redirect('/settings/users')
 }

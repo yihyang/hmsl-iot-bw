@@ -25,6 +25,7 @@ module.exports = (app, tmpUpload) => {
   app.use('/extrusion-cycles', webAuthentication);
   app.use('/mean-times', webAuthentication);
   app.use('/operators', webAuthentication);
+  app.use('/settings', webAuthentication);
 
   app.get('/', web.v1.home.index)
 

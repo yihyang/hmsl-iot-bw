@@ -42,7 +42,7 @@ let index = async function(req, res) {
 
     return {
       position: group.position,
-      name: group.position,
+      name: group.name,
       nodes: nodes
     };
   })
