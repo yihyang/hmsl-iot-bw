@@ -1,6 +1,12 @@
 extends ./../../../layouts/default
 include ./../../../shared/mixins
 
+
+block header_content
+  script(src='/assets/datatables.net/js/jquery.dataTables.min.js')
+  script(src='/assets/datatables.net-bs4/js/dataTables.bootstrap4.min.js')
+  link(rel='stylesheet' href='/assets/datatables.net-bs4/css/dataTables.bootstrap4.min.css')
+
 block content
   .container-fluid
     .row
@@ -8,9 +14,6 @@ block content
         a.btn.btn-link.my-2(href="/portal")
           i.fa.fa-arrow-left
           | &nbsp;Back to Home Page
-
-    .row
-      include ./../../../shared/pagination
 
     .row.my-3
       .col
@@ -25,9 +28,16 @@ block content
       .col.text-right
         input#file-upload(type="file", accept=".csv")
 
+
+    .row.mt-4
+      .col-md-3.col-sm-6
+        input.form-control(type="text", name="query", placeholder="Search by PO Number or Material Number")
+        //- TODO: date filter
+        input.form-control(type="text", name="daterange", placeholder="Filter by Created At")
+
     .row.mt-3
       .col
-        table.table.table-responsive
+        table.table.table-responsive.dataTableIndex
           tr
             th id
             th Uploaded By
@@ -42,34 +52,9 @@ block content
             th Created At
             th Start Time
             th End Time
+          tbody
 
-          for p in poRecords
-            tr
-              td
-                a(href=`/po-records/${p.id}`)= p.id
-              td= p.user ? p.user.name : ''
-              td= p.status
-              td= p.po_number
-              td= p.material_number
-              td= p.material_description
-              td
-                +convert_to_thousand(p.target_quantity)
-              td
-                +convert_to_thousand(p.input_quantity)
-              td
-                +convert_to_thousand(p.produced_quantity)
-              td
-                +format_date(p.target_completion_date)
-              td
-                +format_datetime(p.created_at)
-              td
-                +format_datetime(p.start_time)
-              td
-                +format_datetime(p.end_time)
-
-    .row
-      include ./../../../shared/pagination
-
+  include ./../../../shared/js-utilities
   script.
     $('#file-upload').on('change', function() {
       // The Javascript
@@ -91,3 +76,143 @@ block content
         }
       }
     })
+
+    //- daterangepicker
+    $('input[name="daterange"]').daterangepicker({
+      //- autoUpdateInput: false,
+      maxDate: new Date(),
+      startDate: moment().subtract(1, 'week'),
+      locale: {
+        format: 'YYYY/MM/DD'
+      }
+    })
+    $('input[name="daterange"]').on('apply.daterangepicker', function(ev, picker) {
+      dataTable.draw()
+      $(this).val(picker.startDate.format('YYYY/MM/DD') + ' - ' + picker.endDate.format('YYYY/MM/DD'));
+    });
+
+    $('input[name="daterange"]').on('cancel.daterangepicker', function (ev, picker) {
+      $(this).val('')
+      dataTable.draw()
+    })
+
+    //- datatable
+    let dataTable = $('.dataTableIndex').DataTable({
+        "order": [],
+        "procesing": true,
+        "serverSide": true,
+        "searching": false,
+        "ajax": {
+          "url": "/po-records/index-search",
+          "data": function(data){
+            delete data.columns;
+            let datepicker = $('input[name="daterange"]').data('daterangepicker');
+
+            if (!!$('input[name="daterange"]').val()) {
+              data['startDate'] = datepicker.startDate.format('YYYY-MM-DD')
+              data['endDate'] = datepicker.endDate.format('YYYY-MM-DD')
+            }
+
+            data['query'] = $('input[name="query"]').val();
+
+            return data;
+          }
+        },
+        "columns": [
+          {
+            title: 'ID',
+            name: 'id',
+            render: function(data, type, full, meta) {
+              return '<a href="/po-records/' + full['id'] + '">' + full['id'] + '</a>';
+            },
+            orderable: false,
+          },
+          {
+            title: 'Uploaded By',
+            data: 'uploaded_by',
+            orderable: false,
+          },
+          {
+            title: 'Status',
+            data: 'status',
+            orderable: false,
+          },
+          {
+            title: 'PO Number',
+            data: 'po_number',
+            orderable: false,
+          },
+          {
+            title: 'Material Number',
+            data: 'material_number',
+            orderable: false,
+          },
+          {
+            title: 'Material Description',
+            data: 'material_description',
+            orderable: false,
+          },
+          {
+            title: 'Target Quantity',
+            data: 'target_quantity',
+            orderable: false,
+          },
+          {
+            title: 'Input Quantity',
+            data: 'input_quantity',
+            orderable: false,
+          },
+          {
+            title: 'Produced Quantity',
+            data: 'produced_quantity',
+            orderable: false,
+          },
+          {
+            title: 'Target Completion Date',
+            data: 'target_completion_date',
+            orderable: false,
+            defaultContent: '',
+            render: function(data, type, full, meta) {
+              if (data) {
+                return moment(data).format('YYYY-MM-DD');
+              }
+            }
+          },
+          {
+            title: 'Created At',
+            data: 'created_at',
+            orderable: false,
+            defaultContent: '',
+            render: function(data, type, full, meta) {
+              return utility_format_datetime(data);
+            },
+          },
+          {
+            title: 'Start Time',
+            data: 'start_time',
+            orderable: false,
+            defaultContent: '',
+            render: function(data, type, full, meta) {
+              return utility_format_datetime(data);
+            },
+          },
+          {
+            title: 'End Time',
+            data: 'end_time',
+            orderable: false,
+            defaultContent: '',
+            render: function(data, type, full, meta) {
+              return utility_format_datetime(data);
+            },
+          },
+        ]
+      });
+
+      $('input[name="query"]').on('keyup', function() {
+        dataTable.draw();
+      });
+
+      $('input[name="selectedDateInput"]').on('change', function() {
+        dataTable.draw();
+      });
+

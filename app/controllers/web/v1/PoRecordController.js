@@ -8,22 +8,61 @@ const {
   filterParams,
   getPaginationAttributes,
 } = require(`${rootPath}/app/helpers/route`)
+const _ = require('lodash')
 
 let index = async function(req, res) {
-  let paginationAttribute = getPaginationAttributes(req);
-  let poRecords = (
-    await new PoRecord().query(qb => {
+
+  res.render('web/v1/po-records/index')
+}
+
+let indexSearch = async function(req, res) {
+  let { length, start, draw, query, startDate, endDate } = req.query
+
+  let records = await new PoRecord()
+    .query((qb) => {
       qb.orderBy('id', 'DESC')
-        .offset(paginationAttribute.page_offset)
-        .limit(paginationAttribute.items_per_page)
+      if (query) {
+        qb.where('po_number', 'LIKE', `%${query}%`)
+          .orWhere('material_number', 'LIKE', `%${query}%`)
+      }
+      if (startDate && endDate) {
+        qb.where('created_at', '>=', startDate)
+          .where('created_at', '<=', endDate)
+      }
     })
-    .fetchAll({withRelated: 'user'})
-  ).toJSON();
+    .fetchPage({
+      limit: length,
+      offset: start,
+      withRelated: ['user']
+    })
 
-  let totalCount = await new PoRecord().count('*');
-  let total_page = Math.ceil(parseInt(totalCount) / paginationAttribute.items_per_page)
+  let data = _.map(records.toJSON(), (item) => {
+    return {
+      id: item.id,
+      uploaded_by: item.user ? item.user.name : '',
+      status: item.status,
+      po_number: item.po_number,
+      material_number: item.material_number,
+      material_description: item.material_description,
+      target_quantity: item.target_quantity,
+      input_quantity: item.input_quantity,
+      produced_quantity: item.produced_quantity,
+      target_completion_date: item.target_completion_date,
+      created_at: item.created_at,
+      start_time: item.start_time,
+      end_time: item.end_time,
+    }
+  })
 
-  res.render('web/v1/po-records/index', {poRecords, ...paginationAttribute, total_page})
+  let recordsTotal = records.pagination.rowCount
+  res.json(
+    {
+      draw: parseInt(draw),
+      data,
+      recordsTotal,
+      recordsFiltered: recordsTotal,
+    }
+  )
 }
 
 let add = async function(req, res) {
@@ -101,6 +140,7 @@ let update = async function(req, res) {
 
 module.exports = {
   index,
+  indexSearch,
   add,
   save,
   show,

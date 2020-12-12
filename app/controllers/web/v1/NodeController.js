@@ -7,7 +7,11 @@ const Event = require(`${rootPath}/models/Node/Event`)
 const events = require('./Node/EventController')
 
 let index = async function(req, res) {
-  let nodes = (await new Node().fetchAll({withRelated: ['active_po_job.po_record', 'node_group']})).toJSON();
+  let nodes = (await new Node()
+    .query(function (qb) {
+      qb.orderBy('position_x', 'ASC').orderBy('position_y', 'ASC');
+    })
+    .fetchAll({withRelated: ['active_po_job.po_record', 'node_group']})).toJSON();
   let socketIoHost = process.env.SOCKET_IO_HOST;
 
   // start grouping nodes with order

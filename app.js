@@ -78,12 +78,14 @@ app.use('/assets/noty', express.static(__dirname + '/node_modules/noty/lib'));
 app.use('/assets/select2', express.static(__dirname + '/node_modules/select2/dist'));
 app.use('/assets/vue', express.static(__dirname + '/node_modules/vue/dist'));
 app.use('/assets/chart.js', express.static(__dirname + '/node_modules/chart.js/dist'));
+app.use('/assets/datatables.net', express.static(__dirname + '/node_modules/datatables.net'));
+app.use('/assets/datatables.net-bs4', express.static(__dirname + '/node_modules/datatables.net-bs4'));
 
 
 // io
 io.on('connection', function(socket) {
   console.log(`[${moment()}] [socket.io] a user connected`);
-  socket.emit('nodeEventUpdate', 1232222)
+  // socket.emit('nodeEventUpdate', 1232222)
   socket.on('disconnect', function() {
     console.log(`[${moment()}] [socket.io] user disconnected`);
   });

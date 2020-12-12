@@ -5,6 +5,7 @@ module.exports = (app, tmpUpload) => {
     app.get('/portal', web.v1.home.index)
 
     app.get('/po-records', web.v1.poRecords.index)
+    app.get('/po-records/index-search', web.v1.poRecords.indexSearch)
     app.get('/po-records/new', web.v1.poRecords.add)
     app.post('/po-records', web.v1.poRecords.save)
     app.post('/po-records/shortfall', tmpUpload.single('file'), web.v1.poRecords.shortfall.upload)

@@ -19,3 +19,9 @@ block content
               input.form-control(type="text" name="po_number" required="true")
 
           button.btn.btn-primary(type="submit") Next
+
+  script.
+    $('#form').submit(function() {
+      let poNumber = $('input[name="po_number"]').val();
+      return confirm(`Are you sure you want to end the PO with number ${poNumber}?`);
+    })
