@@ -31,9 +31,12 @@ block content
 
     .row.mt-4
       .col-md-3.col-sm-6
-        input.form-control(type="text", name="query", placeholder="Search by PO Number or Material Number")
-        //- TODO: date filter
-        input.form-control(type="text", name="daterange", placeholder="Filter by Created At")
+        input.my-1.form-control(type="text", name="query", placeholder="Search by PO Number or Material Number")
+        input.my-1.form-control(type="text", name="daterange", placeholder="Filter by Created At")
+        select.my-1.form-control#statusesFilter(name="statuses[]", multiple="multiple")
+          option(value="Created") Created
+          option(value="In Progress") In Progress
+          option(value="Ended") Ended
 
     .row.mt-3
       .col
@@ -77,6 +80,16 @@ block content
       }
     })
 
+    //- statuses picker
+    $('#statusesFilter').select2({
+       placeholder: "Filter by Statuses",
+    });
+
+    $('#statusesFilter').on('change', () => {
+      dataTable.draw()
+    })
+
+
     //- daterangepicker
     $('input[name="daterange"]').daterangepicker({
       //- autoUpdateInput: false,
@@ -111,6 +124,10 @@ block content
             if (!!$('input[name="daterange"]').val()) {
               data['startDate'] = datepicker.startDate.format('YYYY-MM-DD')
               data['endDate'] = datepicker.endDate.format('YYYY-MM-DD')
+            }
+
+            if ($('#statusesFilter').val()) {
+              data['statuses'] = $('#statusesFilter').val()
             }
 
             data['query'] = $('input[name="query"]').val();

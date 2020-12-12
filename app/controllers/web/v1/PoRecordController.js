@@ -16,7 +16,7 @@ let index = async function(req, res) {
 }
 
 let indexSearch = async function(req, res) {
-  let { length, start, draw, query, startDate, endDate } = req.query
+  let { length, start, draw, query, startDate, endDate, statuses } = req.query
 
   let records = await new PoRecord()
     .query((qb) => {
@@ -28,6 +28,9 @@ let indexSearch = async function(req, res) {
       if (startDate && endDate) {
         qb.where('created_at', '>=', startDate)
           .where('created_at', '<=', endDate)
+      }
+      if (statuses) {
+        qb.where('status', 'IN', statuses)
       }
     })
     .fetchPage({
