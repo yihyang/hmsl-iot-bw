@@ -173,16 +173,34 @@ block content
             title: 'Target Quantity',
             data: 'target_quantity',
             orderable: false,
+            defaultContent: '',
+            render: function(data, type, full, meta) {
+              if (data) {
+                return formatNumberToThousand(data);
+              }
+            }
           },
           {
             title: 'Input Quantity',
             data: 'input_quantity',
             orderable: false,
+            defaultContent: '',
+            render: function(data, type, full, meta) {
+              if (data) {
+                return formatNumberToThousand(data);
+              }
+            }
           },
           {
             title: 'Produced Quantity',
             data: 'produced_quantity',
             orderable: false,
+            defaultContent: '',
+            render: function(data, type, full, meta) {
+              if (data) {
+                return formatNumberToThousand(data);
+              }
+            }
           },
           {
             title: 'Target Completion Date',
@@ -232,4 +250,14 @@ block content
       $('input[name="selectedDateInput"]').on('change', function() {
         dataTable.draw();
       });
+
+      function formatNumberToThousand(num) {
+        if (!num) {
+          return 0;
+        }
+
+        num = num * 1000
+        num = (Math.round(num * 100) / 100).toFixed(0);
+        return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+      }
 

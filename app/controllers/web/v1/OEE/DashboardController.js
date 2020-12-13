@@ -3,17 +3,21 @@ const _ = require('lodash')
 
 const rootPath = './../../../../..'
 const Node = require(`${rootPath}/app/models/Node/Node`);
+const NodeGroup = require(`${rootPath}/app/models/Node/NodeGroup`);
 const OEE = require(`${rootPath}/app/models/OEE/OEE`);
 const GWO = require(`${rootPath}/app/models/Gwo/Gwo`);
 const NodeDailyInput = require(`${rootPath}/app/models/OEE/NodeDailyInput`);
 const bookshelf = require(`${rootPath}/config/bookshelf`);
 
 let index = async function(req, res) {
-  res.render('web/v1/oee/dashboard/index', {})
+  let nodeGroups = (await new NodeGroup().fetchAll()).toJSON()
+  res.render('web/v1/oee/dashboard/index', {nodeGroups})
 }
 
 let refresh = async function(req, res) {
-  let {startDate, endDate} = req.query
+  let {startDate, endDate, nodeGroups} = req.query
+
+  let nodeIds = await getNodeIds(nodeGroups)
 
   let startTime = moment(startDate).startOf('day');
   let endTime = moment(endDate).endOf('day');
@@ -29,6 +33,10 @@ let refresh = async function(req, res) {
   let oeeValues = await new OEE().query((qb) => {
       qb.where('start_time', '>=', startTime)
         .where('end_time', '<=', endTime)
+
+      if (nodeIds) {
+        qb.where('node_id', 'IN', nodeIds)
+      }
     })
     .fetchAll({require: false});
 
@@ -46,19 +54,30 @@ let refresh = async function(req, res) {
 }
 
 let reasonRefresh = async function(req, res) {
-  let {startDate, endDate} = req.query
+  let {startDate, endDate, nodeGroups} = req.query
 
   let startTime = moment(startDate).startOf('day');
   let endTime = moment(endDate).endOf('day');
   let formattedStartDate = startTime.format('YYYY-MM-DD');
   let formattedEndDate = endTime.format('YYYY-MM-DD');
 
+  let nodeIds = await getNodeIds(nodeGroups)
+
   let reasonQuery = `
     SELECT gwo_reasons.name AS reason, count(*) AS count
       FROM gwo
       JOIN gwo_reasons ON gwo.gwo_reason_id = gwo_reasons.id
+      JOIN gwo_items ON gwo.id = gwo_items.gwo_id
       WHERE gwo.created_at >= ?
-      AND gwo.created_at <= ?
+      AND gwo.created_at <= ?`;
+
+    if (nodeIds) {
+      reasonQuery += `
+        AND gwo_items.node_id  IN (${nodeIds.join(',')})
+      `
+    }
+
+    reasonQuery += `
       GROUP BY gwo_reasons.name
       ORDER BY count(*);
   `;
@@ -83,9 +102,12 @@ let reasonRefresh = async function(req, res) {
 }
 
 let historyRefresh = async function(req, res) {
+  let {nodeGroups} = req.query
   let today = moment();
   let sixMonthAgo = moment().subtract(6,'months').startOf('month');
   let formattedSixMonthAgo = sixMonthAgo.format('YYYY-MM-DD');
+
+  let nodeIds = await getNodeIds(nodeGroups)
 
   /*******
    * OEE *
@@ -94,7 +116,15 @@ let historyRefresh = async function(req, res) {
   let oeeQuery =`
     SELECT EXTRACT(MONTH FROM start_time) AS month, avg(nullif(value, 'NaN')) AS value
       FROM oee
-      WHERE start_time >= '${formattedSixMonthAgo}'
+      WHERE start_time >= '${formattedSixMonthAgo}'`
+
+  if (nodeIds) {
+    reasonQuery += `
+      AND oee.node_id  IN (${nodeIds.join(',')})
+    `
+  }
+
+  oeeQuery += `
       GROUP BY month
   `;
   let oeeResult = await bookshelf.knex.raw(oeeQuery);
@@ -151,6 +181,33 @@ let historyRefresh = async function(req, res) {
   let output = { label: outputLabel, value: outputValue, default: outputDefaultValue }
 
   res.json({oee, output})
+}
+
+/**
+ * Gets the node identifiers.
+ *
+ * @param      {array}  nodeGroupIds  The node group identifiers
+ * @return     {array}  The node identifiers.
+ */
+async function getNodeIds(nodeGroupIds) {
+  if (!nodeGroupIds) {
+    return null;
+  }
+
+  let nodeGroups = await new NodeGroup().query((qb) => {
+    qb.where('id', 'IN', nodeGroupIds)
+  }).fetchAll({
+    withRelated: ['nodes']
+  })
+  nodeGroups = nodeGroups.toJSON()
+
+  return _.flatten(
+    _.map(nodeGroups, (group) => {
+      return _.map(group.nodes, (node) => {
+        return node.id
+      })
+    })
+  )
 }
 
 module.exports = {

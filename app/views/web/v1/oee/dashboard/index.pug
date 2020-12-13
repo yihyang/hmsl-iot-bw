@@ -18,6 +18,17 @@ block content
         p Date Range
       .col-md-6
         input.form-control(type="daterange" name="dateRange")
+    .row.my-2
+      .col-md-2
+        p Machine Groups
+      .col
+        .row
+          for g in nodeGroups
+            .form-group
+              .form-check
+                input.form-check.input(type="checkbox", value=g.id, name="nodeGroups[]", id=`nodeGroup-${g.id}`)
+                label.form-check-label(for=`nodeGroup-${g.id}`)
+                  = g.name
     //- .row.my-2
     //-   .col-sm-2
     //-     p Shifts
@@ -94,8 +105,7 @@ block content
           format: 'YYYY/MM/DD'
         }
       }, function(start, end, label) {
-        toggleChartUpdate()
-        toggleReasonChartUpdate()
+        refreshAllChart();
       });
 
       //- $('input[name="shifts[]"]').on('click', () => {
@@ -106,10 +116,18 @@ block content
       //-   toggleChartUpdate()
       //- });
 
-      toggleChartUpdate();
-      toggleReasonChartUpdate();
-      toggleHistoryChartUpdate();
+      refreshAllChart()
+
+      $('input[name="nodeGroups[]"]').on('change', () => {
+        refreshAllChart()
+      })
     });
+
+    function refreshAllChart() {
+      toggleChartUpdate()
+      toggleReasonChartUpdate()
+      toggleHistoryChartUpdate();
+    }
 
     function getFormData() {
       var startDate = $('input[name="dateRange"]').data('daterangepicker').startDate.format('YYYY-MM-DD');
@@ -117,12 +135,18 @@ block content
       //- var areas = $('input[name="areas[]"]:checked').map(function() { return $(this).val() }).get();
       //- var shifts = $('input[name="shifts[]"]:checked').map(function() { return $(this).val() }).get();
 
-      return {
+      let data = {
         startDate,
         endDate,
         //- areas,
-        //- shifts
-      };
+        //- shifts,
+      }
+
+      var nodeGroups = $('input[name="nodeGroups[]"]:checked').map(function() { return $(this).val() }).get();
+      if (nodeGroups) {
+        data['nodeGroups'] = nodeGroups
+      }
+      return data;
     }
 
     function toggleChartUpdate() {
