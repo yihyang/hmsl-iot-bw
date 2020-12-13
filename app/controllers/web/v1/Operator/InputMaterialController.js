@@ -28,7 +28,7 @@ let step2 = async (req, res) => {
 let save = async (req, res) => {
   let userId = req.user.id;
   let {po_job_id, quantity} = req.body;
-  quantity = quantity / 1000;
+  quantity = quantity;
 
   let poJob = (await new PoJob({id: po_job_id}).fetch({require: false}))
 

@@ -92,7 +92,7 @@ block content
 
     //- daterangepicker
     $('input[name="daterange"]').daterangepicker({
-      //- autoUpdateInput: false,
+      autoUpdateInput: false,
       maxDate: new Date(),
       startDate: moment().subtract(1, 'week'),
       locale: {
@@ -100,8 +100,8 @@ block content
       }
     })
     $('input[name="daterange"]').on('apply.daterangepicker', function(ev, picker) {
-      dataTable.draw()
       $(this).val(picker.startDate.format('YYYY/MM/DD') + ' - ' + picker.endDate.format('YYYY/MM/DD'));
+      dataTable.draw()
     });
 
     $('input[name="daterange"]').on('cancel.daterangepicker', function (ev, picker) {
@@ -256,7 +256,7 @@ block content
           return 0;
         }
 
-        num = num * 1000
+        //- num = num * 1000
         num = (Math.round(num * 100) / 100).toFixed(0);
         return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
       }

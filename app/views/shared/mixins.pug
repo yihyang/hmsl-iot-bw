@@ -55,5 +55,8 @@ mixin time_diff(date1, date2)
 mixin convert_to_thousand(num)
   = (num * 1000).toLocaleString()
 
+mixin format_number(num)
+  = num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+
 mixin render_date_input(name, date)
   input.form-control(type="date", name=name, value=(date ? moment(date).format('YYYY-MM-DD') : ''))

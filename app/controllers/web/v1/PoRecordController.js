@@ -9,6 +9,7 @@ const {
   getPaginationAttributes,
 } = require(`${rootPath}/app/helpers/route`)
 const _ = require('lodash')
+const moment = require('moment')
 
 let index = async function(req, res) {
 
@@ -27,7 +28,7 @@ let indexSearch = async function(req, res) {
       }
       if (startDate && endDate) {
         qb.where('created_at', '>=', startDate)
-          .where('created_at', '<=', endDate)
+          .where('created_at', '<=', moment(endDate).add(1, 'day'))
       }
       if (statuses) {
         qb.where('status', 'IN', statuses)
@@ -141,6 +142,28 @@ let update = async function(req, res) {
   res.redirect(`/po-records/${id}`)
 }
 
+let restart = async function (req, res) {
+  let {id} = req.params;
+  let poRecord = await new PoRecord({id}).fetch({require: false})
+
+  if (!poRecord) {
+    req.flash('error', `PO Record Not Found`)
+    return res.redirect(`/po-records/${id}`)
+  }
+
+  if (poRecord.status != 'Ended') {
+    req.flash('error', `Unable to restart PO that is not 'Ended'`)
+    return res.redirect(`/po-records/${id}`)
+  }
+
+  // update record
+  await new PoRecord({id})
+    .save({'status': 'In Progress'}, {patch: true});
+
+  req.flash('success', `Restarted PO Successfully`)
+  res.redirect(`/po-records/${id}`)
+}
+
 module.exports = {
   index,
   indexSearch,
@@ -152,4 +175,5 @@ module.exports = {
   edit,
   update,
   poInputs,
+  restart,
 }

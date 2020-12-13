@@ -16,6 +16,12 @@ block content
           i.fa.fa-edit
           | &nbsp;Edit
 
+        if poRecord.status == 'Ended'
+          form(action=`/po-records/${poRecord.id}/restart`, method="post")
+            button.btn.btn-primary(type="submit")
+              i.fa.fa-undo
+              | &nbsp;Restart
+
     .row
       .col
         table.table
@@ -38,16 +44,16 @@ block content
           tr
             th Target Quantity (g)
             td
-              +convert_to_thousand(poRecord.target_quantity)
+              +format_number(poRecord.target_quantity)
           tr
             th Input Quantity (g)
             td
-              +convert_to_thousand(poRecord.input_quantity)
+              +format_number(poRecord.input_quantity)
               | &nbsp;&nbsp;&nbsp;
           tr
             th Produced Quantity (g)
             td
-              +convert_to_thousand(poRecord.produced_quantity)
+              +format_number(poRecord.produced_quantity)
 
     .row
       .col
@@ -76,9 +82,9 @@ block content
                 if j.node
                   = j.node.name
               td
-                +convert_to_thousand(j.input_quantity)
+                +format_number(j.input_quantity)
               td
-                +convert_to_thousand(j.produced_quantity)
+                +format_number(j.produced_quantity)
               td
                 + format_datetime(j.ended_at)
               td
@@ -99,7 +105,7 @@ block content
                     for b in j.po_batches
                       tr
                         td
-                          +convert_to_thousand(b.output_quantity)
+                          +format_number(b.output_quantity)
                           - total = total + b.output_quantity
                         td
                           if b.user
@@ -108,7 +114,7 @@ block content
                           + format_datetime(b.created_at)
                     tr
                       td
-                        + convert_to_thousand(total)
+                        + format_number(total)
 
     .row
       .col

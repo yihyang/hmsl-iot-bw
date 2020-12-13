@@ -37,16 +37,16 @@ block content
           tr
             th Target Quantity (g)
             td
-              +convert_to_thousand(poRecord.target_quantity)
+              +format_number(poRecord.target_quantity)
           tr
             th Input Quantity (g)
             td
-              +convert_to_thousand(poRecord.input_quantity)
+              +format_number(poRecord.input_quantity)
               | &nbsp;&nbsp;&nbsp;
           tr
             th Produced Quantity (g)
             td
-              +convert_to_thousand(poRecord.produced_quantity)
+              +format_number(poRecord.produced_quantity)
 
     .row
       .col

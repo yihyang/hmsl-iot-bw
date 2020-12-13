@@ -23,6 +23,11 @@ let step2 = async (req, res) => {
   }
   node = node.toJSON()
 
+  if (node.active_po_job.status == 'Ended') {
+    req.flash('error', `Unable to checkout a PO that has been ended`)
+    return res.redirect('/operators/po-checkout/step-1')
+  }
+
 
   res.render('web/v1/operators/po-checkout/step-2', { node })
 }
@@ -30,7 +35,7 @@ let step2 = async (req, res) => {
 let save = async (req, res) => {
   let userId = req.user.id;
   let {po_job_id, quantity} = req.body;
-  quantity = quantity / 1000;
+  quantity = quantity;
 
   let poJob = (await new PoJob({id: po_job_id}).fetch({require: false}))
 
@@ -40,6 +45,11 @@ let save = async (req, res) => {
   }
 
   console.log(poJob)
+
+  if ((poJob + quantity) > poJob.input_quantity) {
+    req.flash('error', `Total output quantity is greater than input quantity`)
+    return res.redirect('/operators/input-materials/step-1')
+  }
 
   let poBatch = await new PoBatch({po_job_id, output_quantity: quantity, user_id: userId, status: 'Created'}).save();
 
