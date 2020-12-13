@@ -11,6 +11,7 @@ const session = require('express-session');
 const flash = require('connect-flash');
 const schedule = require('node-schedule');
 const passport = require('./config/passport-initialize');
+const appSettings = require('./config/app-settings')
 const {
   timeLogger
 } = require('./app/helpers/express');
@@ -58,6 +59,7 @@ app.use(function(req, res, next) {
 // global variable to determine login status
 app.locals.signedIn = false;
 app.locals.moment = moment;
+app.locals.appSettings = appSettings;
 
 // setting routes
 router(app, tmpUpload)
