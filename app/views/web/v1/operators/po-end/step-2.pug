@@ -1,0 +1,56 @@
+extends ./../../../../layouts/default
+include ./../../../../shared/mixins
+
+block content
+  .container
+    .row
+      .col
+        a.btn.btn-link.my-2(href=`/operators`)
+          i.fa.fa-arrow-left
+          | &nbsp;Back to Home Page
+
+    .row
+      .col
+        h3 #{poRecord.po_number}
+        table.table
+          tr
+            th ID
+            td= poRecord.id
+          tr
+            th Status
+            td= poRecord.status
+          tr
+            th PO Number
+            td= poRecord.po_number
+          tr
+            th Material Number
+            td= poRecord.material_number
+          tr
+            th Target Completion Date
+            td
+              +format_date(poRecord.target_completion_date)
+          tr
+            th Target Quantity (g)
+            td
+              +format_number(poRecord.target_quantity)
+          tr
+            th Input Quantity (g)
+            td
+              +format_number(poRecord.input_quantity)
+              | &nbsp;&nbsp;&nbsp;
+          tr
+            th Produced Quantity (g)
+            td
+              +format_number(poRecord.produced_quantity)
+    .row
+      .col
+        form#form(action="/operators/po-end" method="POST")
+          input.form-control(type="hidden" name="po_number" required="true" value=poRecord.po_number)
+
+          button.btn.btn-primary(type="submit") End PO
+
+  script.
+    $('#form').submit(function() {
+      let poNumber = $('input[name="po_number"]').val();
+      return confirm(`Are you sure you want to end the PO with number ${poNumber}?`);
+    })

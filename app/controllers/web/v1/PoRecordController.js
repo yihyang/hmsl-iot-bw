@@ -151,6 +151,8 @@ let restart = async function (req, res) {
     return res.redirect(`/po-records/${id}`)
   }
 
+  poRecord = poRecord.toJSON()
+
   if (poRecord.status != 'Ended') {
     req.flash('error', `Unable to restart PO that is not 'Ended'`)
     return res.redirect(`/po-records/${id}`)

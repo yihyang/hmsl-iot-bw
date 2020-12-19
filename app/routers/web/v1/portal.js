@@ -87,6 +87,7 @@ module.exports = (app, tmpUpload) => {
     app.post('/operators/po-checkout/step-2', web.v1.operators.poCheckout.step2)
     app.post('/operators/po-checkout', web.v1.operators.poCheckout.save)
     app.get('/operators/po-end/step-1', web.v1.operators.poEnd.step1)
+    app.post('/operators/po-end/step-2', web.v1.operators.poEnd.step2)
     app.post('/operators/po-end', web.v1.operators.poEnd.end)
 
 }

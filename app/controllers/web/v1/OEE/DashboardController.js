@@ -11,13 +11,16 @@ const bookshelf = require(`${rootPath}/config/bookshelf`);
 
 let index = async function(req, res) {
   let nodeGroups = (await new NodeGroup().fetchAll()).toJSON()
-  res.render('web/v1/oee/dashboard/index', {nodeGroups})
+  let nodes = (await new Node().query((qb) => {
+    qb.orderBy('name')
+  }).fetchAll()).toJSON()
+  res.render('web/v1/oee/dashboard/index', {nodeGroups, nodes})
 }
 
 let refresh = async function(req, res) {
-  let {startDate, endDate, nodeGroups} = req.query
+  let {startDate, endDate, nodeGroups, nodes} = req.query
 
-  let nodeIds = await getNodeIds(nodeGroups)
+  let nodeIds = await getNodeIds(nodeGroups) || nodes
 
   let startTime = moment(startDate).startOf('day');
   let endTime = moment(endDate).endOf('day');

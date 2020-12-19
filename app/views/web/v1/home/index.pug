@@ -4,10 +4,10 @@ block content
   .container
     .row.my-3
       .col.text-center
-        p= `Welcome to ${SITE_NAME} Portal`
+        p= `Welcome to ` + appSettings.siteFullName() + ` Portal`
 
     if signedIn
-      .row.mt-5
+      .row.mt-3
         .col.text-right
           a(href="/settings")
             i.fa.fa-cog(aria-hidden="true")

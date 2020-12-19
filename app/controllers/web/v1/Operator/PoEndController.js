@@ -11,6 +11,23 @@ let step1 = async (req, res) => {
   res.render('web/v1/operators/po-end/step-1', {nodes})
 }
 
+let step2 = async(req, res) => {
+  let {po_number} = req.body
+  let poRecord = await PoRecord.where({po_number}).fetch({require: false});
+  if (!poRecord) {
+    req.flash('error', `Unable to find the PO with Number ${po_number}`)
+    return res.redirect('/operators/po-end/step-1')
+  }
+
+  poRecord = poRecord.toJSON()
+  if (poRecord.status === 'Ended') {
+    req.flash('error', `Unable to end a PO Record that has been ended`)
+    return res.redirect('/operators/po-end/step-1')
+  }
+
+  res.render('web/v1/operators/po-end/step-2', {poRecord})
+}
+
 let end = async (req, res) => {
   let userId = req.user.id
   let {po_number} = req.body
@@ -42,5 +59,6 @@ let end = async (req, res) => {
 
 module.exports = {
   step1,
-  end
+  step2,
+  end,
 }

@@ -18,17 +18,32 @@ block content
         p Date Range
       .col-md-6
         input.form-control(type="daterange" name="dateRange")
-    .row.my-2
-      .col-md-2
-        p Machine Groups
-      .col
-        .row
-          for g in nodeGroups
-            .form-group
-              .form-check
-                input.form-check.input(type="checkbox", value=g.id, name="nodeGroups[]", id=`nodeGroup-${g.id}`)
-                label.form-check-label(for=`nodeGroup-${g.id}`)
-                  = g.name
+    //- BW uses machines
+    if appSettings.isBW()
+      .row.my-2
+        .col-md-2
+          p Machines
+        .col
+          .row
+            for g in nodes
+              .form-group
+                .form-check
+                  input.form-check.input(type="checkbox", value=g.id, name="nodes[]", id=`node-${g.id}`)
+                  label.form-check-label(for=`node-${g.id}`)
+                    = g.name
+    //- AM uses machine groups
+    if appSettings.isAM()
+      .row.my-2
+        .col-md-2
+          p Machine Groups
+        .col
+          .row
+            for g in nodeGroups
+              .form-group
+                .form-check
+                  input.form-check.input(type="checkbox", value=g.id, name="nodeGroups[]", id=`nodeGroup-${g.id}`)
+                  label.form-check-label(for=`nodeGroup-${g.id}`)
+                    = g.name
     //- .row.my-2
     //-   .col-sm-2
     //-     p Shifts
@@ -121,6 +136,10 @@ block content
       $('input[name="nodeGroups[]"]').on('change', () => {
         refreshAllChart()
       })
+
+      $('input[name="nodes[]"]').on('change', () => {
+        refreshAllChart()
+      })
     });
 
     function refreshAllChart() {
@@ -146,6 +165,13 @@ block content
       if (nodeGroups) {
         data['nodeGroups'] = nodeGroups
       }
+
+      var nodes = $('input[name="nodes[]"]:checked').map(function() { return $(this).val() }).get();
+      if (nodes) {
+        data['nodes'] = nodes
+      }
+
+
       return data;
     }
 
