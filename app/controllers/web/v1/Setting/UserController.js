@@ -24,7 +24,6 @@ let index = async function(req, res) {
 }
 
 let edit = async function(req, res) {
-
   let user = await new User({id: req.params.id}).fetch()
 
   user = user.toJSON()
@@ -32,11 +31,39 @@ let edit = async function(req, res) {
   res.render('web/v1/settings/users/edit', {user})
 }
 
+let add = async function(req, res) {
+  res.render('web/v1/settings/users/add', {user: {}})
+}
+
+let save = async function(req, res) {
+  let {name, employee_id, password, username, is_admin} = req.body;
+
+  let user = {
+    name,
+    employee_id,
+    password,
+    username,
+    is_admin,
+  }
+
+  let existingUser = await new User().query((qb) => {
+    qb.where('username', username)
+  }).fetch({require: false})
+
+  if (existingUser) {
+    return res.render('web/v1/settings/users/add', {user, messages: { 'error': ['User with the same username exists'] } })
+  }
+
+  await new User({name, employee_id, password, username, is_admin}).save()
+
+  res.redirect('/settings/users')
+}
+
 let update = async function(req, res) {
-  let {name, employee_id, password} = req.body;
+  let {name, employee_id, password, is_admin} = req.body;
   let user = await new User({id: req.params.id}).fetch()
 
-  let updates = {name, employee_id};
+  let updates = {name, employee_id, is_admin: !!is_admin};
 
   user.save(updates, {patch: true})
   if (password != '') {
@@ -51,6 +78,8 @@ let update = async function(req, res) {
 
 module.exports = {
   index,
+  add,
+  save,
   edit,
-  update
+  update,
 }

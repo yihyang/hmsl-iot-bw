@@ -68,6 +68,8 @@ module.exports = (app, tmpUpload) => {
 
     app.get('/settings', web.v1.settings.index)
     app.get('/settings/users', web.v1.settings.users.index)
+    app.get('/settings/users/new', web.v1.settings.users.add)
+    app.post('/settings/users', web.v1.settings.users.save)
     app.get('/settings/users/:id/edit', web.v1.settings.users.edit)
     app.post('/settings/users/:id/update', web.v1.settings.users.update)
 

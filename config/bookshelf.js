@@ -7,4 +7,6 @@ let bookshelf = Bookshelf(
   Knex(knexConfig)
 );
 
+bookshelf.plugin(require('bookshelf-soft-delete'));
+
 module.exports = bookshelf;

@@ -23,7 +23,7 @@ block content
     .row
       .col
         button.btn.btn-primary.btn-set-default.mx-2.my-2(data-area=area, data-value=0, data-type="availability") Set All Availability to 0 hours
-        button.btn.btn-primary.btn-set-default.mx-2.my-2(data-area=area, data-value=12, data-type="availability") Set All Availability to 12 hours
+        button.btn.btn-primary.btn-set-default.mx-2.my-2(data-area=area, data-value=defaultMaxValue, data-type="availability") Set All Availability to #{defaultMaxValue} hours
 
     .row
       .col
@@ -36,9 +36,9 @@ block content
             tr
               td= n.name
               td
-                input.form-control.input-values(id=`node-${n.id}-am-availability`, type="number", name="n.id", min="0", max="12", required="true", value=n.am_availablitity, data-node_id=n.id, data-node_area=n.area, data-type="am_availability")
+                input.form-control.input-values(id=`node-${n.id}-am-availability`, type="number", name="n.id", min="0", max=defaultMaxValue, required="true", value=n.am_availablitity, data-node_id=n.id, data-node_area=n.area, data-type="am_availability")
               td
-                input.form-control.input-values(id=`node-${n.id}-pm-availability`, type="number", name="n.id", min="0", max="12", required="true", value=n.pm_availability, data-node_id=n.id, data-node_area=n.area, data-type="pm_availability")
+                input.form-control.input-values(id=`node-${n.id}-pm-availability`, type="number", name="n.id", min="0", max=defaultMaxValue, required="true", value=n.pm_availability, data-node_id=n.id, data-node_area=n.area, data-type="pm_availability")
 
   script.
     $(function() {
@@ -77,9 +77,9 @@ block content
 
     function updateValues(type, area, node_id, value, date) {
       let schedule = ''
-      if (type = "am_availability") {
+      if (type == "am_availability") {
         schedule = 'am';
-      } else if (type = "pm_availability") {
+      } else if (type == "pm_availability") {
         schedule = 'pm';
       }
       let data = {

@@ -7,6 +7,7 @@ const User = require('./../Account/User');
 const PoJob = require('./PoJob');
 
 const PoRecord = bookshelf.model('PoRecord', {
+  soft: ['deleted_at'],
   hasTimestamps: true,
   tableName: 'po_records',
   initialize() {

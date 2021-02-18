@@ -12,20 +12,15 @@ block content
       .col
         h1
           i.fa.fa-user(aria-hidden="true")
-          | &nbsp;Edit User
+          | &nbsp;Add New User
     .row
       .col
-        form#form(action=`/settings/users/${user.id}/update` method="POST")
-          .form-group.row
-            .col-md-4
-              label(for="id") ID
-            .col-md-8
-              = user.id
+        form#form(action=`/settings/users` method="POST")
           .form-group.row
             .col-md-4
               label(for="username") Username
             .col-md-8
-              = user.username
+              input.form-control(type="text" name="username" required="true" value=user.username)
           .form-group.row
             .col-md-4
               label(for="name") Name
@@ -40,7 +35,7 @@ block content
             .col-md-4
               label(for="password") Password
             .col-md-8
-              input.form-control(type="password" name="password")
+              input.form-control(type="password" name="password" required="true")
           .form-group.row
             .col-md-4
               label(for="is_admin") Is Admin?

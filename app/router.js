@@ -4,7 +4,7 @@ const mapUsersRoutes = require('./routers/web/v1/users');
 const web = require('./controllers/web')
 const mapApiRoutes = require('./routers/api');
 // const Area = require('./models/Node/Area/Area')
-const { apiAuthentication, webAuthentication } = require('./helpers/authentication');
+const { apiAuthentication, webAuthentication, checkIsAdmin } = require('./helpers/authentication');
 const passport = require(`${rootPath}/config/passport-initialize`);
 const settings = require(`${rootPath}/config/settings`);
 
@@ -26,6 +26,7 @@ module.exports = (app, tmpUpload) => {
   app.use('/mean-times', webAuthentication);
   app.use('/operators', webAuthentication);
   app.use('/settings', webAuthentication);
+  app.use('/settings', checkIsAdmin);
 
   app.get('/', web.v1.home.index)
 

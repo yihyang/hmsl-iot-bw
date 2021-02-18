@@ -3,11 +3,15 @@ const Node = require(`${rootPath}/app/models/Node/Node`);
 const NodeDailyInput = require(`${rootPath}/app/models/OEE/NodeDailyInput`);
 const moment = require('moment');
 const bookshelf = require(`${rootPath}/config/bookshelf`);
+const { isBW } = require(`${rootPath}/config/app-settings`)
 
 let index = async function(req, res) {
   let nodes = (await new Node().fetchAll()).toJSON();
 
-  res.render('web/v1/oee/daily-time-inputs/index', {nodes})
+  console.log(isBW())
+  let defaultMaxValue = isBW() ? 10 : 12;
+
+  res.render('web/v1/oee/daily-time-inputs/index', {nodes, defaultMaxValue})
 }
 
 let fetchByDate = async function(req, res) {
@@ -40,7 +44,7 @@ let update = async function(req, res) {
   let scheduleName = schedule + "_availability";
   let {value, date} = req.body;
 
-  let DEFAULT_MAX_AVAILABILITY = 12;
+  let DEFAULT_MAX_AVAILABILITY = isBW() ? 10 : 12;
   if (value > DEFAULT_MAX_AVAILABILITY) {
     return res.status(422).json({
       'errors': [
@@ -53,7 +57,7 @@ let update = async function(req, res) {
   date = moment(date, 'DD/MM/YYYY');
   date = date.format('YYYY-MM-DD');
 
-  let node = await new Node({id: nodeId}).fetch({require: false}).toJSON();
+  let node = (await new Node({id: nodeId}).fetch({require: false})).toJSON();
 
   let defaultValue = await new NodeDailyInput({node_id: nodeId})
     .query(function(qb) {
@@ -70,6 +74,8 @@ let update = async function(req, res) {
     updateValues.node_id = nodeId;
     await new NodeDailyInput(updateValues).save();
   }
+
+  console.log(node)
 
   res.json({'message': 'Successfully updated ' + schedule + ' for Machine ' + node.name + ' to ' + value});
 }

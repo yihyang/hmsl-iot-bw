@@ -6,7 +6,7 @@ block content
       .col.text-center
         p= `Welcome to ` + appSettings.siteFullName() + ` Portal`
 
-    if signedIn
+    if signedIn && isAdmin
       .row.mt-3
         .col.text-right
           a(href="/settings")

@@ -1,7 +1,7 @@
+const rootPath = './../../../../..'
+
 const _ = require('lodash')
 const moment = require('moment')
-
-const rootPath = './../../../../..'
 
 const Node = require(`${rootPath}/app/models/Node/Node`);
 const OEE = require(`${rootPath}/app/models/OEE/OEE`);

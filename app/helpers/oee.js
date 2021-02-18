@@ -7,11 +7,14 @@ const {
   asyncForEach
 } = require(`${rootPath}/app/helpers/loop`)
 
+const bookshelf = require(`${rootPath}/config/bookshelf`);
+
 const NodeDailyInput = require(`${rootPath}/app/models/OEE/NodeDailyInput`)
 const OEE = require(`${rootPath}/app/models/OEE/OEE`)
 const OEEAvailability = require(`${rootPath}/app/models/OEE/OEEAvailability`)
 const OEEPerformance = require(`${rootPath}/app/models/OEE/OEEPerformance`)
 const OEEQuality = require(`${rootPath}/app/models/OEE/OEEQuality`)
+const PoRecord = require(`${rootPath}/app/models/PoRecord/PoRecord`)
 
 const DEFAULT_AVAILABILITY = 12;
 
@@ -131,13 +134,39 @@ let runQualityJob = async (currentDate) => {
       let qualityStartOfDay = currentDate.clone().startOf('day')
       let qualityEndOfDay = currentDate.clone().endOf('day')
 
+      // calculate OEE Quality value
+      await new PoRecord().query((qb) => {
+        qb.where('created_at', '>=', qualityStartOfDay)
+          .where('created_at', '<=', qualityEndOfDay)
+      }).fetchAll()
+
+      let formattedDate = currentDate.clone().format('YYYY-MM-DD')
+
+      let qualityQuery = `
+      SELECT
+        CASE
+          WHEN sum(input_quantity) = 0 THEN 0
+          ELSE sum(produced_quantity) / sum(input_quantity)
+        END AS value,
+          date(created_at) FROM po_records
+        WHERE date(created_at) = ?
+        GROUP BY date(created_at)
+      `
+      let result = (await bookshelf.knex.raw(qualityQuery, formattedDate)).rows;
+
+      let value = 0
+      if (result.length != 0) {
+        value = result[0].value
+      }
+      // query end
+
       console.log(`Started inserting "quality" for ${node.name}`);
       let existingQuality = await new OEEQuality({node_id: node.id, start_time: qualityStartOfDay, end_time: qualityEndOfDay}).fetch({require: false})
       if (existingQuality) {
-        existingQuality.set('value', OEE_AVAILABILITY_DEFAULT_VALUE)
+        existingQuality.set('value', value)
         existingQuality.save()
       } else {
-        await new OEEQuality({node_id: node.id, start_time: qualityStartOfDay, end_time: qualityEndOfDay, value: OEE_AVAILABILITY_DEFAULT_VALUE}).save()
+        await new OEEQuality({node_id: node.id, start_time: qualityStartOfDay, end_time: qualityEndOfDay, value: value}).save()
       }
       console.log(`Completed inserting "quality" for ${node.name}`);
     })
@@ -250,6 +279,7 @@ let runAllJob = async (startTime) => {
 module.exports = {
   runAllJob,
   runOEEJob,
+  runQualityJob
   runAvailabilityJob,
 }
 

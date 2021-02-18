@@ -16,6 +16,13 @@ block content
           | &nbsp;Users
 
     .row
+      .col
+        a.btn.btn-link.my-2(href="/settings/users/new")
+          i.fa.fa-plus-circle(aria-hidden="true")
+          | &nbsp;
+          | Add new user
+
+    .row
       include ./../../../../shared/pagination
 
     .row.my-3
@@ -25,6 +32,7 @@ block content
           th Username
           th Name
           th Employee ID
+          th Is Admin?
           th Actions
 
         for u in users
@@ -33,6 +41,7 @@ block content
             td= u.username
             td= u.name
             td= u.employee_id
+            td= u.is_admin
             td
               a(href=`/settings/users/${u.id}/edit`)
                 i.fa.fa-edit(aria-hidden="true")

@@ -330,6 +330,11 @@ body-parser@1.19.0, body-parser@^1.19.0:
     raw-body "2.4.0"
     type-is "~1.6.17"
 
+bookshelf-soft-delete@^5.0.0:
+  version "5.0.0"
+  resolved "https://registry.yarnpkg.com/bookshelf-soft-delete/-/bookshelf-soft-delete-5.0.0.tgz#2248da016545201517dc75b09ef584c4cff45fbb"
+  integrity sha512-255xcCcRtQiQhErBlsXwBMdqNF+180cTzCdr04/JhcFmA2wMnQHZ9Ur/NkpBPxi2ZJwo8aRimJiY9w8+1HFBtQ==
+
 bookshelf@^1.1.1:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/bookshelf/-/bookshelf-1.1.1.tgz#afa1e15871438bdb1b2d7b3adb654dac4f641c90"
