@@ -36,9 +36,9 @@ block content
             tr
               td= n.name
               td
-                input.form-control.input-values(id=`node-${n.id}-am-availability`, type="number", name="n.id", min="0", max=defaultMaxValue, required="true", value=n.am_availablitity, data-node_id=n.id, data-node_area=n.area, data-type="am_availability")
+                input.form-control.input-values(id=`node-${n.id}-am-availability`, type="number", name="n.id", min="0", max=12, required="true", value=n.am_availablitity, data-node_id=n.id, data-node_area=n.area, data-type="am_availability")
               td
-                input.form-control.input-values(id=`node-${n.id}-pm-availability`, type="number", name="n.id", min="0", max=defaultMaxValue, required="true", value=n.pm_availability, data-node_id=n.id, data-node_area=n.area, data-type="pm_availability")
+                input.form-control.input-values(id=`node-${n.id}-pm-availability`, type="number", name="n.id", min="0", max=12, required="true", value=n.pm_availability, data-node_id=n.id, data-node_area=n.area, data-type="pm_availability")
 
   script.
     $(function() {

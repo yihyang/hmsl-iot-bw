@@ -8,7 +8,6 @@ const { isBW } = require(`${rootPath}/config/app-settings`)
 let index = async function(req, res) {
   let nodes = (await new Node().fetchAll()).toJSON();
 
-  console.log(isBW())
   let defaultMaxValue = isBW() ? 10 : 12;
 
   res.render('web/v1/oee/daily-time-inputs/index', {nodes, defaultMaxValue})
@@ -44,7 +43,7 @@ let update = async function(req, res) {
   let scheduleName = schedule + "_availability";
   let {value, date} = req.body;
 
-  let DEFAULT_MAX_AVAILABILITY = isBW() ? 10 : 12;
+  let DEFAULT_MAX_AVAILABILITY = 12;
   if (value > DEFAULT_MAX_AVAILABILITY) {
     return res.status(422).json({
       'errors': [

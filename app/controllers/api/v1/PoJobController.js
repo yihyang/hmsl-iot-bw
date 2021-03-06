@@ -36,11 +36,23 @@ let save = async function (req, res) {
   let poJob = (await new PoJob({po_record_id, node_id}).fetch({require: false}))
 
   if (poJob) {
-    return res
-      .status(422)
+    // NOTE: Changed to allow change to active PO Job
+    await new Node({id: node_id}).save({active_po_job_id: poJob.id}, {patch: true})
+
+    return res.status(200)
       .json(
-        respondError("Duplicated Record", "PO Job with the same po record and machine found", 422)
+        respondSuccessWithData(
+          "Updated Machine's active PO Job",
+          `Updated Machine's active PO Job to ${poRecord.toJSON().po_number}`,
+          poJob,
+          201
+        )
       )
+    // return res
+    //   .status(422)
+    //   .json(
+    //     respondError("Duplicated Record", "PO Job with the same po record and machine found", 422)
+    //   )
   }
 
   poJob = await new PoJob({po_record_id, node_id, user_id: userId, status: 'In Progress'}).save();

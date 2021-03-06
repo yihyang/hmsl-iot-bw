@@ -198,41 +198,44 @@ let runOEEJob = async (currentDate) => {
       let availabilities = (await new OEEAvailability()
         .query(function (qb) {
           qb.where('node_id', '=', node.id)
-            .where('created_at', '>=', formattedStartOfDay)
-            .where('created_at', '<=', formattedEndOfDay)
+            .where('start_time', '>=', formattedStartOfDay)
+            .where('end_time', '<=', formattedEndOfDay)
         })
         .fetchAll()
       ).toJSON();
 
-      console.log(availabilities);
+      console.log('----- availabilities -----');
       if (availabilities.length != 0) {
         availability = _.meanBy(availabilities, (a) => a.value)
       }
       console.log(availability);
 
 
+      console.log('----- performances -----');
       let performances = (await new OEEPerformance()
         .query(function (qb) {
           qb.where('node_id', '=', node.id)
-            .where('created_at', '>=', formattedStartOfDay)
-            .where('created_at', '<=', formattedEndOfDay)
+            .where('start_time', '>=', formattedStartOfDay)
+            .where('end_time', '<=', formattedEndOfDay)
         })
         .fetchAll()).toJSON();
       if (performances.length != 0) {
         performance = _.meanBy(performances, (a) => a.value)
       }
+      console.log(performance)
 
-
+      console.log('----- qualities -----');
       let qualities = (await new OEEQuality()
         .query(function (qb) {
           qb.where('node_id', '=', node.id)
-            .where('created_at', '>=', formattedStartOfDay)
-            .where('created_at', '<=', formattedEndOfDay)
+            .where('start_time', '>=', formattedStartOfDay)
+            .where('end_time', '<=', formattedEndOfDay)
         })
         .fetchAll()).toJSON();
       if (qualities.length != 0) {
         quality = _.meanBy(qualities, (a) => a.value)
       }
+      console.log(quality)
 
 
       let value = (availability * performance * quality);
@@ -279,7 +282,7 @@ let runAllJob = async (startTime) => {
 module.exports = {
   runAllJob,
   runOEEJob,
-  runQualityJob
+  runQualityJob,
   runAvailabilityJob,
 }
 
