@@ -58,12 +58,16 @@ block content
           tr
             th ID
             th Machine
+            th Active PO Number
+            th Status
             th Created By
             th Created At
           if poRecord.jobs
             for j in poRecord.jobs
               tr
+                td= j.id
                 td= j.node.name
+                td= j.node && j.node.active_po_job && j.node.active_po_job.po_record && j.node.active_po_job.po_record.po_number
                 td= j.status
                 td
                   if j.user

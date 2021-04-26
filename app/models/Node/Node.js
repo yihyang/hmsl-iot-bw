@@ -38,7 +38,10 @@ const Node = bookshelf.model('Node', {
   },
   node_group() {
     return this.belongsTo(NodeGroup)
-  }
+  },
+  po_jobs() {
+    return this.hasMany(PoJob)
+  },
 })
 
 module.exports = Node;

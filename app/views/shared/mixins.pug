@@ -60,3 +60,20 @@ mixin format_number(num)
 
 mixin render_date_input(name, date)
   input.form-control(type="date", name=name, value=(date ? moment(date).format('YYYY-MM-DD') : ''))
+
+
+mixin dig(object, nestedAttributes)
+  // nestedAttributes can be either string 'a.b.c' or array ['a', 'b', 'c']
+  // convert the string to array
+  if (typeof nestedAttributes == 'string')
+    - nestedAttributes = nestedAttributes.split('.')
+  - result = true
+  for attr in nestedAttributes
+    if (!object[attr])
+      - result = false
+      - return
+
+    - object = object[attr]
+
+  if result
+    = object

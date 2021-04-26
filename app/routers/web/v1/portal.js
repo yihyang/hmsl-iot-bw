@@ -19,6 +19,14 @@ module.exports = (app, tmpUpload) => {
     app.get('/po-records/:id/jobs/new', web.v1.poRecords.jobs.add)
     app.post('/po-records/:id/jobs', web.v1.poRecords.jobs.save)
 
+    app.get('/po-jobs/:id', web.v1.poJobs.show)
+    app.get('/po-jobs/:id/inputs/:inputId/edit', web.v1.poJobs.poJobInputs.edit)
+    app.post('/po-jobs/:id/inputs/:inputId/update', web.v1.poJobs.poJobInputs.update)
+    app.post('/po-jobs/:id/inputs/:inputId/destroy', web.v1.poJobs.poJobInputs.destroy)
+    app.get('/po-jobs/:id/batches/:batchId/edit', web.v1.poJobs.poBatches.edit)
+    app.post('/po-jobs/:id/batches/:batchId/update', web.v1.poJobs.poBatches.update)
+    app.post('/po-jobs/:id/batches/:batchId/destroy', web.v1.poJobs.poBatches.destroy)
+
     app.get('/nodes', web.v1.nodes.index)
     app.get('/nodes/:id', web.v1.nodes.show)
     app.get('/nodes/:id/events', web.v1.nodes.events.index)

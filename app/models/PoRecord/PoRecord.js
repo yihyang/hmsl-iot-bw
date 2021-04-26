@@ -57,24 +57,41 @@ const PoRecord = bookshelf.model('PoRecord', {
     SET produced_quantity = reference.output_quantity
     FROM
     (
-      SELECT po_records.id, sum(output_quantity) AS output_quantity
-      FROM po_batches
-      JOIN po_jobs ON po_batches.po_job_id = po_jobs.id
-      JOIN po_records ON po_jobs.po_record_id = po_records.id
-      WHERE po_records.id IN
-      (
-        SELECT po_records.id
-        FROM po_batches
-        JOIN po_jobs ON po_batches.po_job_id = po_jobs.id
-        JOIN po_records ON po_jobs.po_record_id = po_records.id
-        WHERE po_batches.id = ?
-      )
-      GROUP BY po_records.id
+      -- need left outer join
+      -- in case when all the records has been deleted
+      -- and the join result is null
+      SELECT po_records.id, coalesce(result.output_quantity, 0) AS output_quantity
+        FROM po_records
+        LEFT OUTER JOIN (
+          SELECT po_records.id, sum(output_quantity) AS output_quantity
+          FROM po_batches
+          JOIN po_jobs ON po_batches.po_job_id = po_jobs.id
+          JOIN po_records ON po_jobs.po_record_id = po_records.id
+          WHERE po_records.id IN
+          (
+            SELECT po_records.id
+            FROM po_batches
+            JOIN po_jobs ON po_batches.po_job_id = po_jobs.id
+            JOIN po_records ON po_jobs.po_record_id = po_records.id
+            WHERE po_batches.id = ?
+          )
+          AND po_batches.deleted_at IS NULL
+          GROUP BY po_records.id
+        ) result
+        ON po_records.id = result.id
+        -- join table again to prevent update ALL records
+          WHERE po_records.id IN (
+            SELECT po_records.id
+            FROM po_batches
+            JOIN po_jobs ON po_batches.po_job_id = po_jobs.id
+            JOIN po_records ON po_jobs.po_record_id = po_records.id
+            WHERE po_batches.id = ?
+          )
     ) AS reference
     WHERE po_records.id = reference.id
     `
 
-    await bookshelf.knex.raw(query, poBatchId);
+    await bookshelf.knex.raw(query, [poBatchId, poBatchId]);
   },
   async updateInputQuantity(poJobInputId) {
     let query = `
@@ -82,24 +99,42 @@ const PoRecord = bookshelf.model('PoRecord', {
       SET input_quantity = reference.input_quantity
       FROM
       (
-        SELECT po_records.id, sum(po_job_inputs.quantity) AS input_quantity
-        FROM po_job_inputs
-        JOIN po_jobs ON po_job_inputs.po_job_id = po_jobs.id
-        JOIN po_records ON po_jobs.po_record_id = po_records.id
-        WHERE po_records.id IN
-        (
-          SELECT po_records.id
-          FROM po_job_inputs
-          JOIN po_jobs ON po_job_inputs.po_job_id = po_jobs.id
-          JOIN po_records ON po_jobs.po_record_id = po_records.id
-          WHERE po_job_inputs.id = ?
-        )
-        GROUP BY po_records.id
+        -- need left outer join
+        -- in case when all the records has been deleted
+        -- and the join result is null
+        SELECT po_records.id, coalesce(result.input_quantity, 0) AS input_quantity
+          FROM po_records
+          LEFT OUTER JOIN (
+            SELECT po_records.id, sum(po_job_inputs.quantity) AS input_quantity
+            FROM po_job_inputs
+            JOIN po_jobs ON po_job_inputs.po_job_id = po_jobs.id
+            JOIN po_records ON po_jobs.po_record_id = po_records.id
+            WHERE po_records.id IN
+            (
+              SELECT po_records.id
+              FROM po_job_inputs
+              JOIN po_jobs ON po_job_inputs.po_job_id = po_jobs.id
+              JOIN po_records ON po_jobs.po_record_id = po_records.id
+              WHERE po_job_inputs.id = ?
+            )
+            AND po_job_inputs.deleted_at IS NULL
+            GROUP BY po_records.id
+            ) result
+            ON po_records.id = result.id
+              -- join table again to prevent update ALL records
+              WHERE po_records.id IN (
+                SELECT po_records.id
+                FROM po_job_inputs
+                JOIN po_jobs ON po_job_inputs.po_job_id = po_jobs.id
+                JOIN po_records ON po_jobs.po_record_id = po_records.id
+                WHERE po_job_inputs.id = ?
+              )
+
       ) AS reference
       WHERE po_records.id = reference.id
     `;
 
-    await bookshelf.knex.raw(query, poJobInputId);
+    await bookshelf.knex.raw(query, [poJobInputId, poJobInputId]);
   }
 });
 

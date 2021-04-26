@@ -61,6 +61,7 @@ let eventTime = async (startDate, endDate, eventType) => {
       FROM segments AS s
       join events AS e ON s.id = e.id
     `;
+    console.log(eventsQuery)
 
     let result = (await bookshelf.knex.raw(eventsQuery, [eventType])).rows;
     return result;
@@ -99,7 +100,7 @@ let getDowntimeByCasePareto = async (startDate, endDate) => {
   let formattedStartTime = startTime.format(dateTimeFormat);
   let formattedEndTime = endTime.format(dateTimeFormat);
   let downtimeQuery = `
-    SELECT gwo_reasons.name, SUM(EXTRACT(EPOCH FROM (end_time - start_time))) AS duration
+    SELECT gwo_reasons.name, count(*) AS count
       FROM gwo
       JOIN gwo_reasons
       ON gwo.gwo_reason_id = gwo_reasons.id
@@ -112,7 +113,7 @@ let getDowntimeByCasePareto = async (startDate, endDate) => {
 
   let result = (await bookshelf.knex.raw(downtimeQuery, [formattedStartTime, formattedEndTime])).rows
 
-  return { labels: _.map(result, (item) => item.name), values: _.map(result, (item) => item.duration) }
+  return { labels: _.map(result, (item) => item.name), values: _.map(result, (item) => item.count) }
 }
 
 let getDowntimeByDurationPareto = async (startDate, endDate) => {

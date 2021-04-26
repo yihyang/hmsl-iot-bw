@@ -37,16 +37,19 @@ block content
         h2 OEE Components
     .row.my-2
       .col
-        h3 Availability
-        table.table#tableAvailability
+        h3.btn-link(data-toggle="collapse", data-target="#collapseAvailability") Availability
+        .collapse#collapseAvailability
+          table.table#tableAvailability
     .row.my-2
       .col
-        h3 Performance
-        table.table#tablePerformance
+        h3.btn-link(data-toggle="collapse", data-target="#collapsePerformance") Performance
+        .collapse#collapsePerformance
+          table.table#tablePerformance
     .row.my-2
       .col
-        h3 Quality
-        table.table#tableQuality
+        h3.btn-link(data-toggle="collapse", data-target="#collapseQuality") Quality
+        .collapse#collapseQuality
+          table.table#tableQuality
 
   include ./../../../../shared/js-utilities
 
@@ -100,7 +103,7 @@ block content
     }
 
     function updateData(response) {
-      let { oee, availability, performance, quality } = response;
+      let { oee, availability, performance, quality, jobs } = response;
 
 
       //- OEE
@@ -240,19 +243,62 @@ block content
         <th>Start Time</th>
         <th>End Time</th>
         <th>Value</th>
+        <th>Jobs Count</th>
+        <th>Detail</th>
       </tr>`;
       for(i = 0; i < quality.length; i++) {
         let item = quality[i];
         let nodeName = item.node ? item.node.name : '';
+        let nodeId = item.node ? item.node.id : null
         let startTime = utility_format_datetime(item.start_time);
         let endTime = utility_format_datetime(item.end_time);
+        let jobsCount = 0
+        let detailToggle = `
+          <a class="btn btn-primary" data-toggle="collapse" href="#quality-${item.id}" role="button" aria-expanded="false" aria-controls="quality-${item.id}">Toggle detail</a>
+        `;
+
+        let qualityDetail = `
+          <div>
+          <table class="table">
+            <tr>
+              <th>PO Number</th>
+              <th>Input Quantity</th>
+              <th>Produced Quantity</th>
+            </tr>
+        `
+        if (nodeId) {
+          let jobItem = jobs[nodeId] || []
+          jobsCount = jobItem.length
+
+          for(let j = 0; j < jobItem.length; j++) {
+            qualityDetail += `
+              <tr>
+                <td>${jobItem[j].po_record ? jobItem[j].po_record.po_number : ''}</td>
+                <td>${jobItem[j].input_quantity}</td>
+                <td>${jobItem[j].produced_quantity}</td>
+              </tr>
+            `
+          }
+        }
+
+        qualityDetail += `
+          </table>
+          </div>
+        `
+
+        let qualityItemTable = ''
         result += `<tr>
           <td>${item.id}</td>
           <td>${nodeName}</td>
           <td>${startTime}</td>
           <td>${endTime}</td>
           <td>${roundToDecimalPoint(item.value, roundUpDecimalPoint)}</td>
+          <td>${jobsCount}</td>
+          <td>${detailToggle}</td>
         </tr>`;
+        result += `<tr class="collapse" id="quality-${item.id}">
+          <td colspan="6">${qualityDetail}</td>
+        </tr>`
       }
       $('#tableQuality').html(result);
 

@@ -26,7 +26,7 @@ let save = async (req, res) => {
 let show = async (req, res) => {
   let { id } = req.params;
 
-  let poRecord = await new PoRecord({id}).fetch({require: false, withRelated: ['jobs.node', 'jobs.user']});
+  let poRecord = await new PoRecord({id}).fetch({require: false, withRelated: ['jobs.node.active_po_job.po_record', 'jobs.user']});
 
   if (!poRecord) {
     req.flash('error', `Unable to find the PO with ID ${id}`)

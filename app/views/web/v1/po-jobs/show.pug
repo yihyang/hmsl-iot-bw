@@ -1,0 +1,88 @@
+extends ./../../../layouts/default
+include ./../../../shared/mixins
+
+block content
+  .container
+    .row
+      .col
+        a.btn.btn-link.my-2(href=`/po-records/${poJob.po_record_id}`)
+          i.fa.fa-arrow-left
+          | &nbsp;Back to Po Record Page
+    .row
+      .col
+        h1 PO Job #{poJob.id}
+        table.table
+          tr
+            th ID
+            td= poJob.id
+          tr
+            th Machine
+            td
+              +dig(poJob, 'node.name')
+          tr
+            th Created By
+            td
+              +dig(poJob, 'user.name')
+          tr
+            th Status
+            td= poJob.status
+          tr
+            th Input Quantity
+            td= poJob.input_quantity
+          tr
+            th Produced Quantity
+            td= poJob.produced_quantity
+
+    // inputs
+    .row.my-3
+      .col
+        h2 Inputs
+        table.table
+          tr
+            th User
+            th Quantity
+            if isAdmin
+              th Actions
+          for b in poJob.po_job_inputs
+            tr
+              td
+                +dig(b, 'user.name')
+              td
+                = b.quantity
+              if isAdmin
+                td
+                  a(href=`/po-jobs/${poJob.id}/inputs/${b.id}/edit`)
+                    i.fa.fa-pencil-square-o(aria-hidden="true")
+                    | Edit
+                  br
+                  form(method="POST", action=`/po-jobs/${poJob.id}/inputs/${b.id}/destroy`)
+                    button.btn.btn-link.p-0(onclick=`return confirm('Are you sure you want to delete the record ${b.id}?')`)
+                      i.fa.fa-trash(aria-hidden="true")
+                      | Delete
+
+    // outputs
+    .row.my-3
+      .col
+        h2 Outputs
+        table.table
+          tr
+            th User
+            th Quantity
+            if isAdmin
+              th Actions
+          for b in poJob.po_batches
+            tr
+              td
+                +dig(b, 'user.name')
+              td
+                = b.output_quantity
+              if isAdmin
+                td
+                  a(href=`/po-jobs/${poJob.id}/batches/${b.id}/edit`)
+                    i.fa.fa-pencil-square-o(aria-hidden="true")
+                    | Edit
+                  br
+                  form(method="POST", action=`/po-jobs/${poJob.id}/batches/${b.id}/destroy`)
+                    button.btn.btn-link.p-0(onclick=`return confirm('Are you sure you want to delete the record ${b.id}?')`)
+                      i.fa.fa-trash(aria-hidden="true")
+                      | Delete

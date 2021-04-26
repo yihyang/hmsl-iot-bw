@@ -17,7 +17,6 @@ while(startDate.isBefore(endDate)) {
 
 async function runJob(dates) {
   await asyncForEach(dates, async function(date) {
-    console.log(date)
     OEEHelper.runAllJob(date)
   })
 }

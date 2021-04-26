@@ -276,8 +276,13 @@ const OEEPerformance = bookshelf.model('OEEPerformance', {
       return carry;
     }, {});
 
-    // down time is 1 - (sum / second per minute)
-    let value = 1 - ((eventsBreakdown['EVENT-STOPPED'] || 0) / 3600);
+
+    // value = all event - gwo - down time / all event - gwo
+    let allGwo = (eventsBreakdown['GWO-PLANNED'] || 0) + (eventsBreakdown['GWO-UNPLANNED'] ||0)
+    let downtimeEvent = eventsBreakdown['EVENT-STOPPED'] || 0
+    let allTime = endTime.diff(startTime) / 1000 // convert millisecond to second
+
+    let value = (allTime - allGwo - downtimeEvent) / (allTime - allGwo)
 
     let isoFormattedStartTime = startTime.toISOString();
     let isoFormattedEndTime = endTime.toISOString();

@@ -42,10 +42,14 @@ let save = async (req, res) => {
   }
 
   // create po job
-  let poJob = (await new PoJob({po_record_id, node_id}).fetch({require: false}))
+  let poJob = (await new PoJob({po_record_id, node_id}).fetch({require: false, withRelated: ['po_record']}))
 
   if (poJob) {
-    req.flash('error', `PO Job with the same po record and machine found`)
+    await new Node({id: node_id}).save({active_po_job_id: poJob.id}, {patch: true})
+    let node = await new Node({id: node_id}).fetch()
+    node = node.toJSON()
+    let poNumber = poJob.toJSON().po_record.po_number
+    req.flash('info', `Update ${node.name} active PO Job to ${poNumber}`)
 
     return res.redirect(`/operators/po-inputs/po-records/${po_record_id}`)
   }

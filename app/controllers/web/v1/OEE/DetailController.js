@@ -8,6 +8,7 @@ const OEE = require(`${rootPath}/app/models/OEE/OEE`);
 const OEEAvailability = require(`${rootPath}/app/models/OEE/OEEAvailability`);
 const OEEPerformance = require(`${rootPath}/app/models/OEE/OEEPerformance`);
 const OEEQuality = require(`${rootPath}/app/models/OEE/OEEQuality`);
+const POJob = require(`${rootPath}/app/models/PoRecord/PoJob`)
 
 
 let index = async function(req, res) {
@@ -61,7 +62,17 @@ let refresh = async function(req, res) {
     })
     .fetchAll({withRelated: ['node']})).toJSON();
 
-  res.json({oee, availability, performance, quality})
+  let jobs = (await new POJob().query((qb) => {
+    qb.where('created_at', '>=', startOfDay)
+      .where('created_at', '<=', endOfDay)
+      .whereIn('node_id', nodes)
+      .orderBy('node_id')
+  })
+  .fetchAll({withRelated: ['node', 'po_record']})).toJSON();
+
+  jobs = _.groupBy(jobs, 'node.id')
+
+  res.json({oee, availability, performance, quality, jobs})
 }
 
 module.exports = {

@@ -7,6 +7,7 @@ const PoRecord = require('./PoRecord');
 const PoBatch = bookshelf.model('PoBatch', {
   hasTimestamps: true,
   tableName: 'po_batches',
+  soft: ['deleted_at'], // soft delete
   initialize() {
     this.on('saved', (model) => {
       PoRecord.updateOutputQuantity(model.id);

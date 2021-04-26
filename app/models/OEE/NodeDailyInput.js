@@ -6,6 +6,37 @@ const moment = require('moment');
 const NodeDailyInput = bookshelf.model('NodeDailyInput', {
   hasTimestamps: true,
   tableName: 'oee_node_daily_inputs',
+  initialize() {
+    this.on('saved', async (model) => {
+      // start time
+      let { node_id, date} = model.attributes
+      let startOfDay = moment(date).startOf('day')
+      let endOfDay = moment(date).endOf('day')
+
+      // set the OEE availabilities 'need_rework' = true
+      await bookshelf.knex.raw(
+        `
+          UPDATE oee_performances
+            SET need_rework = false
+            WHERE node_id = ?
+            AND start_time >= ?
+            AND end_time <= ?
+        `,
+        [node_id, startOfDay, endOfDay]
+      )
+      // set the OEE performances 'need_rework' = true
+      await bookshelf.knex.raw(
+        `
+          UPDATE oee_performances
+            SET need_rework = false
+            WHERE node_id = ?
+            AND start_time >= ?
+            AND end_time <= ?
+        `,
+        [node_id, startOfDay, endOfDay]
+      )
+    })
+  },
   node() {
     return this.belongsTo(NodeDailyInput)
   },

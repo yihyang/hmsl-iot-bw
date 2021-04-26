@@ -9,12 +9,14 @@ block content
           i.fa.fa-arrow-left
           | &nbsp;Back to PO Records Page
     .row
+
       .col
         h2
           | PO Records #{poRecord.id}
-        a(href=`/po-records/${poRecord.id}/edit`)
-          i.fa.fa-edit
-          | &nbsp;Edit
+        if isAdmin
+          a(href=`/po-records/${poRecord.id}/edit`)
+            i.fa.fa-edit
+            | &nbsp;Edit
 
         if poRecord.status == 'Ended'
           form(action=`/po-records/${poRecord.id}/restart`, method="post")
@@ -68,12 +70,12 @@ block content
             th Machine
             th Input Quantity
             th Output Quantity
-            th Machine
             th Ended At
             th Ended By
             th Created At
             th Batch Count
             th Batches
+            th Actions
           for j in poJobs
             tr
               td
@@ -115,6 +117,20 @@ block content
                     tr
                       td
                         + format_number(total)
+              td
+                a(href=`/po-jobs/${j.id}`)
+                    i.fa.fa-eye(aria-hidden="true")
+                    | View
+                if isAdmin
+                  br
+                  a(href=`/po-records/${poRecord.id}/jobs/${j.id}/edit`)
+                    i.fa.fa-pencil-square-o(aria-hidden="true")
+                    | Edit
+                  br
+                  form(method="POST", action=`/po-records/${poRecord.id}/jobs/${j.id}/destroy`)
+                    button.btn.btn-link.p-0(onclick=`return confirm('Are you sure you want to delete the record ${j.id}?')`)
+                      i.fa.fa-trash(aria-hidden="true")
+                      | Delete
 
     .row
       .col

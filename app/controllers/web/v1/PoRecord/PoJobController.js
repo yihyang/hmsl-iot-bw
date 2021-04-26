@@ -93,8 +93,9 @@ let save = async (req, res) => {
   res.redirect(`/po-records/${id}`)
 }
 
+
 module.exports = {
   index,
   add,
-  save
+  save,
 }
