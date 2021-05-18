@@ -4,6 +4,8 @@ const _ = require('lodash')
 const moment = require('moment')
 const bookshelf = require(`${rootPath}/config/bookshelf`);
 
+const ROUND_UP_SIZE = 3
+
 let eventTime = async (startDate, endDate, eventType) => {
   let dateTimeFormat = 'YYYY-MM-DD hh:mm:ss';
   let startTime = moment(startDate).startOf('day');
@@ -136,7 +138,14 @@ let getDowntimeByDurationPareto = async (startDate, endDate) => {
 
   let result = (await bookshelf.knex.raw(downtimeQuery, [formattedStartTime, formattedEndTime])).rows
 
-  return { labels: _.map(result, (item) => item.name), values: _.map(result, (item) => item.duration) }
+  return {
+    labels: _.map(
+      result,
+      (item) => item.name
+    ),
+    values: _.map(
+      result, (item) => _.round(item.duration / 60, ROUND_UP_SIZE)  // convert to minute
+    ) }
 }
 
 let index = async function(req, res) {

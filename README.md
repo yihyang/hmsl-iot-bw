@@ -36,3 +36,16 @@ TODO:
 - permissions
 - home page
 
+
+### Helpful commands
+
+- Run redis  in background (used in production environment)
+
+```
+docker run -d -p 6379:6379 redis
+```
+
+Start the code with ES6 compaitibility
+```
+node -r esm app/queues/oee_rework.js
+```

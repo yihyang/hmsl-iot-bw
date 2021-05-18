@@ -4,6 +4,7 @@ const Gwo = require('./Gwo');
 const GwoItemSparePartUsage = require('./GwoItemSparePartUsage');
 const Node = require('./../Node/Node');
 const moment = require('moment')
+const { oeeReworkQueue } = require(`${rootPath}/app/queues/oee_rework`)
 
 // General Work Order
 var GwoItem = bookshelf.Model.extend({
@@ -16,22 +17,9 @@ var GwoItem = bookshelf.Model.extend({
       // set the OEE performances 'need_rework' = true
 
       let { start_time, end_time} = gwo.attributes
-      console.log(start_time, end_time)
       let node_id = model.attributes.node_id
-      let startOfDay = moment(start_time).startOf('day')
-      let endOfDay = moment(end_time).endOf('day')
-
-      // set the OEE availabilities 'need_rework' = true
-      await bookshelf.knex.raw(
-        `
-          UPDATE oee_performances
-            SET need_rework = false
-            WHERE node_id = ?
-            AND start_time >= ?
-            AND end_time <= ?
-        `,
-        [node_id, startOfDay, endOfDay]
-      )
+      let date = moment(start_time).format('YYYY-MM-DD')
+      oeeReworkQueue.add({node_id, date, group: ['performance']})
     })
   },
   gwo() {

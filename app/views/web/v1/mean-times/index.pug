@@ -130,7 +130,7 @@ block content
               ticks: {
                 min: 0
               }
-            }]
+            }],
           }
         }
     });
@@ -159,7 +159,12 @@ block content
             xAxes: [{
               display: true,
               ticks: {
-                min: 0
+                min: 0,
+                stepSize: 1,
+              },
+              scaleLabel: {
+                display: true,
+                labelString: "Number of Cases"
               }
             }]
           }
@@ -191,8 +196,12 @@ block content
               display: true,
               ticks: {
                 min: 0
+              },
+              scaleLabel: {
+                display: true,
+                labelString: "Minutes"
               }
-            }]
+            }],
           }
         }
     });

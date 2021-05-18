@@ -4,7 +4,7 @@ block content
   .container
     .row.my-3
       .col.text-center
-        p= `Welcome to ` + appSettings.siteFullName() + ` Portal`
+        p= `Welcome to ` + appSettings.getSiteFullName() + ` Portal`
 
     if signedIn && isAdmin
       .row.mt-3

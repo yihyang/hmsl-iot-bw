@@ -8,8 +8,8 @@ const {
 
 let dates = [];
 let today = moment();
-let startDate = moment('2021-01-24')
-let endDate = moment('2021-01-25')
+let startDate = moment('2021-04-24')
+let endDate = moment('2021-05-15')
 while(startDate.isBefore(endDate)) {
   dates.push(startDate.clone())
   startDate.add(1, 'day')
@@ -17,7 +17,9 @@ while(startDate.isBefore(endDate)) {
 
 async function runJob(dates) {
   await asyncForEach(dates, async function(date) {
-    OEEHelper.runAllJob(date)
+    console.log(date)
+    await OEEHelper.runAvailabilityJob(date)
+    await OEEHelper.runOEEJob(date)
   })
 }
 

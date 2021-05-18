@@ -10,6 +10,7 @@ const _ = require('lodash')
 var Gwo = bookshelf.Model.extend({
   hasTimestamps: true,
   tableName: 'gwo',
+  soft: ['deleted_at'], // soft delete
   initialize() {
     this.on('saving', (model, attrs) => {
       if (attrs.start_time && attrs.end_time) {
@@ -66,9 +67,8 @@ var Gwo = bookshelf.Model.extend({
     if (!overlappedGwo) {
       return 0
     }
-    console.log(overlappedGwo.toJSON())
 
-    return _.map(overlappedGwo.toJSON(), (item) => {
+    return _.sum(overlappedGwo.toJSON(), (item) => {
       let gwoStartTime = moment(item.start_time).isBefore(startTime) ? startTime : moment(item.start_time)
       let gwoEndTime = moment(item.end_time).isAfter(endTime) ? endTime : moment(item.end_time)
 

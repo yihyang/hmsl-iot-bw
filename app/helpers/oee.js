@@ -78,7 +78,7 @@ let reworkAvailability = async (id) => {
     let value = await getAvailabilityValue(moment(start_time), node_id)
     existingAvailability.set('value', value)
     existingAvailability.set('need_rework', false)
-    console.log(`Updated availability ID - ${id}`)
+    console.log(`Updated availability ID - ${id} - new value - ${value}`)
     await existingAvailability.save()
 }
 let getAvailabilityValue = async (currentDate, nodeId) => {
@@ -103,7 +103,7 @@ let getAvailabilityValue = async (currentDate, nodeId) => {
             am_availability,
             pm_availability
         } = dailyValue.attributes;
-        value = (am_availability || 0) * 12 + (pm_availability || 0);
+        value = (am_availability || 0) + (pm_availability || 0);
     } else {
         // insert default values if not found
         await new NodeDailyInput({
@@ -115,10 +115,11 @@ let getAvailabilityValue = async (currentDate, nodeId) => {
         value = DEFAULT_AVAILABILITY * 2;
     }
     // convert value to seconds
-    denumerator = (value * 3600)
-    numerator = (denumerator) - duration
+    let availableTime = (value * 3600)
+    numerator = (availableTime) - duration
+    let oneDayInSeconds = 24 * 3600
 
-    value = (denumerator / numerator)
+    value = (numerator / oneDayInSeconds)
 
     if (value < 0) {
         value = 0
@@ -151,9 +152,10 @@ let runPerformanceJob = async (currentDate) => {
             await asyncForEach(times, async time => {
                 await asyncForEach(nodes, async node => {
                     await OEEPerformance.calculateHourSummary(node.id, time.startTime, time.endTime)
+                    console.log(`Completed inserting "performance" for ${node.name} - ${time.startTime}`);
                 })
             })
-            console.log(`Completed inserting "performance" for ${node.name}`);
+            console.log(`Completed inserting "performance"`);
         })
         console.log('--- Completed Performance Job ---')
         resolve()
@@ -243,7 +245,7 @@ let runOEEJob = async (currentDate) => {
         console.log('--- Running OEE Job ---');
         let nodes = await getAllNodes();
         await asyncForEach(nodes, async (node) => {
-            let {oee, availability, performance, quality} = getOEEValue(currentDate, node.id)
+            let {oee, availability, performance, quality} = await getOEEValue(currentDate, node.id)
             let startOfDay = currentDate.clone().startOf('day')
             let endOfDay = currentDate.clone().endOf('day')
             let existingOEE = await new OEE({
@@ -270,7 +272,7 @@ let runOEEJob = async (currentDate) => {
                     quality_value: quality
                 }).save()
             }
-            console.log(`Completed inserting "OEE" for ${node.name}`);
+            console.log(`Completed inserting "OEE" for ${node.name} - ${currentDate} - ${oee}`);
         })
         console.log('--- Completed OEE Job ---');
         resolve()

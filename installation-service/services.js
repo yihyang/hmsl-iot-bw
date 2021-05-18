@@ -54,22 +54,38 @@ svc3.on('uninstall',function(){
 });
 
 // oee rework
-var svc4 = new Service({
-  name:'HMSL OEE Rework',
-  description: 'HMSL OEE Rework',
-  script: 'C:\\hmsl-iot\\repo\\hmsl-iot\\oee_rework.js'
+// var svc4 = new Service({
+//   name:'HMSL OEE Rework',
+//   description: 'HMSL OEE Rework',
+//   script: 'C:\\hmsl-iot\\repo\\hmsl-iot\\oee_rework.js'
+// });
+
+// svc4.on('install',function(){
+//   svc4.start();
+//   console.log('installed HTML OEE Rework');
+// });
+
+// svc4.on('uninstall',function(){
+//   console.log('Uninstall HTML OEE Rework complete.');
+//   console.log('The service exists: ',svc4.exists);
+// });
+
+// oee rework queue
+var oeeReworkQueue = new Service({
+  name:'HMSL OEE Rework Queue',
+  description: 'HMSL OEE Rework Queue',
+  script: 'C:\\hmsl-iot\\repo\\hmsl-iot\\app\\queues\\oee_rework.js'
 });
 
 svc4.on('install',function(){
   svc4.start();
-  console.log('installed HTML OEE Rework');
+  console.log('installed HTML OEE Rework Queue');
 });
 
 svc4.on('uninstall',function(){
-  console.log('Uninstall HTML OEE Rework complete.');
-  console.log('The service exists: ',svc3.exists);
+  console.log('Uninstall HTML OEE Rework Queue complete.');
+  console.log('The service exists: ',svc4.exists);
 });
-
 
 module.exports = {
   svc,

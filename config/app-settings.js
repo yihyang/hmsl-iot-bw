@@ -21,12 +21,17 @@ function isBW() {
  *
  * @return     string
  */
-function siteFullName() {
+function getSiteFullName() {
   return process.env.SITE_NAME + ' ' + process.env.PREMISE_NAME
+}
+
+function getSiteName() {
+  return process.env.PREMISE_NAME
 }
 
 module.exports = {
   isAM,
   isBW,
-  siteFullName,
+  getSiteFullName,
+  getSiteName,
 }

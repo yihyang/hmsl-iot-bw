@@ -1,0 +1,71 @@
+extends ./../../../layouts/default
+include ./../../../shared/mixins
+
+block content
+  .container
+    .row
+      .col
+        a.btn.btn-link.my-2(href="/gwo")
+          i.fa.fa-arrow-left
+          | &nbsp;
+          | Back to GWO
+    = JSON.stringify(gwo)
+    .row
+      .col
+        h3 Edit GWO #{gwo.id}
+        form(method="POST" action='/gwo/'+ gwo.id + '/update')
+          .form-group.row
+            .col-sm-2.col-form-label ID
+            .col-sm-10
+              input.form-control(type="text", name="", value=gwo.id, placeholder="ID", readonly="true")
+          .form-group.row
+            .col-sm-2.col-form-label Type
+            .col-sm-10
+              select.form-control(name="type")
+                option(value="unplanned", selected=`gwo.type == 'unplanned`) Unplanned
+                option(value="planned", selected=`gwo.type == 'planned`) Planned
+          .form-group.row
+            .col-sm-2.col-form-label Start Time
+            .col-sm-10
+              input.form-control(type="datetime" name="start_time" required="true" value=gwo.start_time)
+          .form-group.row
+            .col-sm-2.col-form-label End Time
+            .col-sm-10
+              input.form-control(type="datetime" name="end_time" required="true" value=gwo.end_time)
+          .form-group.row
+            .col-sm-2.col-form-label Reason
+            .col-sm-10
+              select.form-control(name="gwo_reason_id")
+                for r in reasons
+                  option(value=r.id, selected=`r.id == gwo.gwo_reason_id`)
+                    = r.name
+
+          button.btn.btn-primary(type="submit") Update
+
+  script.
+    let dateTimeFormat = 'YYYY-MM-DD hh:mm:ss A'
+    $(function() {
+      $('input[name="start_time"]').daterangepicker(
+        {
+          singleDatePicker: true,
+          timePicker: true,
+          locale: {
+            format: dateTimeFormat
+          },
+          startDate: $('input[name="start_time"]').val(),
+        },
+        function(start, end, label) {}
+      );
+
+      $('input[name="end_time"]').daterangepicker(
+        {
+          singleDatePicker: true,
+          timePicker: true,
+          locale: {
+            format: dateTimeFormat,
+          },
+          startDate: $('input[name="end_time"]').val(),
+        },
+        function(start, end, label) {}
+      );
+    })

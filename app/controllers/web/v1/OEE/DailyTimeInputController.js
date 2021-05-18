@@ -3,12 +3,13 @@ const Node = require(`${rootPath}/app/models/Node/Node`);
 const NodeDailyInput = require(`${rootPath}/app/models/OEE/NodeDailyInput`);
 const moment = require('moment');
 const bookshelf = require(`${rootPath}/config/bookshelf`);
-const { isBW } = require(`${rootPath}/config/app-settings`)
+const { getSiteName } = require(`${rootPath}/config/app-settings`)
+const { getDefaultMaxValue } = require(`${rootPath}/app/helpers/oee/daily_time_input`)
 
 let index = async function(req, res) {
   let nodes = (await new Node().fetchAll()).toJSON();
 
-  let defaultMaxValue = isBW() ? 10 : 12;
+  let defaultMaxValue = getDefaultMaxValue(getSiteName());
 
   res.render('web/v1/oee/daily-time-inputs/index', {nodes, defaultMaxValue})
 }
@@ -43,7 +44,7 @@ let update = async function(req, res) {
   let scheduleName = schedule + "_availability";
   let {value, date} = req.body;
 
-  let DEFAULT_MAX_AVAILABILITY = 12;
+  let DEFAULT_MAX_AVAILABILITY = getDefaultMaxValue(getSiteName());;
   if (value > DEFAULT_MAX_AVAILABILITY) {
     return res.status(422).json({
       'errors': [

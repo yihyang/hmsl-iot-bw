@@ -16,6 +16,8 @@ const GwoItemSparePartUsage = require(`${rootPath}/app/models/Gwo/GwoItemSparePa
 const GwoSparePart = require(`${rootPath}/app/models/Gwo/GwoSparePart`)
 const GwoReason = require(`${rootPath}/app/models/Gwo/GwoReason`)
 const Node = require(`${rootPath}/app/models/Node/Node`)
+const moment = require('moment')
+const _ = require('lodash')
 
 let index = async function(req, res) {
   let paginationAttribute = getPaginationAttributes(req);
@@ -50,12 +52,7 @@ let add = async (req, res) => {
   spareParts = spareParts.toJSON();
   spareParts = mapOptionsForSelect2(spareParts, 'id', 'item');
 
-  let reasons = await GwoReason
-    .query((query) => {
-      query.orderBy('name', 'ASC')
-    })
-    .fetchAll();
-  reasons = reasons.toJSON();
+  let reasons = await getGwoReasons()
 
 
   res.render('web/v1/gwo/add', { nodes, spareParts, reasons })
@@ -113,11 +110,60 @@ var show = async function(req, res) {
 }
 
 let edit = async (req, res) => {
+  let { id } = req.params;
 
+  let gwo = await new Gwo({id})
+    .fetch({withRelated: ['gwo_items.node', 'gwo_items.spare_part_usages.spare_part']});
+  gwo = gwo.toJSON();
+  gwo = offsetObjectTimezone(gwo, ['start_time', 'end_time'])
+  // console.log(gwo)
+
+
+  let reasons = await getGwoReasons()
+
+  res.render('web/v1/gwo/edit', {gwo, reasons});
 }
 
 let update = async (req, res) => {
+  console.log(req.body)
+  let updates = _.pick(req.body, ['type', 'start_time', 'end_time', 'gwo_reason_id'])
 
+  let { id } = req.params;
+
+  let gwo = await (new Gwo({id})).fetch()
+
+  if (!gwo) {
+    req.flash('error', `Unable to find GWO`)
+    res.redirect('/gwo')
+  }
+  console.log(gwo)
+  console.log(updates)
+
+  await gwo.save(updates, {patch: true})
+
+  req.flash('success', `Successfully updated GWO`)
+  res.redirect('/gwo')
+}
+
+let getGwoReasons = async () => {
+  let reasons = await GwoReason
+    .query((query) => {
+      query.orderBy('name', 'ASC')
+    })
+    .fetchAll();
+  return reasons.toJSON();
+}
+
+let offsetObjectTimezone = (object, keys) => {
+  for (var i = keys.length - 1; i >= 0; i--) {
+    let key = keys[i]
+    let item = object[key]
+    if (item) {
+      object[key] = moment(item).format('YYYY-MM-DD hh:mm:ss A')
+    }
+  }
+
+  return object
 }
 
 module.exports = {

@@ -9,6 +9,9 @@ const GWO = require(`${rootPath}/app/models/Gwo/Gwo`);
 const NodeDailyInput = require(`${rootPath}/app/models/OEE/NodeDailyInput`);
 const bookshelf = require(`${rootPath}/config/bookshelf`);
 
+
+const ROUND_UP_SIZE = 3
+
 let index = async function(req, res) {
   let nodeGroups = (await new NodeGroup().fetchAll()).toJSON()
   let nodes = (await new Node().query((qb) => {
@@ -165,7 +168,7 @@ let historyRefresh = async function(req, res) {
   let outputResult = outputQueryResult.rows;
 
   // map result
-  outputResult = _.reduce(outputResult, function(carry, item) { carry[item.month] = item.value; return carry; }, {});
+  outputResult = _.reduce(outputResult, function(carry, item) { carry[item.month] = _.round(item.value, ROUND_UP_SIZE); return carry; }, {});
   let outputLabel = [];
   let outputValue = [];
   let outputDefaultValue = [];

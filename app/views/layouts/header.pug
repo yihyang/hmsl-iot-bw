@@ -5,7 +5,7 @@ navbar.navbar.navbar-expand-lg.navbar-dark.bg-dark
     if currentUser.role == 'operator'
       - rootPath = '/operators'
   a.navbar-brand(href=rootPath)
-    = appSettings.siteFullName()
+    = appSettings.getSiteFullName()
   button.navbar-toggler(type="button" data-toggle="collapse" data-target="#navbar-collapse" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation")
     .navbar-toggler-icon
   .collapse.navbar-collapse#navbar-collapse

@@ -35,6 +35,8 @@ block content
           th Machines
           th Reason
           th Created By
+          if isAdmin
+            th Action
         for g in gwos
           tr
             td= g.id
@@ -49,3 +51,12 @@ block content
             td= g.gwo_items == [] ? '' : g.gwo_items.map((x) => { return x.node ? x.node.name : '' }).join(', ')
             td= g.reason ? g.reason.name : ''
             td= g.user ? g.user.name : ''
+            if isAdmin
+              td
+                a(href=`/gwo/${g.id}/edit`)
+                  i.fa.fa-pencil-square-o(aria-hidden="true")
+                  | &nbsp;Edit
+                br
+                a(href=`/gwo/${g.id}/destroy`)
+                  i.fa.fa-trash(aria-hidden="true")
+                  | &nbsp;Delete
