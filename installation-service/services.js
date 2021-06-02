@@ -74,22 +74,23 @@ svc3.on('uninstall',function(){
 var oeeReworkQueue = new Service({
   name:'HMSL OEE Rework Queue',
   description: 'HMSL OEE Rework Queue',
-  script: 'C:\\hmsl-iot\\repo\\hmsl-iot\\app\\queues\\oee_rework.js'
+  script: 'C:\\hmsl-iot\\repo\\hmsl-iot\\queues.js'
 });
 
-svc4.on('install',function(){
-  svc4.start();
+oeeReworkQueue.on('install',function(){
+  oeeReworkQueue.start();
   console.log('installed HTML OEE Rework Queue');
 });
 
-svc4.on('uninstall',function(){
+oeeReworkQueue.on('uninstall',function(){
   console.log('Uninstall HTML OEE Rework Queue complete.');
-  console.log('The service exists: ',svc4.exists);
+  console.log('The service exists: ',oeeReworkQueue.exists);
 });
 
 module.exports = {
   svc,
   svc2,
   svc3,
-  svc4,
+  // svc4,
+  oeeReworkQueue,
 }

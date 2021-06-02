@@ -19,7 +19,7 @@ var GwoItem = bookshelf.Model.extend({
       let { start_time, end_time} = gwo.attributes
       let node_id = model.attributes.node_id
       let date = moment(start_time).format('YYYY-MM-DD')
-      oeeReworkQueue.add({node_id, date, group: ['performance']})
+      await oeeReworkQueue(node_id, date, ['performance'])
     })
   },
   gwo() {

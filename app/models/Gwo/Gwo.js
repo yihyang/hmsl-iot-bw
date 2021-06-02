@@ -13,9 +13,10 @@ var Gwo = bookshelf.Model.extend({
   soft: ['deleted_at'], // soft delete
   initialize() {
     this.on('saving', (model, attrs) => {
+      let dateFormat = "YYYY-MM-DD hh:mm:ss a"
       if (attrs.start_time && attrs.end_time) {
         // set duration
-        attrs['duration'] = moment(attrs.end_time).diff(moment(attrs.start_time)) / 1000;
+        attrs['duration'] = moment(attrs.end_time, dateFormat).diff(moment(attrs.start_time, dateFormat)) / 1000;
       }
     })
     this.on('saved', async (model, attrs) => {

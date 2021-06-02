@@ -11,7 +11,7 @@ const NodeDailyInput = bookshelf.model('NodeDailyInput', {
     this.on('saved', async (model) => {
       let { node_id, date } = model.attributes
 
-      oeeReworkQueue.add({node_id, date, group: ['availability', 'performance']})
+      await oeeReworkQueue(node_id, date, ['availability', 'performance'])
     })
   },
   node() {
