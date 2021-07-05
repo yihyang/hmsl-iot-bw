@@ -4,14 +4,15 @@ const NodeDailyInput = require(`${rootPath}/app/models/OEE/NodeDailyInput`);
 const moment = require('moment');
 const bookshelf = require(`${rootPath}/config/bookshelf`);
 const { getSiteName } = require(`${rootPath}/config/app-settings`)
-const { getDefaultMaxValue } = require(`${rootPath}/app/helpers/oee/daily_time_input`)
+const { getDefaultMaxValue, getDefaultButtonValue } = require(`${rootPath}/app/helpers/oee/daily_time_input`)
 
 let index = async function(req, res) {
   let nodes = (await new Node().fetchAll()).toJSON();
 
   let defaultMaxValue = getDefaultMaxValue(getSiteName());
+  let defaultButtonValue = getDefaultButtonValue(getSiteName());
 
-  res.render('web/v1/oee/daily-time-inputs/index', {nodes, defaultMaxValue})
+  res.render('web/v1/oee/daily-time-inputs/index', {nodes, defaultMaxValue, defaultButtonValue})
 }
 
 let fetchByDate = async function(req, res) {
@@ -74,8 +75,6 @@ let update = async function(req, res) {
     updateValues.node_id = nodeId;
     await new NodeDailyInput(updateValues).save();
   }
-
-  console.log(node)
 
   res.json({'message': 'Successfully updated ' + schedule + ' for Machine ' + node.name + ' to ' + value});
 }

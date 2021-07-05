@@ -69,7 +69,7 @@ var Gwo = bookshelf.Model.extend({
       return 0
     }
 
-    return _.sum(overlappedGwo.toJSON(), (item) => {
+    return _.sumBy(overlappedGwo.toJSON(), (item) => {
       let gwoStartTime = moment(item.start_time).isBefore(startTime) ? startTime : moment(item.start_time)
       let gwoEndTime = moment(item.end_time).isAfter(endTime) ? endTime : moment(item.end_time)
 

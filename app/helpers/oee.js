@@ -65,6 +65,7 @@ let runAvailabilityJob = async (currentDate) => {
         resolve()
     })
 }
+
 let reworkAvailability = async (id) => {
     let existingAvailability = await new OEEAvailability({
         id
@@ -81,6 +82,7 @@ let reworkAvailability = async (id) => {
     console.log(`Updated availability ID - ${id} - new value - ${value}`)
     await existingAvailability.save()
 }
+
 let getAvailabilityValue = async (currentDate, nodeId) => {
     let availabilityStartOfDay = currentDate.clone().startOf('day')
     let availabilityEndOfDay = currentDate.clone().endOf('day')
