@@ -35,35 +35,46 @@ let runAvailabilityJob = async (currentDate) => {
         let nodes = await getAllNodes();
         await asyncForEach(nodes, async (node) => {
             console.log(`Started Inserting "availability" for ${node.name}`)
-            let value = await getAvailabilityValue(currentDate, node.id)
-            let availabilityStartOfDay = currentDate.clone().startOf('day')
-            let availabilityEndOfDay = currentDate.clone().endOf('day')
 
-            // get the
-            // insert record
-            let existingAvailability = await new OEEAvailability({
-                node_id: node.id,
-                start_time: availabilityStartOfDay,
-                end_time: availabilityEndOfDay
-            }).fetch({
-                require: false
-            })
-            if (existingAvailability) {
-                existingAvailability.set('value', value)
-                await existingAvailability.save()
-            } else {
-                await new OEEAvailability({
-                    node_id: node.id,
-                    start_time: availabilityStartOfDay,
-                    end_time: availabilityEndOfDay,
-                    value: value
-                }).save()
-            }
+            let value = await runSingleNodeAvailabilityJob(node.id, currentDate)
+
             console.log(`Completed Inserting "availability" for ${node.name} - ${value}`)
         })
         console.log('--- Completed Availability Job ---')
         resolve()
     })
+}
+
+let runSingleNodeAvailabilityJob = async function(nodeId, currentDate) {
+    console.log(`Started Inserting "availability" for node with ID - ${nodeId}`)
+    let value = await getAvailabilityValue(currentDate, node.id)
+    let availabilityStartOfDay = currentDate.clone().startOf('day')
+    let availabilityEndOfDay = currentDate.clone().endOf('day')
+
+    // get the
+    // insert record
+    let existingAvailability = await new OEEAvailability({
+        node_id: nodeId,
+        start_time: availabilityStartOfDay,
+        end_time: availabilityEndOfDay
+    }).fetch({
+        require: false
+    })
+    if (existingAvailability) {
+        existingAvailability.set('value', value)
+        await existingAvailability.save()
+    } else {
+        await new OEEAvailability({
+            node_id: nodeId,
+            start_time: availabilityStartOfDay,
+            end_time: availabilityEndOfDay,
+            value: value
+        }).save()
+    }
+
+    console.log(`Completed Inserting "availability" for node with ID - ${nodeId}`)
+
+    return value
 }
 
 let reworkAvailability = async (id) => {
@@ -140,27 +151,31 @@ let runPerformanceJob = async (currentDate) => {
         let nodes = await getAllNodes();
         await asyncForEach(nodes, async (node) => {
             console.log(`Started inserting "performance" for ${node.name}`);
-            let performanceStartOfDay = currentDate.clone().startOf('day')
-            let performanceEndOfDay = currentDate.clone().endOf('day')
-            let currentTime = performanceStartOfDay.clone()
-            let times = [];
-            while (currentTime.isBefore(performanceEndOfDay)) {
-                times.push({
-                    startTime: currentTime.clone(),
-                    endTime: currentTime.clone().endOf('hour')
-                });
-                currentTime = currentTime.add(1, 'hour');
-            }
-            await asyncForEach(times, async time => {
-                await asyncForEach(nodes, async node => {
-                    await OEEPerformance.calculateHourSummary(node.id, time.startTime, time.endTime)
-                    console.log(`Completed inserting "performance" for ${node.name} - ${time.startTime}`);
-                })
-            })
-            console.log(`Completed inserting "performance"`);
+            await runSingleNodePerformanceJob(node.id, currentDate)
+            console.log(`Completed inserting "performance" for ${node.name}`);
         })
         console.log('--- Completed Performance Job ---')
         resolve()
+    })
+}
+
+let runSingleNodePerformanceJob = async (nodeId, currentDate) => {
+    let performanceStartOfDay = currentDate.clone().startOf('day')
+    let performanceEndOfDay = currentDate.clone().endOf('day')
+    let currentTime = performanceStartOfDay.clone()
+
+    let times = [];
+    while (currentTime.isBefore(performanceEndOfDay)) {
+        times.push({
+            startTime: currentTime.clone(),
+            endTime: currentTime.clone().endOf('hour')
+        });
+        currentTime = currentTime.add(1, 'hour');
+    }
+
+    await asyncForEach(times, async time => {
+        await OEEPerformance.calculateHourSummary(nodeId, time.startTime, time.endTime)
+        console.log(`Completed inserting "performance" for node with ID ${nodeId}`);
     })
 }
 
@@ -247,39 +262,53 @@ let runOEEJob = async (currentDate) => {
         console.log('--- Running OEE Job ---');
         let nodes = await getAllNodes();
         await asyncForEach(nodes, async (node) => {
-            let {oee, availability, performance, quality} = await getOEEValue(currentDate, node.id)
-            let startOfDay = currentDate.clone().startOf('day')
-            let endOfDay = currentDate.clone().endOf('day')
-            let existingOEE = await new OEE({
-                node_id: node.id,
-                start_time: startOfDay,
-                end_time: endOfDay
-            }).fetch({
-                require: false
-            })
-            if (existingOEE) {
-                existingOEE.set('value', oee);
-                existingOEE.set('availability_value', availability);
-                existingOEE.set('performance_value', performance);
-                existingOEE.set('quality_value', quality);
-                existingOEE.save()
-            } else {
-                await new OEE({
-                    node_id: node.id,
-                    start_time: startOfDay,
-                    end_time: endOfDay,
-                    value: oee,
-                    availability_value: availability,
-                    performance_value: performance,
-                    quality_value: quality
-                }).save()
-            }
+            console.log(`Started inserting "OEE" for ${node.name} - ${currentDate} - ${oee}`);
+
+            let { oee } = await runSingleNodeOEEJob(node.id, currentDate)
             console.log(`Completed inserting "OEE" for ${node.name} - ${currentDate} - ${oee}`);
         })
         console.log('--- Completed OEE Job ---');
         resolve()
     })
 }
+
+let runSingleNodeOEEJob = async function(nodeId, currentDate) {
+    let {oee, availability, performance, quality} = await getOEEValue(currentDate, node.id)
+    let startOfDay = currentDate.clone().startOf('day')
+    let endOfDay = currentDate.clone().endOf('day')
+    let existingOEE = await new OEE({
+        node_id: nodeId,
+        start_time: startOfDay,
+        end_time: endOfDay
+    }).fetch({
+        require: false
+    })
+    if (existingOEE) {
+        existingOEE.set('value', oee);
+        existingOEE.set('availability_value', availability);
+        existingOEE.set('performance_value', performance);
+        existingOEE.set('quality_value', quality);
+        existingOEE.save()
+    } else {
+        await new OEE({
+            node_id: nodeId,
+            start_time: startOfDay,
+            end_time: endOfDay,
+            value: oee,
+            availability_value: availability,
+            performance_value: performance,
+            quality_value: quality
+        }).save()
+    }
+
+    return {
+        oee,
+        availability,
+        performance,
+        quality,
+    }
+}
+
 let getOEEValue = async (currentDate, nodeId) => {
       let startOfDay = currentDate.clone().startOf('day')
       let endOfDay = currentDate.clone().endOf('day')
@@ -379,9 +408,11 @@ let runAllJob = async (startTime) => {
 module.exports = {
     runAllJob,
     runOEEJob,
+    runSingleNodeOEEJob,
     runPerformanceJob,
     runQualityJob,
     runAvailabilityJob,
+    runSingleNodeAvailabilityJob,
     reworkAvailability,
     reworkOEE
 }

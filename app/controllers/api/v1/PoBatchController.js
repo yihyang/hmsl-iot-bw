@@ -2,11 +2,15 @@ const rootPath = './../../../..'
 const PoJob = require(`${rootPath}/app/models/PoRecord/PoJob`)
 const PoBatch = require(`${rootPath}/app/models/PoRecord/PoBatch`)
 const {respondError, respondSuccessWithData} = require(`${rootPath}/app/helpers/response`)
+const { getSiteName } = require(`${rootPath}/config/app-settings`)
 
 let save = async function (req, res) {
   let userId = req.user.id;
   let {po_job_id, output_quantity} = req.body;
-  output_quantity = output_quantity / 1000; // adjust from gram to kg
+  // Adjusted on 24th July 2021
+  // AM need to divide by 1 while BW divide by 1000
+  output_quantity = output_quantity / getSiteQuantityDivider(getSiteName())
+  console.log()
 
   // validate po_job exists
   let poJob = (await new PoJob({id: po_job_id}).fetch({require: false}))
@@ -32,6 +36,16 @@ let save = async function (req, res) {
         201
       )
     )
+}
+
+let getSiteQuantityDivider = (siteName) => {
+  switch (siteName) {
+    case 'AM':
+      return 1;
+    case 'BW':
+    default:
+      return 1000;
+  }
 }
 
 module.exports = {

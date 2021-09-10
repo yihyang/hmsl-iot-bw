@@ -5,6 +5,12 @@ const GwoItemSparePartUsage = require('./GwoItemSparePartUsage');
 const Node = require('./../Node/Node');
 const moment = require('moment')
 const { oeeReworkQueue } = require(`${rootPath}/app/queues/oee_rework`)
+const {
+  getDateRange
+} = require(`${rootPath}/app/helpers/date_helper`)
+const {
+  addRerunGwoOeeJob
+} = require(`${rootPath}/app/helpers/queue_helper`)
 
 // General Work Order
 var GwoItem = bookshelf.Model.extend({
@@ -12,14 +18,23 @@ var GwoItem = bookshelf.Model.extend({
   tableName: 'gwo_items',
   initialize() {
     this.on('saved', async (model, attrs) => {
+      let gwoItem = await model.fetch()
+      if (!gwoItem) {
+        return;
+      }
+
       let gwo  = await model.gwo().fetch()
       // set the OEE availabilities 'need_rework' = true
       // set the OEE performances 'need_rework' = true
 
-      let { start_time, end_time} = gwo.attributes
+      let { start_time, end_time } = gwo.attributes
       let node_id = model.attributes.node_id
-      let date = moment(start_time).format('YYYY-MM-DD')
-      await oeeReworkQueue(node_id, date, ['performance'])
+      let dateRanges = getDateRange(start_time, end_time)
+
+      await asyncForEach(dateRanges, async (date) => {
+        // console.log(node_id, date)
+        await addRerunGwoOeeJob(node_id, date)
+      })
     })
   },
   gwo() {

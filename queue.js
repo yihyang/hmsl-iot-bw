@@ -13,7 +13,7 @@ async function main() {
   }
   const runner = await run({
     connectionString,
-    concurrency: 5,
+    concurrency: 2,
     // Install signal handlers for graceful shutdown on SIGINT, SIGTERM, etc
     noHandleSignals: false,
     pollInterval: 1000,
@@ -24,4 +24,7 @@ async function main() {
 
 }
 
-let {runner} = main();
+main().catch((err) => {
+  console.error(err);
+  process.exit(1);
+});

@@ -2,7 +2,7 @@ const rootPath = './../../..';
 const bookshelf = require(`${rootPath}/config/bookshelf`);
 const Node = require('./../Node/Node');
 const moment = require('moment');
-const { oeeReworkQueue } = require(`${rootPath}/app/queues/oee_rework`)
+const { addRerunDailyTimeInputOeeJob } = require(`${rootPath}/app/queues/oee_rework`)
 
 const NodeDailyInput = bookshelf.model('NodeDailyInput', {
   hasTimestamps: true,
@@ -11,7 +11,7 @@ const NodeDailyInput = bookshelf.model('NodeDailyInput', {
     this.on('saved', async (model) => {
       let { node_id, date } = model.attributes
 
-      await oeeReworkQueue(node_id, date, ['availability', 'performance'])
+      await addRerunDailyTimeInputOeeJob(node_id, date)
     })
   },
   node() {

@@ -17,6 +17,8 @@ module.exports = (app, tmpUpload) => {
     app.post('/po-records/:id/restart', web.v1.poRecords.restart)
     app.get('/po-records/:id/jobs', web.v1.poRecords.jobs.index)
     app.get('/po-records/:id/jobs/new', web.v1.poRecords.jobs.add)
+    // app.get('/po-records/:id/jobs/:jobId/edit', web.v1.poRecords.jobs.edit)
+    // app.get('/po-records/:id/jobs/:jobId/update', web.v1.poRecords.jobs.update)
     app.post('/po-records/:id/jobs', web.v1.poRecords.jobs.save)
 
     app.get('/po-jobs/:id', web.v1.poJobs.show)

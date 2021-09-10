@@ -94,8 +94,18 @@ let save = async (req, res) => {
 }
 
 
+let edit = async (req, res) => {
+
+}
+
+let update = async (req, res) => {
+
+}
+
 module.exports = {
   index,
   add,
   save,
+  edit,
+  update,
 }

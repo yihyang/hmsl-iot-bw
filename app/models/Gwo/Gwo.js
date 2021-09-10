@@ -6,6 +6,16 @@ const GwoItem = require('./GwoItem')
 const moment = require('moment')
 const _ = require('lodash')
 
+const {
+  asyncForEach
+} = require(`${rootPath}/app/helpers/loop`)
+const {
+  getDateRange
+} = require(`${rootPath}/app/helpers/date_helper`)
+const {
+  addRerunGwoOeeJob
+} = require(`${rootPath}/app/helpers/queue_helper`)
+
 // General Work Order
 var Gwo = bookshelf.Model.extend({
   hasTimestamps: true,
@@ -18,8 +28,26 @@ var Gwo = bookshelf.Model.extend({
         // set duration
         attrs['duration'] = moment(attrs.end_time, dateFormat).diff(moment(attrs.start_time, dateFormat)) / 1000;
       }
-    })
+    }),
     this.on('saved', async (model, attrs) => {
+    }),
+    this.on('updating', async function(model, attrs, options) {
+      let changedKeys = (Object.keys(model.changed))
+
+      if (changedKeys.includes('start_time') || changedKeys.includes('end_time')) {
+        // get the previous attributes
+        let gwoItems = model.relations.gwo_items.toJSON()
+        let nodeIds = _.map(gwoItems, 'node_id')
+        // console.log(model._previousAttributes)
+        // console.log(model.attributes)
+        let newStartTime = model.attributes.start_time
+        let newEndTime = model.attributes.end_time
+        newStartTime = moment(newStartTime, 'YYYY-MM-DD hh:mm:ss A')
+        newEndTime = moment(newEndTime, 'YYYY-MM-DD hh:mm:ss A')
+
+        await addRerunGwoOeeJob(nodeIds, model._previousAttributes.start_time, model._previousAttributes.end_time)
+        await addRerunGwoOeeJob(nodeIds, newStartTime, newEndTime)
+      }
     })
   },
   gwo_items() {
