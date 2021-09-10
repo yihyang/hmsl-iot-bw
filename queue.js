@@ -2,6 +2,7 @@ const { connectionString } = require('./queue_add_job')
 
 const { run, quickAddJob, makeWorkerUtils } = require("graphile-worker");
 
+
 async function main() {
   const workerUtils = await makeWorkerUtils({
     connectionString,

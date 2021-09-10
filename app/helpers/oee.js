@@ -47,7 +47,7 @@ let runAvailabilityJob = async (currentDate) => {
 
 let runSingleNodeAvailabilityJob = async function(nodeId, currentDate) {
     console.log(`Started Inserting "availability" for node with ID - ${nodeId}`)
-    let value = await getAvailabilityValue(currentDate, node.id)
+    let value = await getAvailabilityValue(currentDate, nodeId)
     let availabilityStartOfDay = currentDate.clone().startOf('day')
     let availabilityEndOfDay = currentDate.clone().endOf('day')
 
@@ -273,7 +273,7 @@ let runOEEJob = async (currentDate) => {
 }
 
 let runSingleNodeOEEJob = async function(nodeId, currentDate) {
-    let {oee, availability, performance, quality} = await getOEEValue(currentDate, node.id)
+    let {oee, availability, performance, quality} = await getOEEValue(currentDate, nodeId)
     let startOfDay = currentDate.clone().startOf('day')
     let endOfDay = currentDate.clone().endOf('day')
     let existingOEE = await new OEE({
@@ -410,6 +410,7 @@ module.exports = {
     runOEEJob,
     runSingleNodeOEEJob,
     runPerformanceJob,
+    runSingleNodePerformanceJob,
     runQualityJob,
     runAvailabilityJob,
     runSingleNodeAvailabilityJob,

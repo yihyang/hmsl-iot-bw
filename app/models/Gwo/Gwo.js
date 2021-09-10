@@ -35,9 +35,14 @@ var Gwo = bookshelf.Model.extend({
       let changedKeys = (Object.keys(model.changed))
 
       if (changedKeys.includes('start_time') || changedKeys.includes('end_time')) {
+        let gwoItems = await new GwoItem().query((qb) => {
+          qb.where('gwo_id', model.id)
+        }).fetchAll({require: false})
+        gwoItems = gwoItems.toJSON()
         // get the previous attributes
-        let gwoItems = model.relations.gwo_items.toJSON()
+        // let gwoItems = model.relations.gwo_items.toJSON()
         let nodeIds = _.map(gwoItems, 'node_id')
+
         // console.log(model._previousAttributes)
         // console.log(model.attributes)
         let newStartTime = model.attributes.start_time

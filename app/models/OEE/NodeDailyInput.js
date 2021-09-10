@@ -2,7 +2,9 @@ const rootPath = './../../..';
 const bookshelf = require(`${rootPath}/config/bookshelf`);
 const Node = require('./../Node/Node');
 const moment = require('moment');
-const { addRerunDailyTimeInputOeeJob } = require(`${rootPath}/app/queues/oee_rework`)
+const {
+  addRerunDailyTimeInputOeeJob
+} = require(`${rootPath}/app/helpers/queue_helper`)
 
 const NodeDailyInput = bookshelf.model('NodeDailyInput', {
   hasTimestamps: true,

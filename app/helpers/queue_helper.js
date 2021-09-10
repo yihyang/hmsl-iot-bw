@@ -1,4 +1,6 @@
+const rootPath = './../..'
 require('dotenv').config();
+const { connectionString } = require(`${rootPath}/queue_add_job`)
 const {
   quickAddJob,
 } = require("graphile-worker");
@@ -6,7 +8,7 @@ const moment = require('moment')
 
 let addJob = async function(jobName, payload, options = {}) {
   await quickAddJob(
-    {connectionString: process.env.DATABASE_URL},
+    {connectionString},
     jobName,
     payload,
     options,
