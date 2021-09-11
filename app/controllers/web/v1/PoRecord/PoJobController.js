@@ -7,6 +7,8 @@ const {
   getPaginationAttributes,
 } = require(`${rootPath}/app/helpers/route`)
 
+const moment = require('moment')
+
 
 let index = async function(req, res) {
     let {id} = req.params;
@@ -102,10 +104,31 @@ let update = async (req, res) => {
 
 }
 
+let destroy = async (req, res) => {
+  let { id, jobId } = req.params;
+  let job = await getJob(jobId)
+
+  if (!job) {
+    req.flash('error', `Unable to find PO Job with ID - ${jobId}`)
+    return res.redirect(`/po-records/${id}`)
+  }
+
+  job.set('deleted_at', moment())
+  job.save()
+
+  req.flash('success', `Successfully deleted PO Job with ID - ${jobId}`)
+  res.redirect(`/po-records/${id}`)
+}
+
+let getJob = async (id) => {
+  return await new PoJob().query(qb => { qb.where('id', id) }).fetch()
+}
+
 module.exports = {
   index,
   add,
   save,
   edit,
   update,
+  destroy,
 }

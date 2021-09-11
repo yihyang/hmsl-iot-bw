@@ -20,6 +20,7 @@ module.exports = (app, tmpUpload) => {
     // app.get('/po-records/:id/jobs/:jobId/edit', web.v1.poRecords.jobs.edit)
     // app.get('/po-records/:id/jobs/:jobId/update', web.v1.poRecords.jobs.update)
     app.post('/po-records/:id/jobs', web.v1.poRecords.jobs.save)
+    app.post('/po-records/:id/jobs/:jobId/destroy', web.v1.poRecords.jobs.destroy)
 
     app.get('/po-jobs/:id', web.v1.poJobs.show)
     app.get('/po-jobs/:id/inputs/:inputId/edit', web.v1.poJobs.poJobInputs.edit)

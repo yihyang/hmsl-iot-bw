@@ -7,14 +7,14 @@ let destroy = async (req, res) => {
   let jobInput = await getJobInput(inputId)
 
   if (!jobInput) {
-    req.flash('error', `Unable to find PO Job INput with ID - ${inputId}`)
+    req.flash('error', `Unable to find PO Job Input with ID - ${inputId}`)
     return res.redirect(`/po-jobs/${id}`)
   }
 
   jobInput.set('deleted_at', moment())
   jobInput.save()
 
-  req.flash('success', `Successfully deleted PO Job INput with ID - ${inputId}`)
+  req.flash('success', `Successfully deleted PO Job Input with ID - ${inputId}`)
   res.redirect(`/po-jobs/${id}`)
 }
 let edit = async (req, res) => {
@@ -31,7 +31,7 @@ let update = async (req, res) => {
   let jobInput = await getJobInput(inputId)
 
   if (!jobInput) {
-    req.flash('error', `Unable to find PO Job INput with ID - ${inputId}`)
+    req.flash('error', `Unable to find PO Job Input with ID - ${inputId}`)
     return res.redirect(`/po-jobs/${id}`)
   }
 
