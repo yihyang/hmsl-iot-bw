@@ -108,6 +108,71 @@ var Gwo = bookshelf.Model.extend({
 
       return gwoEndTime.diff(gwoStartTime) / 1000
     })
+  },
+  //
+  async getGwoBetween(nodeId, startTime, endTime) {
+    let overlappedGwo = await (Gwo.query((qb) => {
+      qb.select(
+        [
+          'gwo.id',
+          'gwo.type',
+          'gwo_items.node_id',
+          'gwo_items.id AS gwo_item_id',
+          'gwo.start_time',
+          'gwo.end_time',
+        ]
+        )
+        .join('gwo_items', 'gwo.id', 'gwo_items.gwo_id')
+        .where('gwo_items.node_id', nodeId)
+        .where(qb => {
+          qb
+            .where(qb => {
+              // between start and end time
+              qb.where('start_time', '>=', startTime)
+                .where('end_time', '<=', endTime)
+            })
+            .orWhere(qb => {
+              // where outside start and end time
+              qb.where('start_time', '<=', startTime)
+                  .where('end_time', '>=', endTime)
+            })
+            .orWhere(qb => {
+              // where start before start time
+              // and ended between start and end time
+              qb.where('start_time', '<=', startTime)
+                  .where('end_time', '>=', startTime)
+                  .where('end_time', '<=', endTime)
+            })
+            .orWhere(qb => {
+              // where start between start and end time
+              // and ended after end time
+              qb.where('start_time', '>=', startTime)
+                  .where('start_time', '<=', endTime)
+                  .where('end_time', '>=', endTime)
+            })
+        })
+    }).fetchAll({require: false}))
+
+    if (!overlappedGwo) {
+      return []
+    }
+
+    return overlappedGwo.toJSON().map(item => {
+      let itemStartTime = moment(item.start_time)
+      let itemEndTime = moment(item.end_time)
+
+      if (itemStartTime.isBefore(startTime)) {
+        itemStartTime = startTime.clone()
+      }
+      if (itemEndTime.isAfter(endTime)) {
+        itemEndTime = endTime.clone()
+      }
+      item.start_time = itemStartTime
+      item.end_time = itemEndTime
+      item.duration = itemEndTime.diff(itemStartTime, 'seconds')
+
+      return item
+    })
   }
 });
 

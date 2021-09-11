@@ -5,7 +5,9 @@ const rootPath = './../../..';
 
 const bookshelf = require(`${rootPath}/config/bookshelf`);
 const OEE = require(`${rootPath}/app/models/OEE/OEE`);
+const Event = require(`${rootPath}/app/models/Node/Event`);
 const Node = require(`${rootPath}/app/models/Node/Node`);
+const Gwo = require(`${rootPath}/app/models/Gwo/Gwo`);
 
 const OEEPerformance = bookshelf.model('OEEPerformance', {
   hasTimestamps: true,
@@ -305,7 +307,163 @@ const OEEPerformance = bookshelf.model('OEEPerformance', {
         value: value,
       }).save();
     }
-  }
+  },
+  // NOTE v2: improve performance
+  async calculateHourSummaryV2(nodeId, startTime, endTime) {
+    // get event within time range
+    // get GWO within time range
+    let events = await Event.getEventsBetween(nodeId, startTime, endTime)
+    let gwo = await Gwo.getGwoBetween(nodeId, startTime, endTime)
+    // get event end time
+    // console.log(events)
+    // console.log(gwo)
+
+    // preparing data
+    let breakdown = []
+    let currentTime = startTime.clone();
+    let result = [];
+
+    // combine both gwo and events together
+    for (let i = 0; i < gwo.length; i++) {
+      let gwoItem = gwo[i];
+      let gwoItemStartTime = moment(gwoItem.start_time);
+      let gwoItemEndTime = moment(gwoItem.end_time);
+
+      // filter all the event before the current gwo item or after current time
+      let filteredEvents = _.filter(events, (event) => {
+        let itemStartTime = moment(event.start_time);
+        let itemEndTime = moment(event.end_time);
+
+        return itemStartTime.isSameOrBefore(gwoItemStartTime) || itemEndTime.isSameOrAfter(currentTime);
+      })
+
+      for (let i = 0; i < filteredEvents.length; i++) {
+        let item = filteredEvents[i];
+        let itemStartTime = moment(item.start_time);
+        let itemEndTime = moment(item.end_time);
+
+        if (itemStartTime.isBefore(gwoItemStartTime)) {
+          let recordEndTime = itemEndTime.clone()
+          if (itemEndTime.isAfter(gwoItemStartTime)) {
+            recordEndTime = gwoItemStartTime.clone().subtract(1, 'milliseconds')
+          }
+          result.push({
+            main_group: 'event',
+            subgroup: item.status,
+            originator_type: 'event',
+            originator_id: item.id,
+            start_time: currentTime,
+            end_time: recordEndTime,
+            duration: recordEndTime.diff(currentTime, 'seconds'), // offset milliseconds
+          })
+
+          // move time forward
+          currentTime = gwoItemStartTime.clone()
+        }
+      }
+
+      let lastItemEndTime = gwoItemEndTime;
+      if (endTime.isAfter(lastItemEndTime)) {
+        lastItemEndTime = endTime.clone()
+      }
+      result.push({
+        main_group: 'gwo',
+        subgroup: gwoItem.type,
+        originator_type: 'gwo_item',
+        originator_id: gwoItem.gwo_item_id,
+        start_time: gwoItemStartTime,
+        end_time: lastItemEndTime,
+        duration: lastItemEndTime.diff(gwoItemStartTime) / 1000
+      })
+
+      currentTime = lastItemEndTime;
+    }
+    // fill in the events after gwo
+    if (endTime.isAfter(currentTime)) {
+      // filter events that ends after current time
+      // filter all the event before the current gwo item or after current time
+      let filteredEvents = _.filter(events, (event) => {
+        let itemStartTime = moment(event.start_time);
+        let itemEndTime = moment(event.end_time);
+
+        return itemEndTime.isSameOrAfter(currentTime);
+      })
+      // console.log('---+++--')
+      // console.log(events.length)
+      // console.log('---***--')
+      // console.log(filteredEvents.length)
+
+      for (let i = 0; i < filteredEvents.length; i++) {
+        let item = filteredEvents[i];
+        let itemStartTime = moment(item.start_time).clone();
+        let itemEndTime = moment(item.end_time).clone();
+
+        if (itemStartTime.isBefore(currentTime)) {
+          itemStartTime = currentTime.clone();
+        }
+
+        if (itemEndTime.isAfter(endTime)) {
+          itemEndTime = endTime.clone()
+        }
+
+
+        result.push({
+          main_group: 'event',
+          subgroup: item.status,
+          originator_type: 'Event',
+          originator_id: item.id,
+          start_time: itemStartTime,
+          end_time: itemEndTime,
+          duration: itemEndTime.diff(itemStartTime) / 1000
+        })
+        // console.log(result)
+      }
+    }
+
+    let eventsBreakdown = result.reduce((carry, item) => {
+      let itemName = (item.main_group + '-' + item.subgroup).toUpperCase();
+      if (carry[itemName]) {
+        carry[itemName] += item.duration;
+      } else {
+        carry[itemName] = item.duration;
+      }
+
+      return carry;
+    }, {});
+
+    // NOTE: old formula deprecated on 13th June 2021
+    // down time is 1 - (sum / second per minute)
+    // let value = 1 - ((eventsBreakdown['EVENT-STOPPED'] || 0) / 3600);
+    // value = all event - gwo - down time / all event - gwo
+    let allGwo = (eventsBreakdown['GWO-PLANNED'] || 0) + (eventsBreakdown['GWO-UNPLANNED'] ||0)
+    let downtimeEvent = eventsBreakdown['EVENT-STOPPED'] || 0
+    let allTime = endTime.diff(startTime) / 1000 // convert millisecond to second
+
+    let value = (allTime - allGwo - downtimeEvent) / (allTime - allGwo)
+
+    let isoFormattedStartTime = startTime.toISOString();
+    let isoFormattedEndTime = endTime.toISOString();
+    let jsonBreakdown = JSON.stringify(result);
+
+    let existingOEEPerformance = await new OEEPerformance({node_id: nodeId, start_time: isoFormattedStartTime, end_time: isoFormattedEndTime}).fetch({require: false})
+
+
+    if (existingOEEPerformance) {
+      existingOEEPerformance.set('value', value);
+      existingOEEPerformance.set('value_breakdown', jsonBreakdown);
+      existingOEEPerformance.set('events_breakdown', eventsBreakdown);
+      existingOEEPerformance.save();
+    } else {
+      await new OEEPerformance({
+        node_id: nodeId,
+        start_time: isoFormattedStartTime,
+        end_time: endTime,
+        events_breakdown: eventsBreakdown,
+        value_breakdown: jsonBreakdown,
+        value: value,
+      }).save();
+    }
+  },
 })
 
 module.exports = OEEPerformance;

@@ -37,20 +37,20 @@ svc2.on('uninstall',function(){
 
 
 // oee generator
-var svc3 = new Service({
+var oeeGenerator = new Service({
   name:'HMSL OEE Generator',
   description: 'HMSL OEE Generator',
   script: 'C:\\hmsl-iot\\repo\\hmsl-iot\\oee_generator.js'
 });
 
-svc3.on('install',function(){
-  svc3.start();
+oeeGenerator.on('install',function(){
+  oeeGenerator.start();
   console.log('installed HTML OEE Generator');
 });
 
-svc3.on('uninstall',function(){
+oeeGenerator.on('uninstall',function(){
   console.log('Uninstall HTML OEE Generator complete.');
-  console.log('The service exists: ',svc3.exists);
+  console.log('The service exists: ',oeeGenerator.exists);
 });
 
 // oee rework
@@ -90,7 +90,7 @@ oeeReworkQueue.on('uninstall',function(){
 module.exports = {
   svc,
   svc2,
-  svc3,
+  oeeGenerator,
   // svc4,
   oeeReworkQueue,
 }

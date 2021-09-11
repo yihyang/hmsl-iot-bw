@@ -46,6 +46,10 @@ let runAvailabilityJob = async (currentDate) => {
 }
 
 let runSingleNodeAvailabilityJob = async function(nodeId, currentDate) {
+    if (!nodeId) {
+        console.log('OEEHelper.runSingleNodePerformanceJob - invalid nodeId provided')
+    }
+
     console.log(`Started Inserting "availability" for node with ID - ${nodeId}`)
     let value = await getAvailabilityValue(currentDate, nodeId)
     let availabilityStartOfDay = currentDate.clone().startOf('day')
@@ -160,6 +164,9 @@ let runPerformanceJob = async (currentDate) => {
 }
 
 let runSingleNodePerformanceJob = async (nodeId, currentDate) => {
+    if (!nodeId) {
+        console.log('OEEHelper.runSingleNodePerformanceJob - invalid nodeId provided')
+    }
     let performanceStartOfDay = currentDate.clone().startOf('day')
     let performanceEndOfDay = currentDate.clone().endOf('day')
     let currentTime = performanceStartOfDay.clone()
@@ -174,7 +181,7 @@ let runSingleNodePerformanceJob = async (nodeId, currentDate) => {
     }
 
     await asyncForEach(times, async time => {
-        await OEEPerformance.calculateHourSummary(nodeId, time.startTime, time.endTime)
+        await OEEPerformance.calculateHourSummaryV2(nodeId, time.startTime, time.endTime)
         console.log(`Completed inserting "performance" for node with ID ${nodeId}`);
     })
 }
@@ -185,7 +192,7 @@ let reworkPerformance = async (id) => {
     }).fetch({
         require: false
     })
-    await OEEPerformance.calculateHourSummary(existingPerformance.node_id, existingPerformance.start_time, time.end_time)
+    await OEEPerformance.calculateHourSummaryV2(existingPerformance.node_id, existingPerformance.start_time, time.end_time)
 
     existingPerformance.set('need_rework', false)
     existingPerformance.save()
@@ -262,10 +269,10 @@ let runOEEJob = async (currentDate) => {
         console.log('--- Running OEE Job ---');
         let nodes = await getAllNodes();
         await asyncForEach(nodes, async (node) => {
-            console.log(`Started inserting "OEE" for ${node.name} - ${currentDate} - ${oee}`);
+            console.log(`Started inserting "OEE" for ${node.name} - ${currentDate}`);
 
             let { oee } = await runSingleNodeOEEJob(node.id, currentDate)
-            console.log(`Completed inserting "OEE" for ${node.name} - ${currentDate} - ${oee}`);
+            console.log(`Completed inserting "OEE" for ${node.name} - ${currentDate}`);
         })
         console.log('--- Completed OEE Job ---');
         resolve()
