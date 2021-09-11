@@ -22,6 +22,7 @@ let addRerunDailyTimeInputOeeJob = async function(nodeId, date) {
 
 let addRerunGwoOeeJob = async function(nodeIds, startTime, endTime) {
   let jobKey = 'rerun_gwo_oee_calculation-' + nodeIds + '-' + startTime + '-' + endTime
+
   addJob('rerun_gwo_oee_calculation', {node_ids: nodeIds, start_time: startTime, end_time: endTime}, {job_key: jobKey})
 }
 

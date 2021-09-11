@@ -46,6 +46,7 @@ module.exports = (app, tmpUpload) => {
     app.get('/gwo/:id', web.v1.gwo.show)
     app.get('/gwo/:id/edit', web.v1.gwo.edit)
     app.post('/gwo/:id/update', web.v1.gwo.update)
+    app.post('/gwo/:id/destroy', web.v1.gwo.destroy)
 
     app.get('/extrusion-cycles', web.v1.extrusionCycles.index)
     app.put('/extrusion-cycles', web.v1.extrusionCycles.update)

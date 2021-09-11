@@ -11,6 +11,9 @@ const {
 const {
   addRerunGwoOeeJob
 } = require(`${rootPath}/app/helpers/queue_helper`)
+const {
+    asyncForEach
+} = require(`${rootPath}/app/helpers/loop`)
 
 // General Work Order
 var GwoItem = bookshelf.Model.extend({
@@ -33,7 +36,7 @@ var GwoItem = bookshelf.Model.extend({
 
       await asyncForEach(dateRanges, async (date) => {
         // console.log(node_id, date)
-        await addRerunGwoOeeJob(node_id, date)
+        await addRerunGwoOeeJob([node_id], date)
       })
     })
   },

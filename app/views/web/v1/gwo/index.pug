@@ -57,6 +57,7 @@ block content
                   i.fa.fa-pencil-square-o(aria-hidden="true")
                   | &nbsp;Edit
                 br
-                a(href=`/gwo/${g.id}/destroy`)
-                  i.fa.fa-trash(aria-hidden="true")
-                  | &nbsp;Delete
+                form(method="POST", action=`/gwo/${g.id}/destroy`)
+                  button.btn.btn-link.p-0(onclick=`return confirm('Are you sure you want to delete the record ${g.id}?')`)
+                    i.fa.fa-trash(aria-hidden="true")
+                    | Delete

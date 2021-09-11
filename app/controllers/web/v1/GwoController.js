@@ -77,7 +77,7 @@ let save = async (req, res) => {
     }).save();
 
     // save each spare part
-    asyncForEach(item.spare_parts, async function(sparePart) {
+    asyncForEach(item.spare_parts || [], async function(sparePart) {
       let sparePartParams = filterParams(sparePart, ['spare_part_quantity', 'gwo_spare_part_id']);
 
       let gwoItemSparePart = await new GwoItemSparePartUsage({ ...sparePartParams,
@@ -136,12 +136,33 @@ let update = async (req, res) => {
     req.flash('error', `Unable to find GWO`)
     res.redirect('/gwo')
   }
-  console.log(gwo)
-  console.log(updates)
+  // console.log(gwo)
+  // console.log(updates)
 
   await gwo.save(updates, {patch: true})
 
   req.flash('success', `Successfully updated GWO`)
+  res.redirect('/gwo')
+}
+
+let destroy = async (req, res) => {
+  let { id } = req.params;
+  let gwo = await (new Gwo({id})).fetch()
+  if (!gwo) {
+    req.flash('error', `Unable to find GWO`)
+    return res.redirect('/gwo')
+  }
+
+  await gwo.save(
+    {
+      deleted_at: moment(),
+    },
+    {
+      patch: true
+    }
+  )
+
+  req.flash('success', `Successfully deleted GWO`)
   res.redirect('/gwo')
 }
 
@@ -173,5 +194,6 @@ module.exports = {
   save,
   show,
   edit,
-  update
+  update,
+  destroy,
 }
