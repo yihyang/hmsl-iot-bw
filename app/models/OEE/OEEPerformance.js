@@ -12,6 +12,7 @@ const Gwo = require(`${rootPath}/app/models/Gwo/Gwo`);
 const OEEPerformance = bookshelf.model('OEEPerformance', {
   hasTimestamps: true,
   tableName: 'oee_performances',
+  soft: ['deleted_at'],
   oee() {
     return this.belongsTo(OEE)
   },

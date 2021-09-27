@@ -42,6 +42,10 @@ const Node = bookshelf.model('Node', {
   po_jobs() {
     return this.hasMany(PoJob)
   },
+}, {
+  async getByGroupId(groupId) {
+
+  },
 })
 
 module.exports = Node;

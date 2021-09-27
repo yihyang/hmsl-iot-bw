@@ -79,6 +79,10 @@ module.exports = (app, tmpUpload) => {
     app.get('/oee/daily-time-inputs/update', web.v1.oee.dailyTimeInputs.update)
     app.put('/oee/daily-time-inputs/:nodeId/:schedule(am|pm)', web.v1.oee.dailyTimeInputs.update)
     app.put('/oee/daily-time-inputs/set-default-values', web.v1.oee.dailyTimeInputs.setDefaultValues)
+    app.get('/oee/settings', web.v1.oee.settings.index)
+    app.get('/oee/settings/machine-default-values', web.v1.oee.settings.nodeDefaultValues.index)
+    app.get('/oee/settings/machine-default-values/:area(all)', web.v1.oee.settings.nodeDefaultValues.area);
+    app.put('/oee/settings/machine-default-values/:nodeId', web.v1.oee.settings.nodeDefaultValues.update);
 
     app.get('/settings', web.v1.settings.index)
     app.get('/settings/users', web.v1.settings.users.index)

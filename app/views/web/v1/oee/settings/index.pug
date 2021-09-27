@@ -1,0 +1,20 @@
+extends ./../../../../layouts/default
+
+include ./../../../../shared/page_components
+
+
+block content
+  .container
+    +render_back_to_link('OEE Page', '/oee')
+
+    .row
+      .col-12
+        h1
+          i.fa.fa-cogs
+          | &nbsp;
+          | OEE Settings
+        br
+
+    .row
+      .col-md-4.my-2
+        a.btn.btn-primary.btn-block(href="/oee/settings/machine-default-values") OEE Time Presets

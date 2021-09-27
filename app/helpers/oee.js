@@ -1,21 +1,30 @@
 const rootPath = './../..'
+
 const moment = require('moment')
-const Event = require(`${rootPath}/app/models/Node/Event`)
-const Gwo = require(`${rootPath}/app/models/Gwo/Gwo`)
-const Node = require(`${rootPath}/app/models/Node/Node`)
 const _ = require('lodash')
+
+const { isAM } = require(`${rootPath}/config/app-settings`)
 const {
     asyncForEach
 } = require(`${rootPath}/app/helpers/loop`)
+
 const bookshelf = require(`${rootPath}/config/bookshelf`);
+
+const Event = require(`${rootPath}/app/models/Node/Event`)
+const Gwo = require(`${rootPath}/app/models/Gwo/Gwo`)
+const Node = require(`${rootPath}/app/models/Node/Node`)
 const NodeDailyInput = require(`${rootPath}/app/models/OEE/NodeDailyInput`)
+const NodeDefaultValue = require(`${rootPath}/app/models/OEE/NodeDefaultValue`)
 const OEE = require(`${rootPath}/app/models/OEE/OEE`)
 const OEEAvailability = require(`${rootPath}/app/models/OEE/OEEAvailability`)
 const OEEPerformance = require(`${rootPath}/app/models/OEE/OEEPerformance`)
 const OEEQuality = require(`${rootPath}/app/models/OEE/OEEQuality`)
 const PoRecord = require(`${rootPath}/app/models/PoRecord/PoRecord`)
+
 const DEFAULT_AVAILABILITY = 12
 const DEFAULT_QUALITY_VALUE = 1
+const DATE_FORMAT = 'YYYY-MM-DD'
+
 let getAllNodes = async () => {
     return new Promise(async (resolve, reject) => {
         let allNodes = (await new Node().fetchAll()).toJSON();
@@ -32,13 +41,14 @@ let getAllNodes = async () => {
 let runAvailabilityJob = async (currentDate) => {
     return new Promise(async (resolve, reject) => {
         console.log('--- Running Availability Job ---')
+        let formattedDate = currentDate.format(DATE_FORMAT)
         let nodes = await getAllNodes();
         await asyncForEach(nodes, async (node) => {
-            console.log(`Started Inserting "availability" for ${node.name}`)
+            console.log(`Started Inserting "availability" for ${formattedDate} - ${node.name}`)
 
             let value = await runSingleNodeAvailabilityJob(node.id, currentDate)
 
-            console.log(`Completed Inserting "availability" for ${node.name} - ${value}`)
+            console.log(`Completed Inserting "availability" for ${formattedDate} - ${node.name} => ${value}`)
         })
         console.log('--- Completed Availability Job ---')
         resolve()
@@ -51,7 +61,7 @@ let runSingleNodeAvailabilityJob = async function(nodeId, currentDate) {
     }
 
     console.log(`Started Inserting "availability" for node with ID - ${nodeId}`)
-    let value = await getAvailabilityValue(currentDate, nodeId)
+    let value = await getAvailabilityValue(nodeId, currentDate)
     let availabilityStartOfDay = currentDate.clone().startOf('day')
     let availabilityEndOfDay = currentDate.clone().endOf('day')
 
@@ -91,16 +101,17 @@ let reworkAvailability = async (id) => {
         start_time,
         node_id
     } = existingAvailability.attributes
-    let value = await getAvailabilityValue(moment(start_time), node_id)
+    let value = await getAvailabilityValue(node_id, moment(start_time))
     existingAvailability.set('value', value)
     existingAvailability.set('need_rework', false)
     console.log(`Updated availability ID - ${id} - new value - ${value}`)
     await existingAvailability.save()
 }
 
-let getAvailabilityValue = async (currentDate, nodeId) => {
+let getAvailabilityValue = async (nodeId, currentDate) => {
     let availabilityStartOfDay = currentDate.clone().startOf('day')
     let availabilityEndOfDay = currentDate.clone().endOf('day')
+
     // set the values
     let currentFormattedDate = currentDate.clone().format('YYYY-MM-DD');
     let dailyValue = (await new NodeDailyInput({
@@ -110,10 +121,15 @@ let getAvailabilityValue = async (currentDate, nodeId) => {
         require: false
     }));
 
+    let defaultValueObject = await NodeDefaultValue.getDefaultValueObject(nodeId)
+    let defaultAmAvailability = defaultValueObject.am_availability
+    let defaultPmAvailability = defaultValueObject.pm_availability
+
     // availability = hour in day -
     // get GWO events
     let duration = await Gwo.getOverlappedGWODuration(nodeId, availabilityStartOfDay, availabilityEndOfDay)
     // calculate the GWO times
+
 
     if (dailyValue) {
         let {
@@ -126,10 +142,10 @@ let getAvailabilityValue = async (currentDate, nodeId) => {
         await new NodeDailyInput({
             node_id: nodeId,
             date: currentFormattedDate,
-            am_availability: DEFAULT_AVAILABILITY,
-            pm_availability: DEFAULT_AVAILABILITY
+            am_availability: defaultAmAvailability,
+            pm_availability: defaultPmAvailability
         }).save();
-        value = DEFAULT_AVAILABILITY * 2;
+        value = defaultAmAvailability + defaultPmAvailability;
     }
     // convert value to seconds
     let availableTime = (value * 3600)
@@ -216,30 +232,10 @@ let runQualityJob = async (currentDate) => {
             //   qb.where('created_at', '>=', qualityStartOfDay)
             //     .where('created_at', '<=', qualityEndOfDay)
             // }).fetchAll()
-            let formattedDate = currentDate.clone().format('YYYY-MM-DD')
-            let qualityQuery = `
-      SELECT
-        CASE
-          WHEN sum(input_quantity) = 0 THEN 0
-          ELSE sum(produced_quantity) / sum(input_quantity)
-        END AS value,
-          date(created_at) FROM po_jobs
-        WHERE date(created_at) = ?
-        AND node_id = ?
-        GROUP BY date(created_at)
-      `
-            let result = (await bookshelf.knex.raw(qualityQuery, [formattedDate, node.id])).rows;
-            // NOTE: default set as 100%
-            let value = DEFAULT_QUALITY_VALUE
-            if (result.length != 0) {
-                value = result[0].value
-            }
-            // ensure it don't get more than 100%
-            if (value > 1) {
-                value = 1
-            }
+
+            let value = await getQualityValue(currentDate, node.id)
             // query end
-            console.log(`Started inserting "quality" for ${node.name}`);
+            console.log(`Started inserting "quality" for ${node.name} - ${value}`);
             let existingQuality = await new OEEQuality({
                 node_id: node.id,
                 start_time: qualityStartOfDay,
@@ -264,6 +260,55 @@ let runQualityJob = async (currentDate) => {
         resolve()
     })
 }
+
+let getQualityValue = async (currentDate, nodeId) => {
+    // if AM: take ended PO output / input
+    //  else: take input / output of previous date
+
+    // BW
+    let qualityQuery = `
+      SELECT
+        CASE
+          WHEN sum(input_quantity) = 0 THEN 0
+          ELSE sum(produced_quantity) / sum(input_quantity)
+        END AS value,
+          date(created_at) FROM po_jobs
+        WHERE date(created_at) = ?
+        AND node_id = ?
+        GROUP BY date(created_at)
+      `
+
+    if (isAM()) {
+      let qualityQuery = `
+        SELECT
+          CASE
+            WHEN sum(input_quantity) = 0 THEN 0
+            ELSE sum(produced_quantity) / sum(input_quantity)
+          END AS value,
+        FROM po_records
+        JOIN po_jobs ON po_records.id = po_jobs.po_record_id
+        WHERE date(po_records.created_at) = ?
+        AND node_id = ?
+        GROUP BY date(created_at)
+      `
+    }
+    let formattedDate = currentDate.clone().format('YYYY-MM-DD')
+    let result = (await bookshelf.knex.raw(qualityQuery, [formattedDate, nodeId])).rows;
+    // NOTE: default set as 100%
+    let value = DEFAULT_QUALITY_VALUE
+    if (!result.length) {
+      value = 0
+    } else {
+      value = result[0].value
+    }
+    // ensure it don't get more than 100%
+    if (value > 1) {
+      value = 1
+    }
+
+    return value
+}
+
 let runOEEJob = async (currentDate) => {
     return new Promise(async (resolve, reject) => {
         console.log('--- Running OEE Job ---');
@@ -280,7 +325,7 @@ let runOEEJob = async (currentDate) => {
 }
 
 let runSingleNodeOEEJob = async function(nodeId, currentDate) {
-    let {oee, availability, performance, quality} = await getOEEValue(currentDate, nodeId)
+    let {oee, availability, performance, quality} = await getOEEValue(nodeId, currentDate)
     let startOfDay = currentDate.clone().startOf('day')
     let endOfDay = currentDate.clone().endOf('day')
     let existingOEE = await new OEE({
@@ -316,7 +361,7 @@ let runSingleNodeOEEJob = async function(nodeId, currentDate) {
     }
 }
 
-let getOEEValue = async (currentDate, nodeId) => {
+let getOEEValue = async (nodeId, currentDate) => {
       let startOfDay = currentDate.clone().startOf('day')
       let endOfDay = currentDate.clone().endOf('day')
       let formattedStartOfDay = startOfDay.toISOString();
@@ -388,7 +433,7 @@ let reworkOEE = async (id) => {
         start_time,
         node_id
     } = existingOEE.attributes
-    let {oee} = await getOEEValue(moment(start_time), node_id)
+    let {oee} = await getOEEValue(node_id, moment(start_time))
 
     existingOEE.set('value', oee)
     existingOEE.set('need_rework', false)
@@ -421,6 +466,7 @@ module.exports = {
     runQualityJob,
     runAvailabilityJob,
     runSingleNodeAvailabilityJob,
+    getAvailabilityValue,
     reworkAvailability,
     reworkOEE
 }

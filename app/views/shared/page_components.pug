@@ -1,0 +1,7 @@
+mixin render_back_to_link(pageName, url)
+  .row.my-3
+    .col
+      a(href=url)
+        i.fa.fa-chevron-left(aria-hidden=true)
+        | &nbsp;Back to #{pageName}
+

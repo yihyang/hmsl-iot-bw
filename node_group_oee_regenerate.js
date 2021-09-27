@@ -1,7 +1,7 @@
 const schedule = require('node-schedule')
 const moment = require('moment')
 
-const OEEHelper = require('./app/helpers/oee');
+const NodeGroupOEEHelper = require('./app/helpers/oee/node_group');
 const {
   asyncForEach
 } = require('./app/helpers/loop')
@@ -18,9 +18,9 @@ while(startDate.isBefore(endDate)) {
 async function runJob(dates) {
   await asyncForEach(dates, async function(date) {
     console.log(date)
-    // await OEEHelper.runAvailabilityJob(date)
-    await OEEHelper.runQualityJob(date)
-    // await OEEHelper.runOEEJob(date)
+    // await NodeGroupOEEHelper.runAvailabilityJob(date)
+    // await NodeGroupOEEHelper.runQualityJob(date)
+    await NodeGroupOEEHelper.runOEEJob(date)
   })
 }
 

@@ -1,0 +1,17 @@
+extends ./../../../../../layouts/default
+
+include ./../../../../../shared/page_components
+
+block content
+  .container
+    +render_back_to_link('OEE Settings Page', '/oee/settings')
+
+    .row
+      .col-12
+        h1
+          i.fa.fa-clock-o(aria-hidden=true)
+          | &nbsp;OEE Time Presets
+        br
+    .row
+      .col-4
+        a.btn.btn-primary.btn-block(href="/oee/settings/machine-default-values/all") All

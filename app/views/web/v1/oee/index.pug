@@ -1,12 +1,11 @@
 extends ./../../../layouts/default
 
+include ./../../../shared/page_components
+
 block content
   .container
-    .row
-      .col
-        a.btn.btn-link.my-2(href="/portal")
-          i.fa.fa-arrow-left
-          | &nbsp;Back to Home Page
+    +render_back_to_link('Home Page', '/portal')
+
     .row.my-2
       .col-12
         h1 OEE
@@ -28,3 +27,8 @@ block content
               i.fa.fa-calendar
               | &nbsp;
               | Daily Time Inputs
+            br
+            a.btn.btn-link.my-1(href="/oee/settings")
+              i.fa.fa-cogs
+              | &nbsp;
+              | Settings

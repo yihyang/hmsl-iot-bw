@@ -6,6 +6,7 @@ const bookshelf = require(`${rootPath}/config/bookshelf`);
 const OEEQuality = bookshelf.model('OEEQuality', {
   hasTimestamps: true,
   tableName: 'oee_qualities',
+  soft: ['deleted_at'],
   oee() {
     return this.belongsTo(OEE)
   },

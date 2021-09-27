@@ -52,6 +52,10 @@ mixin time_diff(date1, date2)
       - result += ss + ' seconds'
     =result
 
+mixin titleize(text)
+  if ((text != null) && (typeof(text) != 'undefined'))
+    =text.toLowerCase().replace(/\b\w/g, l => l.toUpperCase())
+
 mixin convert_to_thousand(num)
   = (num * 1000).toLocaleString()
 

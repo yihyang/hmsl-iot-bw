@@ -6,6 +6,7 @@ const Node = require(`${rootPath}/app/models/Node/Node`);
 const OEEAvailability = bookshelf.model('OEEAvailability', {
   hasTimestamps: true,
   tableName: 'oee_availabilities',
+  soft: ['deleted_at'],
   oee() {
     return this.belongsTo(OEE)
   },
