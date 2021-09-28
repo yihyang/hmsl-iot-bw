@@ -446,25 +446,51 @@ const OEEPerformance = bookshelf.model('OEEPerformance', {
     let isoFormattedEndTime = endTime.toISOString();
     let jsonBreakdown = JSON.stringify(result);
 
-    let existingOEEPerformance = await new OEEPerformance({node_id: nodeId, start_time: isoFormattedStartTime, end_time: isoFormattedEndTime}).fetch({require: false})
+    return {
+      events_breakdown: eventsBreakdown,
+      value_breakdown: jsonBreakdown,
+      value,
+    }
+  },
+  async insertHourSummaryV2(nodeId, startTime, endTime) {
+    let isoFormattedStartTime = startTime.toISOString();
+    let isoFormattedEndTime = endTime.toISOString();
 
+    let result = await this.calculateHourSummaryV2(nodeId, startTime, endTime)
+
+    let { events_breakdown, value_breakdown, value } = result
+
+    let existingOEEPerformance = await new OEEPerformance({node_id: nodeId, start_time: isoFormattedStartTime, end_time: isoFormattedEndTime}).fetch({require: false})
 
     if (existingOEEPerformance) {
       existingOEEPerformance.set('value', value);
-      existingOEEPerformance.set('value_breakdown', jsonBreakdown);
-      existingOEEPerformance.set('events_breakdown', eventsBreakdown);
+      existingOEEPerformance.set('value_breakdown', value_breakdown);
+      existingOEEPerformance.set('events_breakdown', events_breakdown);
       existingOEEPerformance.save();
     } else {
       await new OEEPerformance({
         node_id: nodeId,
         start_time: isoFormattedStartTime,
         end_time: endTime,
-        events_breakdown: eventsBreakdown,
-        value_breakdown: jsonBreakdown,
+        events_breakdown: events_breakdown,
+        value_breakdown: value_breakdown,
         value: value,
       }).save();
+
+      // fetch new record
+      return await new OEEPerformance({node_id: nodeId, start_time: isoFormattedStartTime, end_time: isoFormattedEndTime}).fetch({require: false})
     }
   },
+  async findOrCreateRecord(nodeId, startTime, endTime) {
+    let isoFormattedStartTime = startTime.toISOString();
+    let isoFormattedEndTime = endTime.toISOString();
+    let existingOEEPerformance = await new OEEPerformance({node_id: nodeId, start_time: isoFormattedStartTime, end_time: isoFormattedEndTime}).fetch({require: false})
+
+    if (existingOEEPerformance) {
+      return existingOEEPerformance
+    }
+    return this.insertHourSummaryV2(nodeId, startTime, endTime)
+  }
 })
 
 module.exports = OEEPerformance;

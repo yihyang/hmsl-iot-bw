@@ -185,19 +185,11 @@ let runSingleNodePerformanceJob = async (nodeId, currentDate) => {
     }
     let performanceStartOfDay = currentDate.clone().startOf('day')
     let performanceEndOfDay = currentDate.clone().endOf('day')
-    let currentTime = performanceStartOfDay.clone()
 
-    let times = [];
-    while (currentTime.isBefore(performanceEndOfDay)) {
-        times.push({
-            startTime: currentTime.clone(),
-            endTime: currentTime.clone().endOf('hour')
-        });
-        currentTime = currentTime.add(1, 'hour');
-    }
+    let times = getTimeslotBetween(performanceStartOfDay, performanceEndOfDay)
 
     await asyncForEach(times, async time => {
-        await OEEPerformance.calculateHourSummaryV2(nodeId, time.startTime, time.endTime)
+        await OEEPerformance.insertHourSummaryV2(nodeId, time.startTime, time.endTime)
         console.log(`Completed inserting "performance" for node with ID ${nodeId}`);
     })
 }
@@ -208,7 +200,7 @@ let reworkPerformance = async (id) => {
     }).fetch({
         require: false
     })
-    await OEEPerformance.calculateHourSummaryV2(existingPerformance.node_id, existingPerformance.start_time, time.end_time)
+    await OEEPerformance.insertHourSummaryV2(existingPerformance.node_id, existingPerformance.start_time, time.end_time)
 
     existingPerformance.set('need_rework', false)
     existingPerformance.save()
@@ -457,6 +449,20 @@ let runAllJob = async (startTime) => {
         await runOEEJob(date);
     })
 }
+
+let getTimeslotBetween = (startTime, endTime) => {
+    let currentTime = startTime.clone()
+    let times = [];
+    while (currentTime.isBefore(endTime)) {
+        times.push({
+            startTime: currentTime.clone(),
+            endTime: currentTime.clone().endOf('hour')
+        });
+        currentTime = currentTime.add(1, 'hour');
+    }
+    return times
+}
+
 module.exports = {
     runAllJob,
     runOEEJob,
@@ -468,7 +474,8 @@ module.exports = {
     runSingleNodeAvailabilityJob,
     getAvailabilityValue,
     reworkAvailability,
-    reworkOEE
+    reworkOEE,
+    getTimeslotBetween,
 }
 // let date = moment().subtract(3, 'day')
 // runAllJob(date)

@@ -19,7 +19,8 @@ async function runJob(dates) {
   await asyncForEach(dates, async function(date) {
     console.log(date)
     // await OEEHelper.runAvailabilityJob(date)
-    await OEEHelper.runQualityJob(date)
+    await OEEHelper.runPerformanceJob(date)
+    // await OEEHelper.runQualityJob(date)
     // await OEEHelper.runOEEJob(date)
   })
 }
