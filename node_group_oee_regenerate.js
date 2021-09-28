@@ -17,7 +17,7 @@ while(startDate.isBefore(endDate)) {
 
 async function runJob(dates) {
   await asyncForEach(dates, async function(date) {
-    console.log(date)
+    console.log(date.toISOString())
     // await NodeGroupOEEHelper.runAvailabilityJob(date)
     // await NodeGroupOEEHelper.runQualityJob(date)
     await NodeGroupOEEHelper.runOEEJob(date)

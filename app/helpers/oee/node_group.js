@@ -7,23 +7,32 @@ const {
     asyncForEach
 } = require(`${rootPath}/app/helpers/loop`)
 
+const bookshelf = require(`${rootPath}/config/bookshelf`)
+
 const Node = require(`${rootPath}/app/models/Node/Node`)
 const NodeGroup = require(`${rootPath}/app/models/Node/NodeGroup`)
 const OEEAvailability = require(`${rootPath}/app/models/OEE/NodeGroup/OEEAvailability`)
 const OEEPerformance = require(`${rootPath}/app/models/OEE/NodeGroup/OEEPerformance`)
 const OEENodePerformance = require(`${rootPath}/app/models/OEE/OEEPerformance`)
+const OEENodeQuality = require(`${rootPath}/app/models/OEE/OEEQuality`)
 
 const { isAM } = require(`${rootPath}/config/app-settings`)
 
 const OEEHelper = require(`${rootPath}/app/helpers/oee`)
 
 const DATE_FORMAT = 'YYYY-MM-DD'
+const OEE_AVAILABILITY_DEFAULT_VALUE = 1
+const OEE_DEFAULT_QUALITY_VALUE = 1
 
 let nodeGroupCache = {}
+let allNodeGroupsCache = null
 
 // get all node groups
 let getAllNodeGroups = async () => {
-    let allNodeGroups = (await new NodeGroup().fetchAll({withRelated: ['nodes']})).toJSON();
+    if (allNodeGroupsCache) {
+        return allNodeGroupsCache
+    }
+    allNodeGroups = (await new NodeGroup().fetchAll({withRelated: ['nodes']})).toJSON();
     return allNodeGroups;
 }
 
@@ -176,17 +185,58 @@ let getPerformanceValue = async (nodeGroupId, startTime, endTime) => {
 }
 
 /***********
- * Qualtiy *
+ * Quality *
  ***********/
 let runQualityJob = async (currentDate) => {
+    let nodeGroups = await getAllNodeGroups()
 
+    await asyncForEach(nodeGroups, async (nodeGroup) => {
+        await runSingleNodeQualityJob(nodeGroup.id, currentDate)
+    })
+}
+
+let runSingleNodeQualityJob = async (nodeGroupId, currentDate) => {
+    console.log(`Started Inserting "quality" for node with Group ID - ${nodeGroupId}`)
+
+    let value = await getQualityValue(nodeGroupId, currentDate)
+
+    console.log(`Completed Inserting "quality" for node with Group ID - ${nodeGroupId}`)
+}
+
+let getQualityValue = async(nodeGroupId, currentDate) => {
+
+    let nodes = await getNodesByGroupId(nodeGroupId)
+
+    let nodeIds = _.map(nodes, 'id')
+
+    let qualityQuery = OEENodeQuality.amSiteQualityQuery(nodeIds)
+    if (isAM()) {
+      qualityQuery = OEEQuality.bwSiteQualityQuery(nodeIds)
+    }
+    let formattedDate = currentDate.clone().format('YYYY-MM-DD')
+
+    let result = (await bookshelf.knex.raw(qualityQuery, [formattedDate, ...nodeIds])).rows;
+    // NOTE: default set as 100%
+    let value = OEE_DEFAULT_QUALITY_VALUE
+    if (!result.length) {
+      value = 0
+    } else {
+      value = result[0].value
+    }
+    // ensure it don't get more than 100%
+    if (value > 1) {
+      value = 1
+    }
+
+    return value
 }
 
 let runOEEJob = async (currentDate) => {
     console.log('--- Running OEE Job ---');
 
     // await runAvailabilityJob(currentDate)
-    await runPerformanceJob(currentDate)
+    // await runPerformanceJob(currentDate)
+    await runQualityJob(currentDate)
 
     console.log('--- Completed OEE Job ---');
 }

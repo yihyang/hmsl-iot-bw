@@ -22,7 +22,7 @@ const OEEQuality = require(`${rootPath}/app/models/OEE/OEEQuality`)
 const PoRecord = require(`${rootPath}/app/models/PoRecord/PoRecord`)
 
 const DEFAULT_AVAILABILITY = 12
-const DEFAULT_QUALITY_VALUE = 1
+const OEE_DEFAULT_QUALITY_VALUE = 1
 const DATE_FORMAT = 'YYYY-MM-DD'
 
 let getAllNodes = async () => {
@@ -258,36 +258,15 @@ let getQualityValue = async (currentDate, nodeId) => {
     //  else: take input / output of previous date
 
     // BW
-    let qualityQuery = `
-      SELECT
-        CASE
-          WHEN sum(input_quantity) = 0 THEN 0
-          ELSE sum(produced_quantity) / sum(input_quantity)
-        END AS value,
-          date(created_at) FROM po_jobs
-        WHERE date(created_at) = ?
-        AND node_id = ?
-        GROUP BY date(created_at)
-      `
+    let qualityQuery = OEEQuality.amSiteQualityQuery([nodeId])
 
     if (isAM()) {
-      let qualityQuery = `
-        SELECT
-          CASE
-            WHEN sum(input_quantity) = 0 THEN 0
-            ELSE sum(produced_quantity) / sum(input_quantity)
-          END AS value,
-        FROM po_records
-        JOIN po_jobs ON po_records.id = po_jobs.po_record_id
-        WHERE date(po_records.created_at) = ?
-        AND node_id = ?
-        GROUP BY date(created_at)
-      `
+      qualityQuery = OEEQuality.bwSiteQualityQuery([nodeId])
     }
     let formattedDate = currentDate.clone().format('YYYY-MM-DD')
     let result = (await bookshelf.knex.raw(qualityQuery, [formattedDate, nodeId])).rows;
     // NOTE: default set as 100%
-    let value = DEFAULT_QUALITY_VALUE
+    let value = OEE_DEFAULT_QUALITY_VALUE
     if (!result.length) {
       value = 0
     } else {
@@ -363,7 +342,7 @@ let getOEEValue = async (nodeId, currentDate) => {
 
       let availability = 0;
       let performance = 0;
-      let quality = DEFAULT_QUALITY_VALUE;
+      let quality = OEE_DEFAULT_QUALITY_VALUE;
 
       // availability
       let availabilities = (await new OEEAvailability()
