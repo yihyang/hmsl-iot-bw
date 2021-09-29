@@ -1,27 +1,24 @@
 const moment = require('moment')
 const _ = require('lodash')
 
-const rootPath = './../../../../..'
+const rootPath = './../../../../../..'
 const Node = require(`${rootPath}/app/models/Node/Node`);
 const NodeGroup = require(`${rootPath}/app/models/Node/NodeGroup`);
-const OEE = require(`${rootPath}/app/models/OEE/OEE`);
+const OEE = require(`${rootPath}/app/models/OEE/NodeGroup/OEE`);
 const GWO = require(`${rootPath}/app/models/Gwo/Gwo`);
 const NodeDailyInput = require(`${rootPath}/app/models/OEE/NodeDailyInput`);
 const bookshelf = require(`${rootPath}/config/bookshelf`);
 
 
-
 const ROUND_UP_SIZE = 3
 
 let index = async function(req, res) {
-  let nodes = (await new Node().query((qb) => {
-    qb.orderBy('name')
-  }).fetchAll()).toJSON()
-  res.render('web/v1/oee/dashboard/index', {nodes})
+  let nodeGroups = (await new NodeGroup().fetchAll()).toJSON()
+  res.render('web/v1/oee/node-groups/dashboard/index', {nodeGroups})
 }
 
 let refresh = async function(req, res) {
-  let {startDate, endDate, nodes} = req.query
+  let {startDate, endDate, nodeGroups, nodes} = req.query
 
   let startTime = moment(startDate).startOf('day');
   let endTime = moment(endDate).endOf('day');
@@ -38,8 +35,8 @@ let refresh = async function(req, res) {
       qb.where('start_time', '>=', startTime)
         .where('end_time', '<=', endTime)
 
-      if (nodes) {
-        qb.where('node_id', 'IN', nodes)
+      if (nodeGroups) {
+        qb.where('node_group_id', 'IN', nodeGroups)
       }
     })
     .fetchAll({require: false});

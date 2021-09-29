@@ -70,10 +70,17 @@ module.exports = (app, tmpUpload) => {
     app.get('/oee', web.v1.oee.index)
     app.get('/oee/details', web.v1.oee.details.index)
     app.get('/oee/details/refresh', web.v1.oee.details.refresh)
+    // single machine
     app.get('/oee/dashboard', web.v1.oee.dashboard.index)
     app.get('/oee/dashboard/refresh', web.v1.oee.dashboard.refresh)
     app.get('/oee/dashboard/reason-refresh', web.v1.oee.dashboard.reasonRefresh)
     app.get('/oee/dashboard/history-refresh', web.v1.oee.dashboard.historyRefresh)
+    // machine group
+    app.get('/oee/machine-groups/dashboard', web.v1.oee.nodeGroup.dashboard.index)
+    app.get('/oee/machine-groups/dashboard/refresh', web.v1.oee.nodeGroup.dashboard.refresh)
+    app.get('/oee/machine-groups/dashboard/reason-refresh', web.v1.oee.nodeGroup.dashboard.reasonRefresh)
+    app.get('/oee/machine-groups/dashboard/history-refresh', web.v1.oee.nodeGroup.dashboard.historyRefresh)
+    // daily time input
     app.get('/oee/daily-time-inputs', web.v1.oee.dailyTimeInputs.index)
     app.get('/oee/daily-time-inputs/fetch-by-date', web.v1.oee.dailyTimeInputs.fetchByDate)
     app.get('/oee/daily-time-inputs/update', web.v1.oee.dailyTimeInputs.update)

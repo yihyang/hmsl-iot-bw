@@ -1,6 +1,7 @@
 const rootPath = './../../..'
 let dailyTimeInputs = require('./OEE/DailyTimeInputController')
 let dashboard = require('./OEE/DashboardController')
+const nodeGroupDashboard = require('./OEE/NodeGroup/DashboardController')
 let details = require('./OEE/DetailController')
 let settings = require('./OEE/SettingController')
 
@@ -13,5 +14,8 @@ module.exports = {
   dailyTimeInputs,
   dashboard,
   details,
-  settings
+  settings,
+  nodeGroup: {
+    dashboard: nodeGroupDashboard
+  }
 }

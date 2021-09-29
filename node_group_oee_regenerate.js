@@ -8,8 +8,8 @@ const {
 
 let dates = [];
 let today = moment();
-let startDate = moment('2021-04-24')
-let endDate = moment('2021-05-15')
+let startDate = moment('2021-09-01')
+let endDate = moment('2021-09-30')
 while(startDate.isBefore(endDate)) {
   dates.push(startDate.clone())
   startDate.add(1, 'day')

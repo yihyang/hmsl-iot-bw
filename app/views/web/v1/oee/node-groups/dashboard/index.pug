@@ -1,4 +1,4 @@
-extends ./../../../../layouts/default
+extends ./../../../../../layouts/default
 
 
 
@@ -18,18 +18,17 @@ block content
         p Date Range
       .col-md-6
         input.form-control(type="daterange" name="dateRange")
-    if appSettings.isBW()
-      .row.my-2
-        .col-md-2
-          p Machines
-        .col
-          .row
-            for g in nodes
-              .form-group
-                .form-check
-                  input.form-check.input(type="checkbox", value=g.id, name="nodes[]", id=`node-${g.id}`)
-                  label.form-check-label(for=`node-${g.id}`)
-                    = g.name
+    .row.my-2
+      .col-md-2
+        p Machine Groups
+      .col
+        .row
+          for g in nodeGroups
+            .form-group
+              .form-check
+                input.form-check.input(type="checkbox", value=g.id, name="nodeGroups[]", id=`nodeGroup-${g.id}`)
+                label.form-check-label(for=`nodeGroup-${g.id}`)
+                  = g.name
     //- .row.my-2
     //-   .col-sm-2
     //-     p Shifts
@@ -165,7 +164,7 @@ block content
       var formData = getFormData();
       //- Send Ajax request
       $.ajax({
-        url: '/oee/dashboard/refresh',
+        url: '/oee/machine-groups/dashboard/refresh',
         data: formData,
         success: function(response) {
           console.log(response)
@@ -181,7 +180,7 @@ block content
       var formData = getFormData();
 
       $.ajax({
-        url: '/oee/dashboard/reason-refresh',
+        url: '/oee/machine-groups/dashboard/reason-refresh',
         data: formData,
         success: function(response) {
           updateReasonCharts(response.reasons);
@@ -194,7 +193,7 @@ block content
 
     function toggleHistoryChartUpdate() {
       $.ajax({
-        url: '/oee/dashboard/history-refresh',
+        url: '/oee/machine-groups/dashboard/history-refresh',
         success: function(response) {
           chartMonthlyOEE.data.labels = response.oee.label
           chartMonthlyOEE.data.datasets[0].data = response.oee.default;

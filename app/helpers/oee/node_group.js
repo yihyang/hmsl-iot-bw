@@ -202,10 +202,13 @@ let runSingleNodeQualityJob = async (nodeGroupId, currentDate) => {
 
     let value = await getQualityValue(nodeGroupId, currentDate)
 
+    let startOfDay = currentDate.clone().startOf('day')
+    let endOfDay = currentDate.clone().endOf('day')
+
     let existingQuality = await new OEEQuality({
         node_group_id: nodeGroupId,
-        start_time: availabilityStartOfDay,
-        end_time: availabilityEndOfDay
+        start_time: startOfDay,
+        end_time: endOfDay
     }).fetch({
         require: false
     })
@@ -215,8 +218,8 @@ let runSingleNodeQualityJob = async (nodeGroupId, currentDate) => {
     } else {
         await new OEEQuality({
             node_group_id: nodeGroupId,
-            start_time: availabilityStartOfDay,
-            end_time: availabilityEndOfDay,
+            start_time: startOfDay,
+            end_time: endOfDay,
             value: value
         }).save()
     }
@@ -368,11 +371,22 @@ let getOEEValue = async (nodeGroupId, currentDate) => {
       }
 }
 
-let runAllJob = async (currentDate) => {
-    // await runQualityJob(currentDate)
-    await runOEEJob(currentDate)
+let runAllJob = async (startTime) => {
+    startTime.startOf('day');
+    let today = moment();
+    let dates = []
+    while (startTime.isBefore(today)) {
+        dates.push(startTime.clone())
+        startTime.add(1, 'day')
+    }
+    asyncForEach(dates, async (date) => {
+        console.log(date);
+        await runAvailabilityJob(date);
+        await runPerformanceJob(date);
+        await runQualityJob(date);
+        await runOEEJob(date);
+    })
 }
-
 
 module.exports = {
     runAllJob,
