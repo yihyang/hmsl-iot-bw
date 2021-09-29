@@ -20,7 +20,7 @@ async function runJob(dates) {
     console.log(date.toISOString())
     // await NodeGroupOEEHelper.runAvailabilityJob(date)
     // await NodeGroupOEEHelper.runQualityJob(date)
-    await NodeGroupOEEHelper.runOEEJob(date)
+    await NodeGroupOEEHelper.runAllJob(date)
   })
 }
 

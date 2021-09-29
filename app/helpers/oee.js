@@ -335,10 +335,10 @@ let runSingleNodeOEEJob = async function(nodeId, currentDate) {
 let getOEEValue = async (nodeId, currentDate) => {
       let startOfDay = currentDate.clone().startOf('day')
       let endOfDay = currentDate.clone().endOf('day')
-      let formattedStartOfDay = startOfDay.toISOString();
-      let formattedEndOfDay = endOfDay.toISOString();
+      let formattedStartOfDay = startOfDay.toISOString()
+      let formattedEndOfDay = endOfDay.toISOString()
 
-      console.log(`Started inserting "OEE" for NODE ID -  ${nodeId}`);
+      console.log(`Started inserting "OEE" for NODE ID -  ${nodeId}`)
 
       let availability = 0;
       let performance = 0;

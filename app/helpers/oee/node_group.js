@@ -11,8 +11,10 @@ const bookshelf = require(`${rootPath}/config/bookshelf`)
 
 const Node = require(`${rootPath}/app/models/Node/Node`)
 const NodeGroup = require(`${rootPath}/app/models/Node/NodeGroup`)
+const OEE = require(`${rootPath}/app/models/OEE/NodeGroup/OEE`)
 const OEEAvailability = require(`${rootPath}/app/models/OEE/NodeGroup/OEEAvailability`)
 const OEEPerformance = require(`${rootPath}/app/models/OEE/NodeGroup/OEEPerformance`)
+const OEEQuality = require(`${rootPath}/app/models/OEE/NodeGroup/OEEQuality`)
 const OEENodePerformance = require(`${rootPath}/app/models/OEE/OEEPerformance`)
 const OEENodeQuality = require(`${rootPath}/app/models/OEE/OEEQuality`)
 
@@ -200,6 +202,25 @@ let runSingleNodeQualityJob = async (nodeGroupId, currentDate) => {
 
     let value = await getQualityValue(nodeGroupId, currentDate)
 
+    let existingQuality = await new OEEQuality({
+        node_group_id: nodeGroupId,
+        start_time: availabilityStartOfDay,
+        end_time: availabilityEndOfDay
+    }).fetch({
+        require: false
+    })
+    if (existingQuality) {
+        existingQuality.set('value', value)
+        await existingQuality.save()
+    } else {
+        await new OEEQuality({
+            node_group_id: nodeGroupId,
+            start_time: availabilityStartOfDay,
+            end_time: availabilityEndOfDay,
+            value: value
+        }).save()
+    }
+
     console.log(`Completed Inserting "quality" for node with Group ID - ${nodeGroupId}`)
 }
 
@@ -232,17 +253,129 @@ let getQualityValue = async(nodeGroupId, currentDate) => {
 }
 
 let runOEEJob = async (currentDate) => {
-    console.log('--- Running OEE Job ---');
+  console.log('--- Running OEE Job ---');
 
-    // await runAvailabilityJob(currentDate)
-    // await runPerformanceJob(currentDate)
-    await runQualityJob(currentDate)
+  // await runAvailabilityJob(currentDate)
+  // await runPerformanceJob(currentDate)
 
-    console.log('--- Completed OEE Job ---');
+  let nodeGroups = await getAllNodeGroups()
+  await asyncForEach(nodeGroups, async (nodeGroup) => {
+    await runSingleNodeOEEJob(nodeGroup.id, currentDate)
+  })
+
+  console.log('--- Completed OEE Job ---');
+}
+
+let runSingleNodeOEEJob = async (nodeGroupId, currentDate) => {
+  console.log(`Started inserting "OEE" for node group id -  ${nodeGroupId}`)
+
+  let {oee, availability, performance, quality} = await getOEEValue(nodeGroupId, currentDate)
+
+  let startOfDay = currentDate.clone().startOf('day')
+  let endOfDay = currentDate.clone().endOf('day')
+  let existingOEE = await new OEE({
+    node_group_id: nodeGroupId,
+    start_time: startOfDay,
+    end_time: endOfDay
+  }).fetch({
+    require: false
+  })
+  if (existingOEE) {
+    existingOEE.set('value', oee);
+    existingOEE.set('availability_value', availability);
+    existingOEE.set('performance_value', performance);
+    existingOEE.set('quality_value', quality);
+    existingOEE.save()
+  } else {
+    await new OEE({
+      node_group_id: nodeGroupId,
+      start_time: startOfDay,
+      end_time: endOfDay,
+      value: oee,
+      availability_value: availability,
+      performance_value: performance,
+      quality_value: quality
+    }).save()
+  }
+
+  console.log(`Completed inserting "OEE" for node group id -  ${nodeGroupId}`)
+}
+
+
+let getOEEValue = async (nodeGroupId, currentDate) => {
+  let startOfDay = currentDate.clone().startOf('day')
+  let endOfDay = currentDate.clone().endOf('day')
+  let formattedStartOfDay = startOfDay.toISOString()
+  let formattedEndOfDay = endOfDay.toISOString()
+
+
+      let availability = 0;
+      let performance = 0;
+      let quality = OEE_DEFAULT_QUALITY_VALUE;
+
+      // availability
+      let availabilities = (await new OEEAvailability()
+        .query(function (qb) {
+          qb.where('node_group_id', '=', nodeGroupId)
+            .where('start_time', '>=', formattedStartOfDay)
+            .where('end_time', '<=', formattedEndOfDay)
+        })
+        .fetchAll()
+      ).toJSON();
+
+      console.log('----- availabilities -----');
+      if (availabilities.length != 0) {
+        availability = _.meanBy(availabilities, (a) => a.value)
+      }
+      console.log(availability);
+
+
+      console.log('----- performances -----');
+      let performances = (await new OEEPerformance()
+        .query(function (qb) {
+          qb.where('node_group_id', '=', nodeGroupId)
+            .where('start_time', '>=', formattedStartOfDay)
+            .where('end_time', '<=', formattedEndOfDay)
+        })
+        .fetchAll()).toJSON();
+      if (performances.length != 0) {
+        performance = _.meanBy(performances, (a) => a.value)
+      }
+      console.log(performance)
+
+      console.log('----- qualities -----');
+      let qualities = (await new OEEQuality()
+        .query(function (qb) {
+          qb.where('node_group_id', '=', nodeGroupId)
+            .where('start_time', '>=', formattedStartOfDay)
+            .where('end_time', '<=', formattedEndOfDay)
+        })
+        .fetchAll()).toJSON();
+      if (qualities.length != 0) {
+        quality = _.meanBy(qualities, (a) => a.value)
+      }
+      console.log(quality)
+
+      console.log('----- oee ------')
+      let oee = availability * performance * quality
+      console.log(oee)
+
+      return {
+        availability,
+        performance,
+        quality,
+        oee,
+      }
+}
+
+let runAllJob = async (currentDate) => {
+    // await runQualityJob(currentDate)
+    await runOEEJob(currentDate)
 }
 
 
 module.exports = {
+    runAllJob,
     runAvailabilityJob,
     runPerformanceJob,
     runQualityJob,

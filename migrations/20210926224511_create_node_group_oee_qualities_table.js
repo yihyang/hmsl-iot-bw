@@ -3,7 +3,7 @@ exports.up = function(knex, Promise) {
   return knex.schema.createTable('node_group_oee_qualities', function(t) {
     t.increments('id').unsigned().primary();
 
-    t.integer('node_group_id').unsigned().notNullable();
+    t.integer('node_group_id').unsigned().references('id').inTable('node_groups').onDelete('cascade').notNullable();
 
     t.datetime('start_time').nullable();
     t.datetime('end_time').nullable();
