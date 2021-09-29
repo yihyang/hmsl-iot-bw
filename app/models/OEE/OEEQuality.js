@@ -23,13 +23,14 @@ const OEEQuality = bookshelf.model('OEEQuality', {
     return `
       SELECT
         CASE
-          WHEN sum(input_quantity) = 0 THEN 0
-          ELSE sum(produced_quantity) / sum(input_quantity)
-        END AS value,
-          date(created_at) FROM po_jobs
-        WHERE date(created_at) = ?
+          WHEN sum(po_jobs.input_quantity) = 0 THEN 0
+          ELSE sum(po_jobs.produced_quantity) / sum(po_jobs.input_quantity)
+          END AS value,
+        date(po_jobs.created_at)
+        FROM po_jobs
+        WHERE date(po_jobs.created_at) = ?
         AND node_id IN (${nodeIdsIdentifier})
-        GROUP BY date(created_at)
+        GROUP BY date(po_jobs.created_at)
       `
   },
   bwSiteQualityQuery(nodeIds) {
@@ -38,14 +39,15 @@ const OEEQuality = bookshelf.model('OEEQuality', {
     return `
         SELECT
           CASE
-            WHEN sum(input_quantity) = 0 THEN 0
-            ELSE sum(produced_quantity) / sum(input_quantity)
+            WHEN sum(po_jobs.input_quantity) = 0 THEN 0
+            ELSE sum(po_jobs.produced_quantity) / sum(po_jobs.input_quantity)
           END AS value,
+        date(po_jobs.created_at)
         FROM po_records
         JOIN po_jobs ON po_records.id = po_jobs.po_record_id
         WHERE date(po_records.created_at) = ?
-        AND node_id IN (?)
-        GROUP BY date(created_at)
+        AND node_id IN (${nodeIdsIdentifier})
+        GROUP BY date(po_jobs.created_at)
       `
   }
 })

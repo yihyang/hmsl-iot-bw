@@ -180,7 +180,11 @@ let getPerformanceValue = async (nodeGroupId, startTime, endTime) => {
     let result = []
     await asyncForEach(nodes, async node => {
         let nodeResult = await OEENodePerformance.findOrCreateRecord(node.id, startTime, endTime)
-        result.push(nodeResult['value'] || DEFAULT_PERFORMANCE_VALUE)
+        let value = 1
+        if (nodeResult) {
+          value = nodeResult['value']
+        }
+        result.push(value || DEFAULT_PERFORMANCE_VALUE)
     })
 
     return _.mean(result)
@@ -235,7 +239,7 @@ let getQualityValue = async(nodeGroupId, currentDate) => {
 
     let qualityQuery = OEENodeQuality.amSiteQualityQuery(nodeIds)
     if (isAM()) {
-      qualityQuery = OEEQuality.bwSiteQualityQuery(nodeIds)
+      qualityQuery = OEENodeQuality.bwSiteQualityQuery(nodeIds)
     }
     let formattedDate = currentDate.clone().format('YYYY-MM-DD')
 
@@ -243,7 +247,7 @@ let getQualityValue = async(nodeGroupId, currentDate) => {
     // NOTE: default set as 100%
     let value = OEE_DEFAULT_QUALITY_VALUE
     if (!result.length) {
-      value = 0
+      value = 1
     } else {
       value = result[0].value
     }
@@ -379,7 +383,7 @@ let runAllJob = async (startTime) => {
         dates.push(startTime.clone())
         startTime.add(1, 'day')
     }
-    asyncForEach(dates, async (date) => {
+    await asyncForEach(dates, async (date) => {
         console.log(date);
         await runAvailabilityJob(date);
         await runPerformanceJob(date);
