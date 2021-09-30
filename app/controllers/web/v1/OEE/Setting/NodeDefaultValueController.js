@@ -14,7 +14,7 @@ let area = async (req, res) => {
 
   let nodeDefaultValues = await new NodeDefaultValue()
     .fetchAll();
-  NodeDefaultValues = nodeDefaultValues.toJSON()
+  nodeDefaultValues = nodeDefaultValues.toJSON()
 
   let nodeValues = nodeDefaultValues.reduce((acc, value) => {
     acc[value.node_id] = value;
@@ -47,7 +47,8 @@ let update = async function(req, res) {
   let {type, value} = req.body;
 
   let valueLabel = type;
-  let defaultValue = await new NodeDefaultValue({node_id}).fetch({require: false});
+  let defaultValue = await new NodeDefaultValue({node_id}).fetch({require: false})
+
   let updateValues = {}
   updateValues[valueLabel] = value;
 
