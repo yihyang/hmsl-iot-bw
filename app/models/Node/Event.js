@@ -12,6 +12,7 @@ let logEventFilter = function (nodeId, startTime, endTime, message) {
 const Event = bookshelf.model('Event', {
   hasTimestamps: true,
   tableName: 'events',
+  soft: ['deleted_at'], // soft delete
   initialize() {
     this.on('saving', function(model, attrs, options) {
       // set duration on save

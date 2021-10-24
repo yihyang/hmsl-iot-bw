@@ -6,8 +6,8 @@ const moment = require('moment');
 
 async function main() {
   let date = moment().subtract(1, 'day')
-  // await OEEHelper.runAllJob(date)
+  await OEEHelper.runAllJob(date)
   await OEENodeGroupHelper.runAllJob(date)
 }
-// schedule.scheduleJob('0 5 0 * * *', main)
-main()
+schedule.scheduleJob('0 5 0 * * *', main)
+// main()

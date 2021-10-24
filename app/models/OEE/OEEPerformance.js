@@ -446,6 +446,10 @@ const OEEPerformance = bookshelf.model('OEEPerformance', {
     let isoFormattedEndTime = endTime.toISOString();
     let jsonBreakdown = JSON.stringify(result);
 
+
+    console.log('value')
+    console.log(value)
+
     return {
       events_breakdown: eventsBreakdown,
       value_breakdown: jsonBreakdown,
@@ -487,6 +491,7 @@ const OEEPerformance = bookshelf.model('OEEPerformance', {
     let existingOEEPerformance = await new OEEPerformance({node_id: nodeId, start_time: isoFormattedStartTime, end_time: isoFormattedEndTime}).fetch({require: false})
 
     if (existingOEEPerformance) {
+      console.log('existing record found')
       return existingOEEPerformance
     }
     return this.insertHourSummaryV2(nodeId, startTime, endTime)

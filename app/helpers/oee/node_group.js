@@ -182,7 +182,9 @@ let getPerformanceValue = async (nodeGroupId, startTime, endTime) => {
         let nodeResult = await OEENodePerformance.findOrCreateRecord(node.id, startTime, endTime)
         let value = 1
         if (nodeResult) {
-          value = nodeResult['value']
+          // console.log('nodeResult')
+          // console.log(nodeResult.attributes.value)
+          value = nodeResult.attributes.value
         }
         result.push(value || DEFAULT_PERFORMANCE_VALUE)
     })
@@ -391,6 +393,7 @@ let runAllJob = async (startTime) => {
 }
 
 module.exports = {
+    getPerformanceValue,
     runAllJob,
     runAvailabilityJob,
     runPerformanceJob,
