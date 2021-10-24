@@ -267,9 +267,7 @@ let getQualityValue = async (currentDate, nodeId) => {
     let result = (await bookshelf.knex.raw(qualityQuery, [formattedDate, nodeId])).rows;
     // NOTE: default set as 100%
     let value = OEE_DEFAULT_QUALITY_VALUE
-    if (!result.length) {
-      value = 0
-    } else {
+    if (result.length) {
       value = result[0].value
     }
     // ensure it don't get more than 100%
