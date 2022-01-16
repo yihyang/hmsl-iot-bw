@@ -1,3 +1,5 @@
+require('dotenv').config()
+
 const { connectionString } = require('./queue_add_job')
 
 const { run, quickAddJob, makeWorkerUtils } = require("graphile-worker");

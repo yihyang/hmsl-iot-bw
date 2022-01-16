@@ -74,7 +74,7 @@ oeeGenerator.on('uninstall',function(){
 var oeeReworkQueue = new Service({
   name:'HMSL OEE Rework Queue',
   description: 'HMSL OEE Queue',
-  script: 'C:\\hmsl-iot\\repo\\hmsl-iot\\queues.js'
+  script: 'C:\\hmsl-iot\\repo\\hmsl-iot\\queue.js'
 });
 
 oeeReworkQueue.on('install',function(){

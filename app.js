@@ -67,6 +67,10 @@ router(app, tmpUpload)
 app.set('view engine', 'pug')
 app.set('views', './app/views')
 
+app.get('/_ping', (req, res) => {
+  res.send('ok')
+})
+
 app.use('/dist', express.static(path.join(__dirname, 'dist')));
 app.use('/public', express.static(path.join(__dirname, 'public')));
 app.use('/assets/bootstrap', express.static(path.join(__dirname, 'node_modules/bootstrap/dist')));
