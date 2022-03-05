@@ -22,7 +22,6 @@ block content
             a.btn.btn-primary.btn-block(href="/po-records") PO Records
           .col-md-4.col-sm-12.my-3
             a.btn.btn-primary.btn-block(href="/oee") OEE
-        .row
           .col-md-4.col-sm-12.my-3
             a.btn.btn-primary.btn-block(href="/gwo") GWO
           // if appSettings.isAM()
@@ -32,3 +31,6 @@ block content
             a.btn.btn-primary.btn-block(href="/mean-times") MTBF / MTTR
           .col-md-4.col-sm-12.my-3
             a.btn.btn-primary.btn-block(href="/operators") Operator's portal
+          if appSettings.isAM()
+            .col-md-4.col-sm-12.my-3
+              a.btn.btn-primary.btn-block(href="/production-systems") Production Systems

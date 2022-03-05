@@ -411,20 +411,22 @@ let reworkOEE = async (id) => {
 }
 
 let runAllJob = async (startTime) => {
-    startTime.startOf('day');
-    let today = moment();
-    let dates = []
-    while (startTime.isBefore(today)) {
-        dates.push(startTime.clone())
-        startTime.add(1, 'day')
-    }
-    asyncForEach(dates, async (date) => {
-        console.log(date);
-        await runAvailabilityJob(date);
-        await runPerformanceJob(date);
-        await runQualityJob(date);
-        await runOEEJob(date);
-    })
+    await runAvailabilityJob(startTime);
+    await runPerformanceJob(startTime);
+    await runQualityJob(startTime);
+    await runOEEJob(startTime);
+    // startTime.startOf('day');
+    // let today = moment().startOf('day');
+    // let dates = []
+    // while (startTime.isBefore(today)) {
+    //     dates.push(startTime.clone())
+    //     // console.log(startTime, today)
+    //     startTime.add(1, 'day')
+    // }
+
+    // asyncForEach(dates, async (date) => {
+    //     console.log('Running OEE Job: ' + date.format());
+    // })
 }
 
 let getTimeslotBetween = (startTime, endTime) => {

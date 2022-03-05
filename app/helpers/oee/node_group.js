@@ -375,21 +375,21 @@ let getOEEValue = async (nodeGroupId, currentDate) => {
       }
 }
 
-let runAllJob = async (startTime) => {
-    startTime.startOf('day');
-    let today = moment();
-    let dates = []
-    while (startTime.isBefore(today)) {
-        dates.push(startTime.clone())
-        startTime.add(1, 'day')
-    }
-    await asyncForEach(dates, async (date) => {
-        console.log(date);
-        await runAvailabilityJob(date);
-        await runPerformanceJob(date);
-        await runQualityJob(date);
-        await runOEEJob(date);
-    })
+let runAllJob = async (date) => {
+    console.log(date);
+    await runAvailabilityJob(date);
+    await runPerformanceJob(date);
+    await runQualityJob(date);
+    await runOEEJob(date);
+    // startTime.startOf('day');
+    // let today = moment();
+    // let dates = []
+    // while (startTime.isBefore(today)) {
+    //     dates.push(startTime.clone())
+    //     startTime.add(1, 'day')
+    // }
+    // await asyncForEach(dates, async (date) => {
+    // })
 }
 
 module.exports = {
