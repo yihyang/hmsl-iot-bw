@@ -25,26 +25,29 @@ block content
               .col-md-8
                 input.form-control#qrCode(type="text", v-model="qrCode")
                 error-messages-box(v-for="err in qrDataErrors", :error="err")
-                .form-group(v-if="qrData")
-                  .row
-                    .col
-                      input(type="hidden", name="material_number", v-model="qrData.materialNumber")
-                      input(type="hidden", name="batch", v-model="qrData.batch")
-                      input(type="hidden", name="bag_number", v-model="qrData.bagNumber")
-                      input(type="hidden", name="weight", v-model="qrData.weight")
-                      table.table.table-sm
-                        tr
-                          th Material Number
-                          td {{ qrData.materialNumber }}
-                        tr
-                          th Batch
-                          td {{ qrData.batch }}
-                        tr
-                          th Bag Number
-                          td {{ qrData.bagNumber }}
-                        tr
-                          th Weight (KG)
-                          td {{ qrData.weight }}
+          .form-group(v-if="qrData")
+            .row
+              .col
+                h4 QR Code Data
+                input(type="hidden", name="material_number", v-model="qrData.materialNumber")
+                input(type="hidden", name="batch", v-model="qrData.batch")
+                input(type="hidden", name="bag_number", v-model="qrData.bagNumber")
+                input(type="hidden", name="weight", v-model="qrData.weight")
+                table.table.table-sm
+                  tr
+                    th Material Number
+                    td {{ qrData.materialNumber }}
+                  tr
+                    th Batch
+                    td {{ qrData.batch }}
+                  tr
+                    th Bag Number
+                    td {{ qrData.bagNumber }}
+                  tr
+                    th Weight (KG)
+                    td
+                      input.form-control(type="number", v-model="weight", step="0.0001")
+                      error-messages-box(v-for="err in weightErrors", :error="err")
 
           .form-group(v-cloak=true, v-if="previousSolderPaste")
             .row
@@ -80,17 +83,26 @@ block content
           formStatus: 'pending',
           // previous solder paste
           previousSolderPaste: null,
+          weight: null,
+          weightErrors: [],
         },
         watch: {
           qrCode: function(item) {
             this.formStatus = 'verifying'
             this.searchQrCode(this.qrCode)
           },
+          weight: function(item) {
+            this.qrCode = this.qrData.materialNumber
+              + ';' + this.qrData.batch
+              + ';' + this.qrData.bagNumber
+              + ';' + this.weight
+          },
         },
         methods: {
           searchQrCode: _.debounce(async function (qrCode) {
             this.qrData = null
             this.qrDataErrors = []
+            this.weightErrors = []
             this.previousSolderPaste = null
 
             //- break the QR Code
@@ -110,14 +122,14 @@ block content
             let bagNumber = items[2]
             let weight = parseFloat(items[3])
 
-            if (!materialNumber || !batch || !bagNumber || !weight) {
+            if (!materialNumber || !batch || !bagNumber || weight == null) {
               this.qrDataErrors.push('Invalid QR Code')
               this.formStatus = 'error'
 
               return
             }
 
-            if (weight < 0) {
+            if (weight <= 0) {
               this.qrDataErrors.push('Weight cannot be less than 0')
               this.formStatus = 'error'
 
@@ -130,6 +142,7 @@ block content
               bagNumber,
               weight,
             }
+            this.weight = weight
 
             let vm = this
             //- send for query
@@ -159,6 +172,7 @@ block content
                 vm.previousSolderPaste = previousSolderPaste
                 let previousWeight = previousSolderPaste.weight
                 if (weight >= previousWeight) {
+                  vm.weightErrors.push('New weight cannot be greater than previous weight')
                   vm.qrDataErrors.push(`New weight cannot be greater than previous weight`)
                   vm.formStatus = 'error'
                   return
