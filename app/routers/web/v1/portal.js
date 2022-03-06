@@ -1,4 +1,8 @@
-const web = require('./../../../controllers/web')
+const rootPath = './../../../..'
+
+const { isAM } = require(rootPath + '/config/app-settings')
+
+const web = require(rootPath + '/app/controllers/web')
 
 
 module.exports = (app, tmpUpload) => {
@@ -117,4 +121,20 @@ module.exports = (app, tmpUpload) => {
     app.post('/operators/po-end/step-2', web.v1.operators.poEnd.step2)
     app.post('/operators/po-end', web.v1.operators.poEnd.end)
 
+    // AM Only
+    if (isAM()) {
+        // production systems
+        app.get('/ps', web.v1.productionSystems.index)
+        // bag scanning
+        app.get('/ps/solder-pastes', web.v1.productionSystems.solderPastes.index)
+        // data entry
+        app.get('/ps/solder-pastes/data-entry', web.v1.productionSystems.solderPastes.dataEntry.index)
+        app.post('/ps/solder-pastes/data-entry', web.v1.productionSystems.solderPastes.dataEntry.save)
+        app.post('/ps/solder-pastes/data-entry/verify-form-data', web.v1.productionSystems.solderPastes.dataEntry.verifyFormData)
+        // records
+        app.get('/ps/solder-pastes/records', web.v1.productionSystems.solderPastes.records.index)
+        app.get('/ps/solder-pastes/records/search', web.v1.productionSystems.solderPastes.records.search)
+        // reports
+        app.get('/ps/solder-pastes/reports', web.v1.productionSystems.solderPastes.reports.index)
+    }
 }

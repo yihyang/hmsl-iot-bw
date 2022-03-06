@@ -1,0 +1,21 @@
+extends ./../../../../layouts/default
+
+include ./../../../../shared/page_components
+
+block content
+  .container
+    +render_back_to_link('Production Systems', '/ps')
+
+    .row.my-2
+      .col-12
+        h1 Solder Pastes
+
+    .card.my-4
+      .card-body
+        .row
+          .col-md-4.col-sm-12.my-3
+            a.btn.btn-primary.btn-block(href="/ps/solder-pastes/data-entry") Data Entry
+          .col-md-4.col-sm-12.my-3
+            a.btn.btn-primary.btn-block(href="/ps/solder-pastes/records") Records
+          .col-md-4.col-sm-12.my-3
+            a.btn.btn-primary.btn-block(href="/ps/solder-pastes/reports") Reports

@@ -1,0 +1,173 @@
+extends ./../../../../../layouts/default
+
+include ./../../../../../shared/page_components
+
+block content
+  .container
+    +render_back_to_link('Solder Pastes', '/ps/solder-pastes')
+
+    .row.my-2
+      .col-12
+        h1 Data Entry
+    .row.my-2
+      .col-md-8
+        form#form(action=`/ps/solder-pastes/data-entry`, method="POST")
+          .form-group
+            .row
+              .col-md-4
+                label(for="poNumber") PO Number
+              .col-md-8
+                input.form-control#poNumber(type="text", name="po_number", v-model="poNumber")
+          .form-group(v-cloak="true")
+            .row
+              .col-md-4
+                label(for="qrCode") QR Code
+              .col-md-8
+                input.form-control#qrCode(type="text", v-model="qrCode")
+                error-messages-box(v-for="err in qrDataErrors", :error="err")
+                .form-group(v-if="qrData")
+                  .row
+                    .col
+                      input(type="hidden", name="material_number", v-model="qrData.materialNumber")
+                      input(type="hidden", name="batch", v-model="qrData.batch")
+                      input(type="hidden", name="bag_number", v-model="qrData.bagNumber")
+                      input(type="hidden", name="bag_number", v-model="qrData.weight")
+                      table.table.table-sm
+                        tr
+                          th Material Number
+                          td {{ qrData.materialNumber }}
+                        tr
+                          th Batch
+                          td {{ qrData.batch }}
+                        tr
+                          th Bag Number
+                          td {{ qrData.bagNumber }}
+                        tr
+                          th Weight
+                          td {{ qrData.weight }}
+
+          .form-group(v-cloak=true, v-if="previousSolderPaste")
+            .row
+              .col
+                h4 Previous Solder Paste
+                table.table
+                  tr
+                    th Weight
+                    td {{ previousSolderPaste.weight }}
+          .form-group(v-cloak="true")
+            button.btn.btn-primary(type="submit", v-if="formStatus == 'pending'", disabled=true) Pending
+            button.btn.btn-primary(type="submit", v-if="formStatus == 'verified'") Save
+            button.btn.btn-primary(type="submit", v-if="formStatus == 'verifying'", disabled=true)
+              span.spinner-border.spinner-border-sm(role="status", aria-hidden="true")
+              | &nbsp;Verifying
+            button.btn.btn-danger(type="submit", v-if="formStatus == 'error'", disabled=true)
+              | Unable to save
+
+  include ./../../../../../shared/components/vue-error-messages-box
+
+  script.
+    var vm;
+    $(document).ready(function() {
+      vm = new Vue({
+        el: '#form',
+        data: {
+          poNumber: null,
+          qrCode: null,
+          qrData: null,
+          qrDataErrors: [],
+          //- whether a form is ready
+          //- pending, verifying, verified, error
+          formStatus: 'pending',
+          // previous solder paste
+          previousSolderPaste: null,
+        },
+        watch: {
+          qrCode: function(item) {
+            this.formStatus = 'verifying'
+            this.searchQrCode(this.qrCode)
+          },
+        },
+        methods: {
+          searchQrCode: _.debounce(async function (qrCode) {
+            this.qrData = null
+            this.qrDataErrors = []
+            this.previousSolderPaste = null
+
+            //- break the QR Code
+            let items = qrCode.split(';')
+
+            //- validate length
+            if (items.length != 4) {
+              this.qrDataErrors.push('Invalid QR Code')
+              this.formStatus = 'error'
+
+              return
+            }
+
+            // validate data
+            let materialNumber = items[0]
+            let batch = items[1]
+            let bagNumber = items[2]
+            let weight = parseFloat(items[3])
+
+            if (!materialNumber || !batch || !bagNumber || !weight) {
+              this.qrDataErrors.push('Invalid QR Code')
+              this.formStatus = 'error'
+
+              return
+            }
+
+            if (weight < 0) {
+              this.qrDataErrors.push('Weight cannot be less than 0')
+              this.formStatus = 'error'
+
+              return
+            }
+
+            this.qrData = {
+              materialNumber,
+              batch,
+              bagNumber,
+              weight,
+            }
+
+            let vm = this
+            //- send for query
+            await fetch(
+              `/ps/solder-pastes/data-entry/verify-form-data`,
+              {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                  material_number: materialNumber,
+                  batch: batch,
+                  bag_number: bagNumber,
+                }),
+              },
+            )
+            .then(res => {
+              res.json().then((json) => {
+                let previousSolderPaste = json.data.previous_solder_paste
+                if (!previousSolderPaste) {
+                  vm.formStatus = 'verified'
+                  return
+                }
+
+                // validate input weight if previous solder paste exists
+                vm.previousSolderPaste = previousSolderPaste
+                let previousWeight = previousSolderPaste.weight
+                if (weight >= previousWeight) {
+                  vm.qrDataErrors.push(`New weight cannot be greater than previous weight`)
+                  vm.formStatus = 'error'
+                  return
+                }
+
+                vm.formStatus = 'verified'
+              })
+            })
+          }, 200)
+        },
+      })
+    })

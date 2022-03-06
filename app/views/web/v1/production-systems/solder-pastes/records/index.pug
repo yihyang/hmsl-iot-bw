@@ -1,0 +1,102 @@
+extends ./../../../../../layouts/default
+
+include ./../../../../../shared/page_components
+
+block header_content
+  script(src='/assets/datatables.net/js/jquery.dataTables.min.js')
+  script(src='/assets/datatables.net-bs4/js/dataTables.bootstrap4.min.js')
+  link(rel='stylesheet' href='/assets/datatables.net-bs4/css/dataTables.bootstrap4.min.css')
+
+block content
+  .container
+    +render_back_to_link('Solder Pastes', '/ps/solder-pastes')
+
+    .row.my-2
+      .col-12
+        h1 Records
+
+    .row.my-3
+      .col
+        table.table.table-responsive.dataTableIndex
+          thead
+            tr
+              th ID
+              th PO Number
+              th Material Number
+              th Batch
+              th Weight
+              th Created At
+              th Created By
+
+  include ./../../../../../shared/js-utilities
+  script.
+    let dataTable = $('.dataTableIndex').DataTable({
+        "order": [],
+        "procesing": true,
+        "serverSide": true,
+        "searching": true,
+        "ajax": {
+          "url": "/ps/solder-pastes/records/search",
+          "data": function(data){
+            delete data.columns;
+            //- let datepicker = $('input[name="daterange"]').data('daterangepicker');
+
+            //- if (!!$('input[name="daterange"]').val()) {
+            //-   data['startDate'] = datepicker.startDate.format('YYYY-MM-DD')
+            //-   data['endDate'] = datepicker.endDate.format('YYYY-MM-DD')
+            //- }
+
+            //- if ($('#statusesFilter').val()) {
+            //-   data['statuses'] = $('#statusesFilter').val()
+            //- }
+
+            //- data['query'] = $('input[name="query"]').val();
+
+            return data;
+          }
+        },
+        "columns": [
+          {
+            data: 'id',
+            defaultContent: '',
+            orderable: true,
+          },
+          {
+            data: 'po_number',
+            defaultContent: '',
+            orderable: false,
+          },
+          {
+            data: 'material_number',
+            defaultContent: '',
+            orderable: false,
+          },
+          {
+            data: 'batch',
+            defaultContent: '',
+            orderable: false,
+          },
+          {
+            data: 'weight',
+            defaultContent: '',
+            orderable: false,
+          },
+          {
+            data: 'created_at',
+            defaultContent: '',
+            orderable: true,
+            render: function(data, type, full, meta) {
+              return utility_format_datetime(data);
+            },
+          },
+          {
+            data: 'created_by',
+            defaultContent: '',
+            orderable: true,
+
+            render(data, type, full, meta) {
+              return full['creator'] && full['creator']['name']
+            }
+          },
+        ]
+      })

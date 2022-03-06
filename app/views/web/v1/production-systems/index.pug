@@ -1,0 +1,17 @@
+extends ./../../../layouts/default
+
+include ./../../../shared/page_components
+
+block content
+  .container
+    +render_back_to_link('Home Page', '/portal')
+
+    .row.my-2
+      .col-12
+        h1 Production Systems
+
+    .card.my-4
+      .card-body
+        .row
+          .col-md-4.col-sm-12.my-3
+            a.btn.btn-primary.btn-block(href="/ps/solder-pastes") Solder Pastes

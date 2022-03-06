@@ -6,6 +6,7 @@
   "scripts": {
     "start": "node app",
     "scss": "./node_modules/.bin/node-sass --watch src/scss -o dist/stylesheets",
+    "compile:js": "npx webpack ./src/scripts/index.js --output-path ./dist/scripts/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -19,6 +20,7 @@
   },
   "homepage": "https://github.com/yihyang/hmsl-iot#readme",
   "dependencies": {
+    "autoprefixer": "9.8.0",
     "axios": "^0.19.2",
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.19.0",
@@ -28,6 +30,7 @@
     "bootstrap-daterangepicker": "^3.1.0",
     "bull": "^3.22.5",
     "chart.js": "^2.9.3",
+    "colorette": "1.4.0",
     "connect-flash": "^0.1.1",
     "csv-parser": "^2.3.3",
     "datatables.net": "^1.10.22",
@@ -52,6 +55,10 @@
     "pug": "^2.0.4",
     "select2": "^4.0.13",
     "socket.io": "^2.3.0",
-    "vue": "^2.6.11"
+    "vue": "^2.6.11",
+    "webpack": "^5.70.0"
+  },
+  "devDependencies": {
+    "webpack-cli": "^4.9.2"
   }
 }

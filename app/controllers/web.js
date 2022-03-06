@@ -9,6 +9,7 @@ const poJobs = require('./web/v1/PoJobController')
 const gwo = require('./web/v1/GwoController')
 const operators = require('./web/v1/OperatorController')
 const settings = require('./web/v1/SettingController')
+const productionSystems = require('./web/v1/ProductionSystemController')
 
 module.exports = {
   v1: {
@@ -23,5 +24,6 @@ module.exports = {
     poRecords,
     settings,
     users,
+    productionSystems,
   }
 }

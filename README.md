@@ -18,6 +18,10 @@ The main application
 An Application to capture events
 
 
+```
+yarn run compile:js
+```
+
 done:
 - dotenv
 - bookshelf.js
