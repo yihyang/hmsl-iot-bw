@@ -13,7 +13,13 @@ module.exports = {
   },
   staging: {
     client: 'postgresql',
-    connection: process.env.DATABASE_URL
+    connection: {
+      connectionString: process.env.DATABASE_URL,
+      ssl : {
+        rejectUnauthorized: !process.env.DB_SSL_MODE
+      }
+    }
+
   },
   production: {
     client: 'postgresql',
