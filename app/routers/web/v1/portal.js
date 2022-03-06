@@ -136,5 +136,6 @@ module.exports = (app, tmpUpload) => {
         app.get('/ps/solder-pastes/records/search', web.v1.productionSystems.solderPastes.records.search)
         // reports
         app.get('/ps/solder-pastes/reports', web.v1.productionSystems.solderPastes.reports.index)
+        app.post('/ps/solder-pastes/reports/data', web.v1.productionSystems.solderPastes.reports.getData)
     }
 }

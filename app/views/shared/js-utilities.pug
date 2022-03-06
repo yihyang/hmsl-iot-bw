@@ -16,7 +16,12 @@ script.
       return date.getDate() + "/" + (date.getMonth()+1) +  "/" + date.getFullYear() + "  " + strTime;
     }
   }
+
   function roundToDecimalPoint(num, precision = 2) {
     let roundUp = Math.pow(10, precision);
     return Math.round(num * roundUp) / roundUp;
+  }
+
+  function getRandomColor() {
+    return '#' + Math.floor(Math.random()*16777215).toString(16)
   }

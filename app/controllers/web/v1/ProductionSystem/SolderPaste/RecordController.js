@@ -11,7 +11,6 @@ let index = (req, res) => {
 
 let search = async (req, res) => {
   let { length, start, draw, query, startDate, endDate, search } = req.query
-  console.log(req.query)
 
   let records = await new SolderPaste()
     .query(qb => {

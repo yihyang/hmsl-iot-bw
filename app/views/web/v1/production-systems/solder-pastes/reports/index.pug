@@ -2,6 +2,11 @@ extends ./../../../../../layouts/default
 
 include ./../../../../../shared/page_components
 
+block header_content
+  script(src='/assets/datatables.net/js/jquery.dataTables.min.js')
+  script(src='/assets/datatables.net-bs4/js/dataTables.bootstrap4.min.js')
+  link(rel='stylesheet' href='/assets/datatables.net-bs4/css/dataTables.bootstrap4.min.css')
+
 block content
   .container
     +render_back_to_link('Solder Pastes', '/ps/solder-pastes')
@@ -9,3 +14,130 @@ block content
     .row.my-2
       .col-12
         h1 Reports
+    .row
+      .col-md-4
+        label(for="dateRange") Date Range
+      .col-md-8
+        input.my-1.form-control#dateRange(type="text", name="dateRange", placeholder="")
+    .row.my-3
+      .col
+        h3 Materials
+        canvas#chartMaterial
+        table.table#tableMaterial
+          thead
+            tr
+              th Date
+    .row.my-3
+      .col
+        h3 Employees
+        canvas#chartEmployee
+  include ./../../../../../shared/js-utilities
+  script.
+    //- daterangepicker
+    $('input[name="dateRange"]').daterangepicker({
+      autoUpdateInput: false,
+      autoApply: true,
+      maxDate: new Date(),
+      //- startDate: moment().subtract(1, 'week'),
+      locale: {
+        format: 'YYYY/MM/DD'
+      },
+
+    }, function(start, end, label) {
+        refreshPageData()
+    })
+
+    //- material
+    //- chart
+    let ctxMaterial = document.getElementById('chartMaterial').getContext('2d')
+    let chartMaterialData = {
+      labels: [],
+      datasets:[],
+    }
+    let chartMaterial = new Chart(ctxMaterial, {
+      type: 'bar',
+      data: chartMaterialData,
+      options: {
+          responsive: true,
+          legend: {
+            position: 'bottom',
+          },
+          scales: {
+            xAxes: [{
+              display: true,
+              ticks: {
+                min: 0
+              }
+            }],
+          }
+      }
+    })
+    //- table
+    let tableMaterial = $('#tableMaterial').DataTable({
+      searching: false,
+      pageLength: 500,
+      lengthChange: false,
+    })
+
+    //- employee
+    //- chart
+    let ctxEmployee = document.getElementById('chartEmployee').getContext('2d')
+    let chartEmployeeData = {
+      labels: [],
+      datasets:[],
+    }
+    let chartEmployee = new Chart(ctxEmployee, {
+      type: 'bar',
+      data: chartEmployeeData,
+      options: {
+          responsive: true,
+          legend: {
+            position: 'bottom',
+          },
+          scales: {
+            xAxes: [{
+              display: true,
+              ticks: {
+                min: 0
+              }
+            }],
+          }
+      }
+    })
+    //- table
+    let tableEmployee = $('#tableEmployee').DataTable({
+      searching: false,
+      pageLength: 500,
+      lengthChange: false,
+    })
+
+    function getFormData() {
+      let dateRangePickerData = $('input[name="dateRange"]').data('daterangepicker')
+      let startDate = dateRangePickerData.startDate.format('YYYY-MM-DD')
+      let endDate = dateRangePickerData.endDate.format('YYYY-MM-DD')
+
+      let result = {
+        startDate,
+        endDate,
+      }
+
+      return result;
+    }
+
+    function refreshPageData() {
+      let data = getFormData()
+      $.ajax({
+        url: '/ps/solder-pastes/reports/data',
+        data: data,
+        type: 'POST',
+        success: function (response) {
+          let data = response
+
+          console.log(data)
+        },
+        error: function (response) {
+        },
+      });
+    }
+
+    refreshPageData()

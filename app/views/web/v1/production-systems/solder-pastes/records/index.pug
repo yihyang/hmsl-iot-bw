@@ -14,7 +14,11 @@ block content
     .row.my-2
       .col-12
         h1 Records
-
+    .row
+      .col-md-4
+        label(for="dateRange") Date Range
+      .col-md-8
+        input.my-1.form-control#dateRange(type="text", name="daterange", placeholder="")
     .row.my-3
       .col
         table.table.table-responsive.dataTableIndex
@@ -30,6 +34,25 @@ block content
 
   include ./../../../../../shared/js-utilities
   script.
+    //- daterangepicker
+    $('input[name="daterange"]').daterangepicker({
+      autoUpdateInput: false,
+      autoApply: true,
+      maxDate: new Date(),
+      //- startDate: moment().subtract(1, 'week'),
+      locale: {
+        format: 'YYYY/MM/DD'
+      }
+    })
+    $('input[name="daterange"]').on('apply.daterangepicker', function(ev, picker) {
+      $(this).val(picker.startDate.format('YYYY/MM/DD') + ' - ' + picker.endDate.format('YYYY/MM/DD'));
+      dataTable.draw()
+    });
+
+    $('input[name="daterange"]').on('cancel.daterangepicker', function (ev, picker) {
+      $(this).val('')
+      dataTable.draw()
+    })
     let dataTable = $('.dataTableIndex').DataTable({
         "order": [],
         "procesing": true,
@@ -39,12 +62,12 @@ block content
           "url": "/ps/solder-pastes/records/search",
           "data": function(data){
             delete data.columns;
-            //- let datepicker = $('input[name="daterange"]').data('daterangepicker');
+            let datepicker = $('input[name="daterange"]').data('daterangepicker');
 
-            //- if (!!$('input[name="daterange"]').val()) {
-            //-   data['startDate'] = datepicker.startDate.format('YYYY-MM-DD')
-            //-   data['endDate'] = datepicker.endDate.format('YYYY-MM-DD')
-            //- }
+            if (!!$('input[name="daterange"]').val()) {
+              data['startDate'] = datepicker.startDate.format('YYYY-MM-DD')
+              data['endDate'] = datepicker.endDate.format('YYYY-MM-DD')
+            }
 
             //- if ($('#statusesFilter').val()) {
             //-   data['statuses'] = $('#statusesFilter').val()
