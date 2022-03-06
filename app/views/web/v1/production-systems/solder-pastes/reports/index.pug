@@ -22,27 +22,38 @@ block content
     .row.my-3
       .col
         h3 Materials
+        div(height="400px")
         canvas#chartMaterial
         table.table#tableMaterial
           thead
             tr
               th Date
+              th Material Number
+              th Weight
     .row.my-3
       .col
         h3 Employees
         canvas#chartEmployee
+        table.table#tableEmployee
+          thead
+            tr
+              th Date
+              th Employee Name
+              th Weight
   include ./../../../../../shared/js-utilities
   script.
     //- daterangepicker
     $('input[name="dateRange"]').daterangepicker({
-      autoUpdateInput: false,
+      autoUpdateInput: true,
       autoApply: true,
       maxDate: new Date(),
-      //- startDate: moment().subtract(1, 'week'),
+      startDate: moment().subtract(1, 'week'),
       locale: {
-        format: 'YYYY/MM/DD'
+        format: 'DD/MM/YYYY'
       },
-
+      "maxSpan": {
+        "days": 90,
+      }
     }, function(start, end, label) {
         refreshPageData()
     })
@@ -66,9 +77,14 @@ block content
             xAxes: [{
               display: true,
               ticks: {
-                min: 0
+                min: 0,
               }
             }],
+            yAxes: [{
+              ticks: {
+                beginAtZero: true,
+              }
+            }]
           }
       }
     })
@@ -77,6 +93,21 @@ block content
       searching: false,
       pageLength: 500,
       lengthChange: false,
+      paging: false,
+      columns: [
+        {
+          data: 'date',
+          defaultContent: '',
+        },
+        {
+          data: 'material_number',
+          defaultContent: '',
+        },
+        {
+          data: 'weight',
+          defaultContent: '',
+        },
+      ],
     })
 
     //- employee
@@ -98,9 +129,15 @@ block content
             xAxes: [{
               display: true,
               ticks: {
-                min: 0
+                min: 0,
               }
             }],
+            yAxes: [{
+              ticks: {
+                min: 0,
+                beginAtZero: true,
+              }
+            }]
           }
       }
     })
@@ -109,6 +146,21 @@ block content
       searching: false,
       pageLength: 500,
       lengthChange: false,
+      paging: false,
+      columns: [
+        {
+          data: 'date',
+          defaultContent: '',
+        },
+        {
+          data: 'name',
+          defaultContent: '',
+        },
+        {
+          data: 'weight',
+          defaultContent: '',
+        },
+      ],
     })
 
     function getFormData() {
@@ -124,6 +176,37 @@ block content
       return result;
     }
 
+    function updateChart(chart, groupedData) {
+      let { dates, labels, data } = groupedData.chart_data
+      let datasets = []
+
+      for(let i = 0; i < labels.length; i++) {
+        let currentLabel = labels[i]
+
+        let color = getRandomColor()
+        datasets.push({
+          type: 'bar',
+          label: currentLabel,
+          backgroundColor: color,
+          borderColor: color,
+          data: data[currentLabel]
+        })
+      }
+      chart.data.labels = dates
+      chart.data.datasets = datasets
+
+      chart.update()
+    }
+
+    function updateTable(table, groupedData) {
+      let { raw_data } = groupedData
+
+      table.clear()
+      table.rows.add(raw_data)
+      table.draw()
+
+    }
+
     function refreshPageData() {
       let data = getFormData()
       $.ajax({
@@ -131,9 +214,12 @@ block content
         data: data,
         type: 'POST',
         success: function (response) {
-          let data = response
-
-          console.log(data)
+          let json = response
+          let { materials, employees } = json.data
+          updateChart(chartMaterial, materials)
+          updateTable(tableMaterial, materials)
+          updateChart(chartEmployee, employees)
+          updateTable(tableEmployee, employees)
         },
         error: function (response) {
         },
