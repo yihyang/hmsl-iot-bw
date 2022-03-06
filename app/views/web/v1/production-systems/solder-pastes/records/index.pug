@@ -27,8 +27,9 @@ block content
               th ID
               th PO Number
               th Material Number
+              th Bag Number
               th Batch
-              th Weight
+              th Weight (KG)
               th Created At
               th Created By
 
@@ -91,6 +92,11 @@ block content
           },
           {
             data: 'material_number',
+            defaultContent: '',
+            orderable: false,
+          },
+          {
+            data: 'bag_number',
             defaultContent: '',
             orderable: false,
           },

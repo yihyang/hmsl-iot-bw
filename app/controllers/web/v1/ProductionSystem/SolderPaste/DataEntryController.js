@@ -32,10 +32,9 @@ let save = async (req, res) => {
 
   let previousSolderPaste = await getPreviousSolderPaste(material_number, batch, bag_number)
 
-  console.log(previousSolderPaste)
   if (previousSolderPaste) {
     // new balance
-    let newWeight = previousSolderPaste.weight - weight
+    let newWeight = previousSolderPaste.attributes.weight - weight
     await new SolderPaste({id: previousSolderPaste.id}).save({weight: newWeight}, {patch: true})
   }
 
