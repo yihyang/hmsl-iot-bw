@@ -150,6 +150,44 @@ let historyRefresh = async function(req, res) {
 
     oeeSixMonthAgo.add(1, 'month')
   }
+  // v2
+  // let oeeValues = await new OEE().query((qb) => {
+  //     qb.where('start_time', '>=', sixMonthAgo)
+  //       .where('end_time', '<=', today)
+
+  //     if (nodeIds) {
+  //       qb.where('node_id', 'IN', nodes)
+  //     }
+  //   })
+  //   .fetchAll({require: false})
+  // oeeValues = oeeValues.toJSON()
+
+  // // accumulate values
+  // let oeeResult = _.reduce(oeeValues, (carry, item) => {
+  //   let month = item.format('MM')
+  //   if (!carry[month]) {
+  //     carry[month] = []
+  //   }
+  //   carry[month].push(item.value)
+  // }, {})
+
+  // let oeeLabel = []
+  // let oeeValue = []
+  // let oeeDefaultValue = []
+  // let oeeSixMonthAgo = sixMonthAgo.clone()
+  // while(oeeSixMonthAgo.isBefore(today)) {
+  //   let digitMonth = parseInt(oeeSixMonthAgo.format('MM'))
+  //   let labelMonth = oeeSixMonthAgo.format('MMM')
+
+  //   oeeLabel.push(labelMonth)
+  //   let monthlyAverageValue = _.meanBy(oeeResult[digitMonth], (o) => o || 0)
+  //   oeeValue.push((monthlyAverageValue || 0) * 100)
+  //   oeeDefaultValue.push(70)
+
+  //   oeeSixMonthAgo.add(1, 'month')
+  // }
+
+
   let oee = { label: oeeLabel, value: oeeValue, default: oeeDefaultValue }
 
 

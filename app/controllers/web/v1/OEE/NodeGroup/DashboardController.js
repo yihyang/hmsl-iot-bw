@@ -116,7 +116,7 @@ let historyRefresh = async function(req, res) {
   // get OEE since six months ago
   let oeeQuery =`
     SELECT EXTRACT(MONTH FROM start_time) AS month, avg(nullif(value, 'NaN')) AS value
-      FROM oee
+      FROM node_group_oee
       WHERE start_time >= '${formattedSixMonthAgo}'`
 
   if (nodeIds) {
