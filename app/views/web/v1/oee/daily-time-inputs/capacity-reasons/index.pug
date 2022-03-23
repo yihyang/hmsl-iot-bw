@@ -1,0 +1,37 @@
+extend ./../../../../../layouts/default
+
+include ./../../../../../shared/mixins
+include ./../../../../../shared/page_components
+
+block content
+  .container
+    .row.my-2
+      +render_back_to_link('Daily Time Input', '/oee/daily-time-inputs')
+    .row.mt-3
+      h2 Capacity Reasons
+    .row
+      include ./../../../../../shared/pagination
+    .row
+      .col
+        a.btn.btn-primary.my-2(href="/oee/daily-time-inputs/capacity-reasons/new")
+          i.fa.fa-plus-circle
+          | &nbsp;Add New Reason
+
+    .row
+      table.table
+        tr
+          th ID
+          th Title
+          th Actions
+        for g in reasons
+          tr
+            td= g.id
+            td= g.title
+            td
+              a.btn.btn-link(href=`/oee/daily-time-inputs/capacity-reasons/${g.id}/edit`)
+                i.fa.fa-pencil-square-o
+                | &nbsp;Edit
+              form(method="POST", action=`/oee/daily-time-inputs/capacity-reasons/${g.id}/destroy`)
+                button.btn.btn-link(onclick=`return confirm('Are you sure you want to delete the record ${g.id}?')`)
+                  i.fa.fa-trash
+                  | &nbsp;Delete

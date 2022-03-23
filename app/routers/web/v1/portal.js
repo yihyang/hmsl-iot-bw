@@ -88,12 +88,15 @@ module.exports = (app, tmpUpload) => {
     app.get('/oee/daily-time-inputs', web.v1.oee.dailyTimeInputs.index)
     app.get('/oee/daily-time-inputs/fetch-by-date', web.v1.oee.dailyTimeInputs.fetchByDate)
     app.get('/oee/daily-time-inputs/update', web.v1.oee.dailyTimeInputs.update)
-    app.put('/oee/daily-time-inputs/:nodeId/:schedule(am|pm)', web.v1.oee.dailyTimeInputs.update)
     app.put('/oee/daily-time-inputs/set-default-values', web.v1.oee.dailyTimeInputs.setDefaultValues)
+    app.put('/oee/daily-time-inputs/set-default-availabilities', web.v1.oee.dailyTimeInputs.setDefaultAvailabilities)
+    app.put('/oee/daily-time-inputs/set-default-capacity-reasons', web.v1.oee.dailyTimeInputs.setDefaultCapacityReasons)
+    app.put('/oee/daily-time-inputs/:nodeId', web.v1.oee.dailyTimeInputs.update)
+
     app.get('/oee/settings', web.v1.oee.settings.index)
     app.get('/oee/settings/machine-default-values', web.v1.oee.settings.nodeDefaultValues.index)
-    app.get('/oee/settings/machine-default-values/:area(all)', web.v1.oee.settings.nodeDefaultValues.area);
-    app.put('/oee/settings/machine-default-values/:nodeId', web.v1.oee.settings.nodeDefaultValues.update);
+    app.get('/oee/settings/machine-default-values/:area(all)', web.v1.oee.settings.nodeDefaultValues.area)
+    app.put('/oee/settings/machine-default-values/:nodeId', web.v1.oee.settings.nodeDefaultValues.update)
 
     app.get('/settings', web.v1.settings.index)
     app.get('/settings/users', web.v1.settings.users.index)
@@ -123,6 +126,14 @@ module.exports = (app, tmpUpload) => {
 
     // AM Only
     if (isAM()) {
+        // capacity reasons
+        app.get('/oee/daily-time-inputs/capacity-reasons', web.v1.oee.dailyTimeInputs.capacityReasons.index)
+        app.post('/oee/daily-time-inputs/capacity-reasons', web.v1.oee.dailyTimeInputs.capacityReasons.save)
+        app.get('/oee/daily-time-inputs/capacity-reasons/new', web.v1.oee.dailyTimeInputs.capacityReasons.add)
+        app.get('/oee/daily-time-inputs/capacity-reasons/:id/edit', web.v1.oee.dailyTimeInputs.capacityReasons.edit)
+        app.post('/oee/daily-time-inputs/capacity-reasons/:id/update', web.v1.oee.dailyTimeInputs.capacityReasons.update)
+        app.post('/oee/daily-time-inputs/capacity-reasons/:id/destroy', web.v1.oee.dailyTimeInputs.capacityReasons.destroy)
+
         // production systems
         app.get('/ps', web.v1.productionSystems.index)
         // bag scanning

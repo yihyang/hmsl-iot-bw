@@ -1,0 +1,21 @@
+extend ./../../../../../layouts/default
+
+include ./../../../../../shared/mixins
+include ./../../../../../shared/page_components
+
+block content
+  .container
+    .row.my-2
+      +render_back_to_link('Capacity Reasons', '/oee/daily-time-inputs/capacity-reasons')
+    .row.text-center
+      h1 Update Reason
+
+    .row
+      .col-md-6.col-sm-12
+        //- form
+        form(method="POST" action='/oee/daily-time-inputs/capacity-reasons/'+ reason.id + '/update')
+          .form-group
+            label(for="title") Title
+            input.form-control(type="text" name="title" value=reason.title)
+
+          button.btn.btn-primary(type="submit") Update
