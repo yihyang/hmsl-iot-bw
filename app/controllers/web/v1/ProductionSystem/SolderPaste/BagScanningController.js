@@ -3,7 +3,7 @@ const rootPath = './../../../../../..'
 let SolderPaste = require(rootPath + '/app/models/ProductionSystem/SolderPaste')
 
 let index = (req, res) => {
-  res.render('web/v1/production-systems/solder-pastes/data-entry/index')
+  res.render('web/v1/production-systems/solder-pastes/bag-scanning/index')
 }
 
 // verify qr code
@@ -41,7 +41,7 @@ let save = async (req, res) => {
   let solderPaste = await new SolderPaste({po_number, material_number, batch, bag_number, weight, creator_id: req.user.id}).save()
 
   req.flash('success', `Added new Solder Paste Record`)
-  res.redirect('/ps/solder-pastes/data-entry')
+  res.redirect('/ps/solder-pastes/bag-scanning')
 }
 
 let getPreviousSolderPaste = async (materialNumber, batch, bagNumber) => {

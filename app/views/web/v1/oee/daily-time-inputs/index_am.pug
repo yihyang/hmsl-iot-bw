@@ -1,4 +1,5 @@
-.container-fluid
+
+.container
   .row
     .col
       a.btn.btn-link.my-2(href="/oee")
@@ -19,34 +20,11 @@
 
   .row
     .col
-
-  .row
-    .col
       table.table
-        tr
-          td(colspan="3", style="border: 1px solid #dddddd;")
-            button.btn.btn-primary.btn-set-all-duration.mx-2.my-2(data-area=area, data-value=0, data-type="availability") Set All Availability to 0 hours
-            button.btn.btn-primary.btn-set-all-duration.mx-2.my-2(data-area=area, data-value=12, data-type="availability") Set All Availability to 12 hours
-          td(colspan="4", style="border: 1px solid #dddddd;")
-            button.btn.btn-primary.btn-set-all-duration.mx-2.my-2(data-area=area, data-value=0, data-type="capacity") Set All Capacity to 0 hours
-            p Set all capacity reasons to:
-            select.form-control#input-all-reason-select(data-area=area)
-              option(value="null") [No Reason]
-              for r in reasons
-                option(value=r.id)
-                  = r.title
-        tr
-          th Device
-          th(colspan="2") Availability
-          th(colspan="4") Capacity
         tr
           th Machine Name
           th AM
           th PM
-          th AM
-          th Reason
-          th PM
-          th Reason
         for n in nodes
           tr
             td= n.name
@@ -54,22 +32,6 @@
               input.form-control.input-values(id=`node-${n.id}-am-availability`, type="number", name="n.id", min="0", max=12, required="true", value=n.am_availability, data-node_id=n.id, data-node_area=n.area, data-type="am_availability")
             td
               input.form-control.input-values(id=`node-${n.id}-pm-availability`, type="number", name="n.id", min="0", max=12, required="true", value=n.pm_availability, data-node_id=n.id, data-node_area=n.area, data-type="pm_availability")
-            td
-              input.form-control.input-values(id=`node-${n.id}-am-capacity`, type="number", name="n.id", min="0", max=12, required="true", value=n.am_capacity, data-node_id=n.id, data-node_area=n.area, data-type="am_capacity")
-            td
-              select.form-control.input-select(id=`node-${n.id}-am-capacity-reason-id`, data-node_id=n.id, data-type="am_capacity_reason_id")
-                option(value="null") [No Reason]
-                for r in reasons
-                  option(value=r.id)
-                    = r.title
-            td
-              input.form-control.input-values(id=`node-${n.id}-pm-capacity`, type="number", name="n.id", min="0", max=12, required="true", value=n.pm_capacity, data-node_id=n.id, data-node_area=n.area, data-type="pm_capacity")
-            td
-              select.form-control.input-select(id=`node-${n.id}-pm-capacity-reason-id`, data-node_id=n.id, data-type="pm_capacity_reason_id")
-                option(value="null") [No Reason]
-                for r in reasons
-                  option(value=r.id)
-                    = r.title
 
 script.
   $(function() {
@@ -147,7 +109,7 @@ script.
   }
 
 
-  $('.input-values,.input-select').on('change', function() {
+  $('.input-values').on('change', function() {
     let dom = $(this);
     let type = dom.data('type');
     let area = dom.data('area');
@@ -168,18 +130,6 @@ script.
         response.forEach(function(item) {
           $(`#node-${item.node_id}-am-availability`).val(item.am_availability);
           $(`#node-${item.node_id}-pm-availability`).val(item.pm_availability);
-          $(`#node-${item.node_id}-am-capacity`).val(item.am_capacity);
-          $(`#node-${item.node_id}-pm-capacity`).val(item.pm_capacity);
-          let amCapacityReasonId = 'null';
-          if (item.am_capacity_reason_id) {
-            amCapacityReasonId = item.am_capacity_reason_id
-          }
-          let pmCapacityReasonId = 'null';
-          if (item.pm_capacity_reason_id) {
-            pmCapacityReasonId = item.pm_capacity_reason_id
-          }
-          $(`#node-${item.node_id}-am-capacity-reason-id`).val(amCapacityReasonId);
-          $(`#node-${item.node_id}-pm-capacity-reason-id`).val(pmCapacityReasonId);
         })
         console.log(response.data)
       }
@@ -231,93 +181,6 @@ script.
             theme: 'bootstrap-v4',
             timeout: 2000,
           }).show()
-        });
-      }
-    });
-  });
-  $('.btn-set-all-duration').on('click', function() {
-    let area = $(this).data('area');
-    let value = $(this).data('value');
-    let type = $(this).data('type');
-
-    if (!confirm(`Are you sure you want to set all ${type} to ${value} hours?`)) {
-      return;
-    }
-
-    let url = `/oee/daily-time-inputs/set-default-availabilities`;
-    let date = $('input[name="selected-date"]').val();
-    let data = {
-      type,
-      area,
-      date,
-      value,
-    };
-
-    $.ajax({
-      url: url,
-      data: data,
-      type: 'PUT',
-      success: function(response) {
-        showNoty('success', response.message)
-
-        clearAndResetValues(date);
-      },
-      error: function(response) {
-        console.log('failed');
-        let {
-          errors
-        } = JSON.parse(response.responseText);
-        errors.forEach((error) => {
-          showNoty('error', error.message)
-        });
-      }
-    });
-  });
-  function showNoty(type, message, duration = 2000) {
-    new Noty({
-      type: type,
-      text: message,
-      theme: 'bootstrap-v4',
-      timeout: 2000,
-    }).show()
-  }
-  $('#input-all-reason-select').on('change', function() {
-    let dom = $(this)
-
-    let area = dom.data('area')
-    let label = dom.find('option:selected').prop('label')
-
-    if (!confirm(`Are you sure you want to set all reason to ${label}?`)) {
-      dom.val('null')
-      return;
-    }
-
-    let url = `/oee/daily-time-inputs/set-default-capacity-reasons`;
-    let value = dom.val()
-    let date = $('input[name="selected-date"]').val();
-    let data = {
-      area,
-      date,
-      value,
-      label,
-    }
-
-    $.ajax({
-      url: url,
-      data: data,
-      type: 'PUT',
-      success: function(response) {
-        showNoty('success', response.message)
-
-        clearAndResetValues(date);
-      },
-      error: function(response) {
-        console.log('failed');
-        let {
-          errors
-        } = JSON.parse(response.responseText);
-        errors.forEach((error) => {
-          showNoty('error', error.message)
         });
       }
     });

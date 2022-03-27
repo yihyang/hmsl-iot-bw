@@ -53,3 +53,8 @@ Start the code with ES6 compaitibility
 ```
 node -r esm app/queues/oee_rework.js
 ```
+
+
+### Changelog
+
+- 2022-03-26: Added OEE2 to BW site

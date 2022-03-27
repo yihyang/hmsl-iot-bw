@@ -33,8 +33,8 @@ let area = async (req, res) => {
   nodes.map((node) => {
     node['am_availability'] = nodeValues[node.id] ? nodeValues[node.id].am_availability : DEFAULT_AVAILABILITY;
     node['pm_availability'] = nodeValues[node.id] ? nodeValues[node.id].pm_availability : DEFAULT_AVAILABILITY;
-    // node['am_capacity'] = nodeValues[node.id] ? nodeValues[node.id].am_capacity : DEFAULT_CAPACITY;
-    // node['pm_capacity'] = nodeValues[node.id] ? nodeValues[node.id].pm_capacity : DEFAULT_CAPACITY;
+    node['am_capacity'] = nodeValues[node.id] ? nodeValues[node.id].am_capacity : DEFAULT_CAPACITY;
+    node['pm_capacity'] = nodeValues[node.id] ? nodeValues[node.id].pm_capacity : DEFAULT_CAPACITY;
 
     return node;
   });

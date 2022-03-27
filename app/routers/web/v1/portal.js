@@ -136,12 +136,13 @@ module.exports = (app, tmpUpload) => {
 
         // production systems
         app.get('/ps', web.v1.productionSystems.index)
-        // bag scanning
+        app.get('/ps/solder-wires', web.v1.productionSystems.solderWires.index)
+        // solder pastes
         app.get('/ps/solder-pastes', web.v1.productionSystems.solderPastes.index)
-        // data entry
-        app.get('/ps/solder-pastes/data-entry', web.v1.productionSystems.solderPastes.dataEntry.index)
-        app.post('/ps/solder-pastes/data-entry', web.v1.productionSystems.solderPastes.dataEntry.save)
-        app.post('/ps/solder-pastes/data-entry/verify-form-data', web.v1.productionSystems.solderPastes.dataEntry.verifyFormData)
+        // bag scanning
+        app.get('/ps/solder-pastes/bag-scanning', web.v1.productionSystems.solderPastes.bagScanning.index)
+        app.post('/ps/solder-pastes/bag-scanning', web.v1.productionSystems.solderPastes.bagScanning.save)
+        app.post('/ps/solder-pastes/bag-scanning/verify-form-data', web.v1.productionSystems.solderPastes.bagScanning.verifyFormData)
         // records
         app.get('/ps/solder-pastes/records', web.v1.productionSystems.solderPastes.records.index)
         app.get('/ps/solder-pastes/records/search', web.v1.productionSystems.solderPastes.records.search)

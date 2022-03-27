@@ -19,6 +19,7 @@ const OEE = require(`${rootPath}/app/models/OEE/OEE`)
 const OEEAvailability = require(`${rootPath}/app/models/OEE/OEEAvailability`)
 const OEEPerformance = require(`${rootPath}/app/models/OEE/OEEPerformance`)
 const OEEQuality = require(`${rootPath}/app/models/OEE/OEEQuality`)
+const OEECapacity = require(`${rootPath}/app/models/OEE/OEECapacity`)
 const PoRecord = require(`${rootPath}/app/models/PoRecord/PoRecord`)
 
 const DEFAULT_AVAILABILITY = 12
@@ -162,6 +163,77 @@ let getAvailabilityValue = async (nodeId, currentDate) => {
 
     return value;
 }
+
+/************/
+/* capacity */
+/************/
+let runSingleNodeCapacityJob = async(nodeId, currentDate) => {
+  //
+  console.log(`Started Inserting "capacity" for node with ID ${nodeId} - ${currentDate}`)
+
+  // get default value object
+  let defaultValueObject = await NodeDefaultValue.getDefaultValueObject(nodeId)
+
+    let value = await getCapacityValue(nodeId, currentDate, defaultValueObject)
+    console.log(value)
+    let capacityStartOfDay = currentDate.clone().startOf('day')
+    let capacityEndOfDay = currentDate.clone().endOf('day')
+
+    // insert record
+    let existingCapacity = await new OEECapacity({node_id: nodeId, start_time: capacityStartOfDay, end_time: capacityEndOfDay}).fetch({require: false})
+    if (existingCapacity) {
+      existingCapacity.set('value', value)
+      await existingCapacity.save()
+    } else {
+      await new OEECapacity({
+        node_id: nodeId,
+        start_time: capacityStartOfDay,
+        end_time: capacityEndOfDay,
+        value: value
+      }).save()
+    }
+
+  console.log(`Completed Inserting "capacity" for node with ID ${nodeId} - ${currentDate}`)
+}
+
+let getCapacityValue = async (nodeId, currentDate, defaultValueObject) => {
+  // get the daily input values
+  let dailyValue = await getAndSetDailyTimeInput(nodeId, currentDate, defaultValueObject)
+
+  let {
+      am_capacity,
+      pm_capacity
+  } = dailyValue.attributes;
+  let value = (am_capacity || defaultValueObject.am_capacity) + (pm_capacity || defaultValueObject.pm_capacity);
+  //
+  // value = (HOUR_PER_SHIFT - capacity) / HOUR_PERS_SHIFT
+  // e.g.     (12 - 1) / 12 = 91.67%
+  // NOTE: removed on 7th Dec 2021
+  // let amValue = (HOUR_PER_SHIFT - am_capacity) / HOUR_PER_SHIFT
+  // let pmValue = (HOUR_PER_SHIFT - pm_capacity) / HOUR_PER_SHIFT
+
+  // return _.mean([amValue, pmValue])
+
+  // UPDATE 7th Dec 2021
+  // am + pm / 24
+  return value / 24
+}
+
+let runCapacityJob = async (currentDate) => {
+  return new Promise(async(resolve, reject) => {
+    console.log('--- Running Capacity Job ---')
+    let nodes = await getAllNodes();
+
+    await asyncForEach(nodes, async (node) => {
+      await runSingleNodeCapacityJob(node.id, currentDate)
+    })
+
+    console.log('--- Completed Capacity Job ---')
+
+    resolve()
+  })
+}
+
 /***************/
 /* performance */
 /***************/
@@ -294,7 +366,7 @@ let runOEEJob = async (currentDate) => {
 }
 
 let runSingleNodeOEEJob = async function(nodeId, currentDate) {
-    let {oee, availability, performance, quality} = await getOEEValue(nodeId, currentDate)
+    let {oee, availability, performance, quality, oee2, capacity} = await getOEEValue(nodeId, currentDate)
     let startOfDay = currentDate.clone().startOf('day')
     let endOfDay = currentDate.clone().endOf('day')
     let existingOEE = await new OEE({
@@ -304,7 +376,10 @@ let runSingleNodeOEEJob = async function(nodeId, currentDate) {
     }).fetch({
         require: false
     })
+
     if (existingOEE) {
+        existingOEE.set('oee2', oee2);
+        existingOEE.set('capacity_value', capacity);
         existingOEE.set('value', oee);
         existingOEE.set('availability_value', availability);
         existingOEE.set('performance_value', performance);
@@ -318,7 +393,9 @@ let runSingleNodeOEEJob = async function(nodeId, currentDate) {
             value: oee,
             availability_value: availability,
             performance_value: performance,
-            quality_value: quality
+            quality_value: quality,
+            oee2: oee2,
+            capacity_value: capacity,
         }).save()
     }
 
@@ -340,6 +417,7 @@ let getOEEValue = async (nodeId, currentDate) => {
 
       let availability = 0;
       let performance = 0;
+      let capacity = 0;
       let quality = OEE_DEFAULT_QUALITY_VALUE;
 
       // availability
@@ -358,7 +436,7 @@ let getOEEValue = async (nodeId, currentDate) => {
       }
       console.log(availability);
 
-
+      // performances
       console.log('----- performances -----');
       let performances = (await new OEEPerformance()
         .query(function (qb) {
@@ -372,6 +450,7 @@ let getOEEValue = async (nodeId, currentDate) => {
       }
       console.log(performance)
 
+      // qualities
       console.log('----- qualities -----');
       let qualities = (await new OEEQuality()
         .query(function (qb) {
@@ -385,11 +464,31 @@ let getOEEValue = async (nodeId, currentDate) => {
       }
       console.log(quality)
 
+      // capacities
+      console.log('----- capacities -----');
+      let capacities = (await new OEECapacity()
+        .query(function (qb) {
+          qb.where('node_id', '=', nodeId)
+            .where('start_time', '>=', formattedStartOfDay)
+            .where('end_time', '<=', formattedEndOfDay)
+        })
+        .fetchAll()
+      ).toJSON();
+
+      if (capacities.length != 0) {
+        capacity = _.meanBy(capacities, (a) => a.value)
+      }
+      console.log(capacity);
+
+      let oee = availability * performance * quality
+
       return {
         availability,
+        capacity,
         performance,
         quality,
-        oee: (availability * performance * quality)
+        oee: oee,
+        oee2: capacity * oee,
       }
 }
 
@@ -410,11 +509,80 @@ let reworkOEE = async (id) => {
     await existingOEE.save()
 }
 
+let setNullDailyTimeInputValue = async (dailyValue, defaultValueObject) => {
+  let {
+    am_availability,
+    pm_availability,
+    am_capacity,
+    pm_capacity,
+  } = dailyValue.attributes;
+
+  // NOTE: have to return early if value already exists
+  //       otherwise it will cause endless loop in rerun_daily_time_input
+  if (am_availability != null &&
+      pm_availability != null &&
+      am_capacity != null &&
+      pm_capacity != null) {
+    return dailyValue
+  }
+
+  // availability
+  if (am_availability == null) {
+    dailyValue.set('am_availability', defaultValueObject.am_availability)
+  }
+  if (pm_availability == null) {
+    dailyValue.set('pm_availability', defaultValueObject.pm_availability)
+  }
+  // capacity
+  if (am_capacity == null) {
+    dailyValue.set('am_capacity', defaultValueObject.am_capacity)
+  }
+  if (pm_capacity == null) {
+    dailyValue.set('pm_capacity', defaultValueObject.pm_capacity)
+  }
+  await dailyValue.save()
+
+  return dailyValue
+}
+
+let getAndSetDailyTimeInput = async (nodeId, currentDate, defaultValueObject) => {
+    let currentFormattedDate = currentDate.clone().format('YYYY-MM-DD');
+    let dailyValue = (await new NodeDailyInput({
+        node_id: nodeId,
+        date: currentFormattedDate
+    }).fetch({
+        require: false
+    }));
+
+    if (dailyValue) {
+        dailyValue = await setNullDailyTimeInputValue(dailyValue, defaultValueObject);
+        let {
+            am_availability,
+            pm_availability,
+            am_capacity,
+            pm_capacity,
+        } = dailyValue.attributes;
+    } else {
+        // insert default values if not found
+        dailyValue = await new NodeDailyInput({
+            node_id: nodeId,
+            date: currentFormattedDate,
+            am_availability: defaultValueObject.am_availability,
+            pm_availability: defaultValueObject.pm_availability,
+            am_capacity: defaultValueObject.am_capacity,
+            pm_capacity: defaultValueObject.pm_capacity,
+        }).save();
+    }
+
+    return dailyValue
+}
+
 let runAllJob = async (startTime) => {
     await runAvailabilityJob(startTime);
     await runPerformanceJob(startTime);
     await runQualityJob(startTime);
     await runOEEJob(startTime);
+    await runCapacityJob(startTime)
     // startTime.startOf('day');
     // let today = moment().startOf('day');
     // let dates = []
@@ -447,10 +615,12 @@ module.exports = {
     runOEEJob,
     runSingleNodeOEEJob,
     runPerformanceJob,
-    runSingleNodePerformanceJob,
-    runQualityJob,
     runAvailabilityJob,
+    runCapacityJob,
+    runQualityJob,
     runSingleNodeAvailabilityJob,
+    runSingleNodeCapacityJob,
+    runSingleNodePerformanceJob,
     getAvailabilityValue,
     reworkAvailability,
     reworkOEE,

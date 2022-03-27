@@ -1,0 +1,22 @@
+extends ./../../../../layouts/default
+
+include ./../../../../shared/page_components
+
+block content
+  .container
+    +render_back_to_link('Production Systems', '/ps')
+
+    .row.my-2
+      .col-12
+        h1 Solder Wires
+
+    .card.my-4
+      .card-body
+        .row
+          .col
+            .col
+            img.img-fluid(src="/public/images/production-systems/solder-wire-2.jpeg")
+          .col
+            .row
+              .col-12.my-2
+                a.btn.btn-primary.btn-block(href="/oee") OEE

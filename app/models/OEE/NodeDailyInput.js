@@ -24,10 +24,10 @@ const NodeDailyInput = bookshelf.model('NodeDailyInput', {
     return bookshelf.knex.raw(
       '\
         INSERT INTO oee_node_daily_inputs\
-          (node_id, date)\
-          SELECT nodes.id, ? AS date\
-          FROM nodes\
-          WHERE nodes.id NOT IN\
+          (node_id, am_availability, pm_availability, am_capacity, pm_capacity, date)\
+          SELECT node_id, am_availability, pm_availability, am_capacity, pm_capacity, ? AS date\
+          FROM oee_node_default_values\
+          WHERE node_id NOT IN\
           (\
             SELECT node_id\
             FROM oee_node_daily_inputs\

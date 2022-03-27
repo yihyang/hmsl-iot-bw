@@ -1,4 +1,4 @@
-const dataEntry = require('./SolderPaste/DataEntryController')
+const bagScanning = require('./SolderPaste/BagScanningController')
 const records = require('./SolderPaste/RecordController')
 const reports = require('./SolderPaste/ReportController')
 
@@ -18,7 +18,7 @@ module.exports = {
   index,
   add,
   save,
-  dataEntry,
+  bagScanning,
   records,
   reports,
 }

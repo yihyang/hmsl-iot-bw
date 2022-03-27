@@ -8,10 +8,10 @@ block content
 
     .row.my-2
       .col-12
-        h1 Data Entry
+        h1 Bag Scanning
     .row.my-2
       .col-md-8
-        form#form(action=`/ps/solder-pastes/data-entry`, method="POST")
+        form#form(action=`/ps/solder-pastes/bag-scanning`, method="POST")
           .form-group
             .row
               .col-md-4
@@ -147,7 +147,7 @@ block content
             let vm = this
             //- send for query
             await fetch(
-              `/ps/solder-pastes/data-entry/verify-form-data`,
+              `/ps/solder-pastes/bag-scanning/verify-form-data`,
               {
                 method: 'POST',
                 headers: {

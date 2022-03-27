@@ -1,0 +1,702 @@
+extends ./../../../../layouts/default
+
+
+
+block content
+  .container-fluid
+    .row
+      .col
+        a.btn.btn-link.my-2(href="/oee")
+          i.fa.fa-arrow-left
+          | &nbsp;Back to OEE Page
+
+    .row.my-2
+      .col-12
+        h1 OEE Dashboard
+    .row.my-2
+      .col-md-2
+        p Date Range
+      .col-md-6
+        input.form-control(type="daterange" name="dateRange")
+    if appSettings.isBW()
+      .row.my-2
+        .col-md-2
+          p Machines
+        .col
+          .row
+            for g in nodes
+              .form-group
+                .form-check
+                  input.form-check.input(type="checkbox", value=g.id, name="nodes[]", id=`node-${g.id}`)
+                  label.form-check-label(for=`node-${g.id}`)
+                    = g.name
+    //- .row.my-2
+    //-   .col-sm-2
+    //-     p Shifts
+    //-   .col-sm-10
+    //-     .row
+    //-       .form-group
+    //-         .form-check
+    //-           input.form-check.input(type="checkbox", value='day', name="shifts[]", id="shifts-day")
+    //-           label.form-check-label(for="shifts-day") Day Shift
+    //-       .form-group
+    //-         .form-check
+    //-           input.form-check.input(type="checkbox", value='night', name="shifts[]", id="shifts-night")
+    //-           label.form-check-label(for="shifts-night") Night Shift
+    //- .row.my-2
+    //-   .col-sm-2
+    //-     p Area
+    //-   .col-sm-10
+    //-     .row
+    //-       .form-group
+    //-         .form-check
+    //-           input.form-check.input(type="checkbox", value='copper', name="areas[]", id="areas-copper")
+    //-           label.form-check-label(for="areas-copper") Copper
+    //-       .form-group
+    //-         .form-check
+    //-           input.form-check.input(type="checkbox", value='aluminium', name="areas[]", id="areas-aluminium")
+    //-           label.form-check-label(for="areas-aluminium") Aluminium
+
+    hr
+
+    .row
+      .col-sm-12.col-md-8
+        .row.my-2
+          .col
+            h2 Key Performance Indicator
+        .row.my-2
+          .col
+            .row
+              .col-md-4
+                h2 OEE 2
+                canvas#chartOEE2(height="250%", width="250%")
+              .col-md-8
+                .row
+                  .col-md-4.col-sm-4.offset-md-4.offset-sm-4
+                    h3 Capacity
+                    canvas#chartOEECapacity
+            .row
+              .col-sm-12.col-md-4
+                h2 OEE
+                canvas#chartOEE(height="220%", width="220%")
+              .col-sm-12.col-md-8
+                .row.my-2
+                  .col-md-4.col-sm-4
+                    h3 Availability
+                    canvas#chartOEEAvailability
+                  .col-md-4.col-sm-4
+                    h3 Performance
+                    canvas#chartOEEPerformance
+                  .col-md-4.col-sm-4
+                    h3 Quality
+                    canvas#chartOEEQuality
+      .col-sm-12.col-md-4
+        h3 Schematic Explanation
+        img.img-fluid(src="/public/images/oee/schematic-explanation.png")
+    .row
+      .col-sm-12.col-md-4
+        h4 Monthly OEE Trend
+        canvas#chartMonthlyOEE
+      .col-sm-12.col-md-4
+        h4 Output Trend
+        canvas#chartMonthlyOutputTrend
+      .col-sm-12.col-md-4
+        h4 Downtime Pareto
+        canvas#chartDowntimeReason
+
+  script.
+    $(function() {
+      //- default date
+      var todayFormatted = moment().format('YYYY/MM/DD');
+      var sevenDaysAgoFormatted = moment().subtract('7', 'days').format('YYYY/MM/DD');
+      $('input[type="daterange"]').daterangepicker({
+        "autoApply": true,
+        "startDate": moment().subtract('7', 'days'),
+        "maxDate": moment(),
+        "locale": {
+          format: 'YYYY/MM/DD'
+        }
+      }, function(start, end, label) {
+        refreshAllChart();
+      });
+
+      //- $('input[name="shifts[]"]').on('click', () => {
+      //-   toggleChartUpdate()
+      //- });
+
+      //- $('input[name="areas[]"]').on('click', () => {
+      //-   toggleChartUpdate()
+      //- });
+
+      refreshAllChart()
+
+      $('input[name="nodeGroups[]"]').on('change', () => {
+        refreshAllChart()
+      })
+
+      $('input[name="nodes[]"]').on('change', () => {
+        refreshAllChart()
+      })
+    });
+
+    function refreshAllChart() {
+      toggleChartUpdate()
+      toggleReasonChartUpdate()
+      toggleHistoryChartUpdate();
+    }
+
+    function getFormData() {
+      var startDate = $('input[name="dateRange"]').data('daterangepicker').startDate.format('YYYY-MM-DD');
+      var endDate = $('input[name="dateRange"]').data('daterangepicker').endDate.format('YYYY-MM-DD');
+      //- var areas = $('input[name="areas[]"]:checked').map(function() { return $(this).val() }).get();
+      //- var shifts = $('input[name="shifts[]"]:checked').map(function() { return $(this).val() }).get();
+
+      let data = {
+        startDate,
+        endDate,
+        //- areas,
+        //- shifts,
+      }
+
+      var nodeGroups = $('input[name="nodeGroups[]"]:checked').map(function() { return $(this).val() }).get();
+      if (nodeGroups) {
+        data['nodeGroups'] = nodeGroups
+      }
+
+      var nodes = $('input[name="nodes[]"]:checked').map(function() { return $(this).val() }).get();
+      if (nodes) {
+        data['nodes'] = nodes
+      }
+
+
+      return data;
+    }
+
+    function toggleChartUpdate() {
+      var formData = getFormData();
+      //- Send Ajax request
+      $.ajax({
+        url: '/oee/dashboard/refresh',
+        data: formData,
+        success: function(response) {
+          console.log(response)
+          updateOEECharts(response);
+        },
+        error: function(error) {
+          console.log(error);
+        }
+      });
+    }
+
+    function toggleReasonChartUpdate() {
+      var formData = getFormData();
+
+      $.ajax({
+        url: '/oee/dashboard/reason-refresh',
+        data: formData,
+        success: function(response) {
+          updateReasonCharts(response.reasons);
+        },
+        error: function(error) {
+          console.log(error);
+        }
+      });
+    }
+
+    function toggleHistoryChartUpdate() {
+      $.ajax({
+        url: '/oee/dashboard/history-refresh',
+        success: function(response) {
+          chartMonthlyOEE.data.labels = response.oee.label
+          chartMonthlyOEE.data.datasets[0].data = response.oee.default;
+          chartMonthlyOEE.data.datasets[1].data = response.oee.value;
+          chartMonthlyOEE.update();
+
+          chartMonthlyOutputTrend.data.labels = response.output.label
+          chartMonthlyOutputTrend.data.datasets[0].data = response.output.default;
+          chartMonthlyOutputTrend.data.datasets[1].data = response.output.value;
+          chartMonthlyOutputTrend.update();
+        },
+        error: function(error) {
+          console.log(error);
+        }
+      })
+    }
+
+    function updateOEECharts(data)
+    {
+      let {
+        availability_value,
+        capacity_value,
+        performance_value,
+        quality_value,
+        value,
+        oee2
+      } = data;
+      let availabilityData = [
+        roundToTwoDecimalPoint(availability_value * 100),
+        roundToTwoDecimalPoint((1 - availability_value) * 100)
+      ];
+      chartOEEAvailability.data.datasets[0].data = availabilityData;
+      chartOEEAvailability.options.elements.center.text = roundToTwoDecimalPoint(availability_value * 100) + '%';
+      chartOEEAvailability.update();
+
+      //- need to check coz capacity was added later
+      if (capacity_value != null) {
+        let capacityData = [
+          roundToTwoDecimalPoint(capacity_value * 100),
+          roundToTwoDecimalPoint((1 - capacity_value) * 100)
+        ];
+        chartOEECapacity.data.datasets[0].data = capacityData;
+        chartOEECapacity.options.elements.center.text = roundToTwoDecimalPoint(capacity_value * 100) + '%';
+        chartOEECapacity.update();
+      } else {
+        chartOEECapacity.data.datasets[0].data = [0, 1];
+        chartOEECapacity.options.elements.center.text = '-';
+        chartOEECapacity.update();
+      }
+
+      let performanceData = [
+        roundToTwoDecimalPoint(performance_value * 100),
+        roundToTwoDecimalPoint((1 - performance_value) * 100)
+      ];
+      chartOEEPerformance.data.datasets[0].data = performanceData;
+      chartOEEPerformance.options.elements.center.text = roundToTwoDecimalPoint(performance_value * 100) + '%';
+      chartOEEPerformance.update();
+
+      let qualityData = [
+        roundToTwoDecimalPoint(quality_value * 100),
+        roundToTwoDecimalPoint((1 - quality_value) * 100)
+      ];
+      chartOEEQuality.data.datasets[0].data = qualityData;
+      chartOEEQuality.options.elements.center.text = roundToTwoDecimalPoint(quality_value * 100) + '%';
+      chartOEEQuality.update();
+
+      //- need to check coz oee2 was added later
+      if (oee2 != null) {
+        let oee2TotalData = [
+          roundToTwoDecimalPoint(oee2 * 100),
+          roundToTwoDecimalPoint((1 - oee2) * 100)
+        ];
+        chartOEE2.data.datasets[0].data = oee2TotalData;
+        chartOEE2.options.elements.center.text = roundToTwoDecimalPoint(oee2 * 100) + '%';
+        chartOEE2.update();
+      } else {
+        chartOEE2.data.datasets[0].data = [0, 1];
+        chartOEE2.options.elements.center.text = '-';
+        chartOEE2.update();
+      }
+
+      let oeeTotalData = [
+        roundToTwoDecimalPoint(value * 100),
+        roundToTwoDecimalPoint((1 - value) * 100)
+      ];
+      chartOEE.data.datasets[0].data = oeeTotalData;
+      chartOEE.options.elements.center.text = roundToTwoDecimalPoint(value * 100) + '%';
+      chartOEE.update();
+    }
+
+    function updateReasonCharts(data)
+    {
+      chartDowntimeReason.data.datasets[0].data = data.values;
+      chartDowntimeReason.data.labels = data.labels;
+      chartDowntimeReason.update()
+    }
+
+    let backgroundColor = ['#49b431', '#e3e1e3']
+    let labels = ['success', 'failure']
+    //- #chartOEE2
+    var ctx = document.getElementById('chartOEE2').getContext('2d');
+    document.getElementById('chartOEE2').height = 80;
+    var data = {
+                  datasets: [{
+                    data: [0, 1],
+                    backgroundColor: backgroundColor
+                  }],
+                  labels: labels
+                };
+    var chartOEE2 = new Chart(ctx,{
+      type: 'doughnut',
+      data: data,
+      options: {
+        elements: {
+          center: {
+            text: '-',
+            color: '#FF6384', // Default is #000000
+            fontStyle: 'Arial', // Default is Arial
+            sidePadding: 20, // Default is 20 (as a percentage)
+            minFontSize: 12, // Default is 20 (in px), set to false and text will not wrap.
+            lineHeight: 25 // Default is 25 (in px), used for when text wraps
+          }
+        },
+        legend: { display: false },
+        tooltips: {
+          mode: 'label',
+          callbacks: {
+            //- label: function(tooltipItem, data) {
+            //-   return data.labels[tooltipItem.index].replace(/ -.+%/gi, '') + ': ' + data.datasets[0].data[tooltipItem.index];
+            //- }
+          }
+        }
+      }
+    });
+    //- #chartOEE
+    var ctx = document.getElementById('chartOEE').getContext('2d');
+    document.getElementById('chartOEE').height = 80;
+    var data = {
+                  datasets: [{
+                    data: [0, 1],
+                    backgroundColor: backgroundColor
+                  }],
+                  labels: labels
+                };
+    var chartOEE = new Chart(ctx,{
+      type: 'doughnut',
+      data: data,
+      options: {
+        elements: {
+          center: {
+            text: '-',
+            color: '#FF6384', // Default is #000000
+            fontStyle: 'Arial', // Default is Arial
+            sidePadding: 20, // Default is 20 (as a percentage)
+            minFontSize: 12, // Default is 20 (in px), set to false and text will not wrap.
+            lineHeight: 25 // Default is 25 (in px), used for when text wraps
+          }
+        },
+        legend: { display: false },
+        tooltips: {
+          mode: 'label',
+          callbacks: {
+            //- label: function(tooltipItem, data) {
+            //-   return data.labels[tooltipItem.index].replace(/ -.+%/gi, '') + ': ' + data.datasets[0].data[tooltipItem.index];
+            //- }
+          }
+        }
+      }
+    });
+
+    //- #chartOEECapacity
+    var ctx = document.getElementById('chartOEECapacity').getContext('2d');
+    //- document.getElementById('chartOEECapacity').height = 80;
+    var data = {
+                  datasets: [{
+                    data: [0, 1],
+                    backgroundColor: backgroundColor
+                  }],
+                  labels: ['success', 'fail']
+                };
+    var chartOEECapacity = new Chart(ctx,{
+      type: 'doughnut',
+      data: data,
+      options: {
+        elements: {
+          center: {
+            text: '-',
+            color: '#FF6384', // Default is #000000
+            fontStyle: 'Arial', // Default is Arial
+            sidePadding: 20, // Default is 20 (as a percentage)
+            minFontSize: 12, // Default is 20 (in px), set to false and text will not wrap.
+            lineHeight: 25 // Default is 25 (in px), used for when text wraps
+          }
+        },
+        legend: { display: false },
+        tooltips: {
+          mode: 'label',
+          callbacks: {
+            //- label: function(tooltipItem, data) {
+            //-   return data.labels[tooltipItem.index].replace(/ -.+%/gi, '') + ': ' + data.datasets[0].data[tooltipItem.index];
+            //- }
+          }
+        }
+      }
+    });
+
+    //- #chartOEEAvailability
+    var ctx = document.getElementById('chartOEEAvailability').getContext('2d');
+    //- document.getElementById('chartOEEAvailability').height = 80;
+    var data = {
+                  datasets: [{
+                    data: [0, 1],
+                    backgroundColor: backgroundColor
+                  }],
+                  labels: ['success', 'fail']
+                };
+    var chartOEEAvailability = new Chart(ctx,{
+      type: 'doughnut',
+      data: data,
+      options: {
+        elements: {
+          center: {
+            text: '-',
+            color: '#FF6384', // Default is #000000
+            fontStyle: 'Arial', // Default is Arial
+            sidePadding: 20, // Default is 20 (as a percentage)
+            minFontSize: 12, // Default is 20 (in px), set to false and text will not wrap.
+            lineHeight: 25 // Default is 25 (in px), used for when text wraps
+          }
+        },
+        legend: { display: false },
+        tooltips: {
+          mode: 'label',
+          callbacks: {
+            //- label: function(tooltipItem, data) {
+            //-   return data.labels[tooltipItem.index].replace(/ -.+%/gi, '') + ': ' + data.datasets[0].data[tooltipItem.index];
+            //- }
+          }
+        }
+      }
+    });
+
+    //- #chartOEEPerformance
+    var ctx = document.getElementById('chartOEEPerformance').getContext('2d');
+    //- document.getElementById('chartOEEPerformance').height = 80;
+    var data = {
+                  datasets: [{
+                    data: [0, 1],
+                    backgroundColor: backgroundColor
+                  }],
+                  labels: labels
+                };
+    var chartOEEPerformance = new Chart(ctx,{
+      type: 'doughnut',
+      data: data,
+      options: {
+        elements: {
+          center: {
+            text: '-',
+            color: '#FF6384', // Default is #000000
+            fontStyle: 'Arial', // Default is Arial
+            sidePadding: 20, // Default is 20 (as a percentage)
+            minFontSize: 12, // Default is 20 (in px), set to false and text will not wrap.
+            lineHeight: 25 // Default is 25 (in px), used for when text wraps
+          }
+        },
+        legend: { display: false },
+        tooltips: {
+          mode: 'label',
+          callbacks: {
+            //- label: function(tooltipItem, data) {
+            //-   return data.labels[tooltipItem.index].replace(/ -.+%/gi, '') + ': ' + data.datasets[0].data[tooltipItem.index];
+            //- }
+          }
+        }
+      }
+    });
+
+    //- #chartOEEQuality
+    var ctx = document.getElementById('chartOEEQuality').getContext('2d');
+    //- document.getElementById('chartOEEQuality').height = 80;
+    var data = {
+                  datasets: [{
+                    data: [0, 1],
+                    backgroundColor: backgroundColor
+                  }],
+                  labels: labels
+                };
+    var chartOEEQuality = new Chart(ctx,{
+      type: 'doughnut',
+      data: data,
+      options: {
+        elements: {
+          center: {
+            text: '-',
+            color: '#FF6384', // Default is #000000
+            fontStyle: 'Arial', // Default is Arial
+            sidePadding: 20, // Default is 20 (as a percentage)
+            minFontSize: 12, // Default is 20 (in px), set to false and text will not wrap.
+            lineHeight: 25 // Default is 25 (in px), used for when text wraps
+          }
+        },
+        legend: { display: false },
+        tooltips: {
+          mode: 'label',
+          callbacks: {
+            //- label: function(tooltipItem, data) {
+            //-   return data.labels[tooltipItem.index].replace(/ -.+%/gi, '') + ': ' + data.datasets[0].data[tooltipItem.index];
+            //- }
+          }
+        }
+      }
+    });
+
+    //- #chartMonthlyOEE
+    var ctx = document.getElementById('chartMonthlyOEE').getContext('2d');
+    let monthlyOEEData = {
+      labels: ['Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep'],
+      datasets: [{
+        label: 'OEE Target',
+        backgroundColor: ' #4272c7',
+        borderColor: ' #4272c7',
+        borderWidth: 1,
+        data: [70, 70, 70, 70, 70, 70],
+      }, {
+        label: 'Actual',
+        backgroundColor: '#f17b2a',
+        borderColor: '#f17b2a',
+        borderWidth: 1,
+        data: [0, 0, 0, 0, 0, 0],
+      }]
+    }
+    //- document.getElementById('chartMonthlyOEE').height = 80;
+    var chartMonthlyOEE = new Chart(ctx,{
+      type: 'bar',
+      data: monthlyOEEData,
+      options: {
+          responsive: true,
+          legend: {
+            position: 'bottom',
+          },
+        }
+    });
+
+    //- #chartMonthlyOutputTrend
+    var ctx = document.getElementById('chartMonthlyOutputTrend').getContext('2d');
+    let monthlyOutputData = {
+      labels: ['Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep'],
+      datasets: [{
+        label: 'Output Target (kg)',
+        backgroundColor: ' #fabe0a',
+        borderColor: ' #fabe0a',
+        borderWidth: 1,
+        data: [10, 10, 10, 10, 10, 10],
+      }, {
+        label: 'Actual (kg)',
+        backgroundColor: '#6dae45',
+        borderColor: '#6dae45',
+        borderWidth: 1,
+        data: [0, 0, 0, 0, 0, 0],
+      }]
+    }
+    //- document.getElementById('chartMonthlyOutputTrend').height = 80;
+    var chartMonthlyOutputTrend = new Chart(ctx,{
+      type: 'bar',
+      data: monthlyOutputData,
+      options: {
+          responsive: true,
+          legend: {
+            position: 'bottom',
+          },
+        }
+    });
+
+    //- #chartDowntimeReason
+    var ctx = document.getElementById('chartDowntimeReason').getContext('2d');
+    let monthlyDowntimeData = {
+      labels: ['Preventive Maintainance', 'Breakdown', 'Setup'],
+      datasets: [{
+        label: 'Reason',
+        backgroundColor: ' #5c99cf',
+        borderColor: ' #5c99cf',
+        borderWidth: 1,
+        data: [10, 5, 2],
+      }]
+    }
+    //- document.getElementById('chartDowntimeReason').height = 80;
+    var chartDowntimeReason = new Chart(ctx,{
+      type: 'horizontalBar',
+      data: monthlyDowntimeData,
+      options: {
+          responsive: true,
+          legend: {
+            position: 'bottom',
+          },
+          scales: {
+            xAxes: [{
+              display: true,
+              ticks: {
+                min: 0
+              }
+            }]
+          }
+        }
+    });
+
+    //- show text inside pie chart
+    Chart.pluginService.register({
+      beforeDraw: function(chart) {
+        if (chart.config.options.elements.center) {
+          // Get ctx from string
+          var ctx = chart.chart.ctx;
+
+          // Get options from the center object in options
+          var centerConfig = chart.config.options.elements.center;
+          var fontStyle = centerConfig.fontStyle || 'Arial';
+          var txt = centerConfig.text;
+          var color = centerConfig.color || '#000';
+          var maxFontSize = centerConfig.maxFontSize || 75;
+          var sidePadding = centerConfig.sidePadding || 20;
+          var sidePaddingCalculated = (sidePadding / 100) * (chart.innerRadius * 2)
+          // Start with a base font of 30px
+          ctx.font = "30px " + fontStyle;
+
+          // Get the width of the string and also the width of the element minus 10 to give it 5px side padding
+          var stringWidth = ctx.measureText(txt).width;
+          var elementWidth = (chart.innerRadius * 2) - sidePaddingCalculated;
+
+          // Find out how much the font can grow in width.
+          var widthRatio = elementWidth / stringWidth;
+          var newFontSize = Math.floor(30 * widthRatio);
+          var elementHeight = (chart.innerRadius * 2);
+
+          // Pick a new font size so it will not be larger than the height of label.
+          var fontSizeToUse = Math.min(newFontSize, elementHeight, maxFontSize);
+          var minFontSize = centerConfig.minFontSize;
+          var lineHeight = centerConfig.lineHeight || 25;
+          var wrapText = false;
+
+          if (minFontSize === undefined) {
+            minFontSize = 20;
+          }
+
+          if (minFontSize && fontSizeToUse < minFontSize) {
+            fontSizeToUse = minFontSize;
+            wrapText = true;
+          }
+
+          // Set font settings to draw it correctly.
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          var centerX = ((chart.chartArea.left + chart.chartArea.right) / 2);
+          var centerY = ((chart.chartArea.top + chart.chartArea.bottom) / 2);
+          ctx.font = fontSizeToUse + "px " + fontStyle;
+          ctx.fillStyle = color;
+
+          if (!wrapText) {
+            ctx.fillText(txt, centerX, centerY);
+            return;
+          }
+
+          var words = txt.split(' ');
+          var line = '';
+          var lines = [];
+
+          // Break words up into multiple lines if necessary
+          for (var n = 0; n < words.length; n++) {
+            var testLine = line + words[n] + ' ';
+            var metrics = ctx.measureText(testLine);
+            var testWidth = metrics.width;
+            if (testWidth > elementWidth && n > 0) {
+              lines.push(line);
+              line = words[n] + ' ';
+            } else {
+              line = testLine;
+            }
+          }
+
+          // Move the center up depending on line height and number of lines
+          centerY -= (lines.length / 2) * lineHeight;
+
+          for (var n = 0; n < lines.length; n++) {
+            ctx.fillText(lines[n], centerX, centerY);
+            centerY += lineHeight;
+          }
+          //Draw text in center
+          ctx.fillText(line, centerX, centerY);
+        }
+      }
+    });
+
+    function roundToTwoDecimalPoint(num) {
+      return Math.round(num * 1) / 1;
+    }

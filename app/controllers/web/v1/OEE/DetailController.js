@@ -5,6 +5,7 @@ const moment = require('moment')
 
 const Node = require(`${rootPath}/app/models/Node/Node`);
 const OEE = require(`${rootPath}/app/models/OEE/OEE`);
+const OEECapacity = require(`${rootPath}/app/models/OEE/OEECapacity`);
 const OEEAvailability = require(`${rootPath}/app/models/OEE/OEEAvailability`);
 const OEEPerformance = require(`${rootPath}/app/models/OEE/OEEPerformance`);
 const OEEQuality = require(`${rootPath}/app/models/OEE/OEEQuality`);
@@ -28,6 +29,15 @@ let refresh = async function(req, res) {
 
   // oee
   let oee = (await new OEE().query((qb) => {
+    qb.where('start_time', '>=', startOfDay)
+      .where('end_time', '<=', endOfDay)
+      .whereIn('node_id', nodes)
+      .orderBy('node_id')
+    })
+    .fetchAll({withRelated: ['node']})).toJSON();
+
+  // availability
+  let capacity = (await new OEECapacity().query((qb) => {
     qb.where('start_time', '>=', startOfDay)
       .where('end_time', '<=', endOfDay)
       .whereIn('node_id', nodes)
@@ -72,7 +82,7 @@ let refresh = async function(req, res) {
 
   jobs = _.groupBy(jobs, 'node.id')
 
-  res.json({oee, availability, performance, quality, jobs})
+  res.json({oee, availability, performance, quality, jobs, capacity})
 }
 
 module.exports = {

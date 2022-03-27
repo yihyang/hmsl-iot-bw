@@ -32,6 +32,8 @@ let refresh = async function(req, res) {
     availability_value: 0,
     quality_value: 0,
     performance_value: 0,
+    capacity_value: 0,
+    oee2: 0,
   }
 
   let oeeValues = await new OEE().query((qb) => {
@@ -47,12 +49,18 @@ let refresh = async function(req, res) {
   if(oeeValues) {
     oeeValues = oeeValues.toJSON();
     result = {
+      oee2: _.meanBy(oeeValues, (o) => o.oee2 || 0),
+      capacity_value: _.meanBy(oeeValues, (o) => o.capacity_value || 0),
       value: _.meanBy(oeeValues, (o) => o.value || 0),
       availability_value: _.meanBy(oeeValues, (o) => o.availability_value || 0),
       performance_value: _.meanBy(oeeValues, (o) => o.performance_value || 0),
       quality_value: _.meanBy(oeeValues, (o) => o.quality_value || 0),
     }
   }
+
+  // NOTE: set to null as the HMSL has not issued PO
+  result['oee2'] = null
+  result['capacity_value'] = null
 
   res.json(result)
 }

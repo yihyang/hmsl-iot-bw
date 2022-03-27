@@ -1,0 +1,343 @@
+extends ./../../../../layouts/default
+
+
+
+block content
+  .container
+    .row
+      .col
+        a.btn.btn-link.my-2(href="/oee")
+          i.fa.fa-arrow-left
+          | &nbsp;Back to OEE Page
+    .row.my-2
+      .col-12
+        h1 OEE Details
+    .row.my-2
+      .col-md-2
+        p Date
+      .col-md-6
+        input.form-control(type="text" name="selectedDate")
+    .row.my-2
+      .col-md-2
+        p Machines
+      .col-md-10
+        .row
+          for n in nodes
+            .form-group
+              .form-check
+                input.form-check.input(type="checkbox", value=n.id, name="nodes[]", id=`nodes-${n.id}`)
+                label.form-check-label(for=`nodes-${n.id}`)
+                  = n.name
+    .row.my-2
+      .col
+        h2 OEE
+        table.table#tableOEE
+    .row.my-2
+      .col
+        h2 OEE Components
+    .row.my-2
+      .col
+        h3.btn-link(data-toggle="collapse", data-target="#collapseAvailability") Availability
+        .collapse#collapseAvailability
+          table.table#tableAvailability
+    .row.my-2
+      .col
+        h3.btn-link(data-toggle="collapse", data-target="#collapsePerformance") Performance
+        .collapse#collapsePerformance
+          table.table#tablePerformance
+    .row.my-2
+      .col
+        h3.btn-link(data-toggle="collapse", data-target="#collapseQuality") Quality
+        .collapse#collapseQuality
+          table.table#tableQuality
+    .row.my-2
+      .col
+        h3.btn-link(data-toggle="collapse", data-target="#collapseCapacity") Capacity
+        .collapse#collapseCapacity
+          table.table#tableCapacity
+
+  include ./../../../../shared/js-utilities
+
+  script.
+
+    let roundUpDecimalPoint = 4;
+    $(function() {
+      $('input[name="selectedDate"]').daterangepicker({
+        "autoApply": true,
+        "startDate": moment().subtract(1, 'day'),
+        "singleDatePicker": true,
+        "maxDate": moment().subtract(1, 'day'),
+        "locale": {
+          format: 'YYYY/MM/DD'
+        }
+      }, function(start, end, label) {
+        toggleTableUpdate()
+      });
+
+      toggleTableUpdate()
+    })
+
+
+    $('input[name="nodes[]"]').on('click', () => {
+      toggleTableUpdate()
+    });
+
+    function getFormData() {
+      let date = $('input[name="selectedDate"]').data('daterangepicker').startDate.format('YYYY-MM-DD');
+      var nodes = $('input[name="nodes[]"]:checked').map(function() { return $(this).val() }).get();
+
+      return {
+        date,
+        nodes,
+      };
+    }
+    function toggleTableUpdate() {
+      var formData = getFormData();
+      //- Send Ajax request
+      $.ajax({
+        url: '/oee/details/refresh',
+        data: formData,
+        success: function(response) {
+          console.log(response)
+          updateData(response);
+        },
+        error: function(error) {
+          console.log(error);
+        }
+      });
+    }
+
+    function updateData(response) {
+      let { oee, availability, performance, quality, jobs, capacity } = response;
+
+
+      //- OEE
+      $('#tableOEE').empty();
+      let result = ''
+      result += `<tr>
+        <th>ID</th>
+        <th>Machine</th>
+        <th>Start Time</th>
+        <th>End Time</th>
+        <th>OEE2</th>
+        <th>Capacity</th>
+        <th>Value</th>
+        <th>Availability</th>
+        <th>Performance</th>
+        <th>Quality</th>
+      </tr>`;
+      for(i = 0; i < oee.length; i++) {
+        let item = oee[i];
+        let nodeName = item.node ? item.node.name : '';
+        let startTime = utility_format_datetime(item.start_time);
+        let endTime = utility_format_datetime(item.end_time);
+        result += `<tr>
+          <td>${item.id}</td>
+          <td>${nodeName}</td>
+          <td>${startTime}</td>
+          <td>${endTime}</td>
+          //- set to null as PO has not been issued by HMSL
+          <td>-</td>
+          <td>-</td>
+          <!--<td>${roundToDecimalPoint(item.oee2, roundUpDecimalPoint)}</td>-->
+          <!--<td>${roundToDecimalPoint(item.capacity_value, roundUpDecimalPoint)}</td>-->
+          <td>${roundToDecimalPoint(item.value, roundUpDecimalPoint)}</td>
+          <td>${roundToDecimalPoint(item.availability_value, roundUpDecimalPoint)}</td>
+          <td>${roundToDecimalPoint(item.performance_value, roundUpDecimalPoint)}</td>
+          <td>${roundToDecimalPoint(item.quality_value, roundUpDecimalPoint)}</td>
+        </tr>`;
+      }
+      $('#tableOEE').html(result);
+
+      //- Availablity
+      $('#tableAvailability').empty();
+      result = '';
+      result += `<tr>
+        <th>ID</th>
+        <th>Machine</th>
+        <th>Start Time</th>
+        <th>End Time</th>
+        <th>Value</th>
+      </tr>`;
+      for(i = 0; i < availability.length; i++) {
+        let item = availability[i];
+        let nodeName = item.node ? item.node.name : '';
+        let startTime = utility_format_datetime(item.start_time);
+        let endTime = utility_format_datetime(item.end_time);
+        result += `<tr>
+          <td>${item.id}</td>
+          <td>${nodeName}</td>
+          <td>${startTime}</td>
+          <td>${endTime}</td>
+          <td>${roundToDecimalPoint(item.value, roundUpDecimalPoint)}</td>
+        </tr>`;
+      }
+      $('#tableAvailability').html(result);
+
+      //- Performance
+      $('#tablePerformance').empty();
+      result = '';
+      result += `<tr>
+        <th>ID</th>
+        <th>Machine</th>
+        <th>Start Time</th>
+        <th>End Time</th>
+        <th>Value</th>
+        <th>Detail</th>
+      </tr>`;
+      for(i = 0; i < performance.length; i++) {
+        let item = performance[i];
+        let nodeName = item.node ? item.node.name : '';
+        let startTime = utility_format_datetime(item.start_time);
+        let endTime = utility_format_datetime(item.end_time);
+        let breakdown = item.value_breakdown;
+
+        let detailToggle = `
+          <a class="btn btn-primary" data-toggle="collapse" href="#performance-${item.id}" role="button" aria-expanded="false" aria-controls="performance-${item.id}">Toggle detail</a>
+        `;
+        let detail = `
+          <div>
+          <table class="table">
+            <tr>
+              <th>Group</th>
+              <th>Subgroup</th>
+              <th>Start Time</th>
+              <th>End Time</th>
+              <th>Duration</th>
+            </tr>
+        `;
+
+        for(j = 0; j < breakdown.length; j++) {
+          let breakDownItem = breakdown[j];
+          let breakDownStartTime = utility_format_datetime(breakDownItem.start_time);
+          let breakDownEndTime = utility_format_datetime(breakDownItem.end_time);
+          detail += `
+            <tr>
+              <td>${breakDownItem.main_group}</td>
+              <td>${breakDownItem.subgroup}</td>
+              <td>${breakDownStartTime}</td>
+              <td>${breakDownEndTime}</td>
+              <td>${breakDownItem.duration}</td>
+            </tr>
+          `;
+        }
+
+        detail += `
+          </table>
+        `;
+
+        detail += `
+          </div>
+        `;
+
+        result += `<tr>
+          <td>${item.id}</td>
+          <td>${nodeName}</td>
+          <td>${startTime}</td>
+          <td>${endTime}</td>
+          <td>${roundToDecimalPoint(item.value, roundUpDecimalPoint)}</td>
+          <td>${detailToggle}</td>
+        </tr>`;
+
+        result += `<tr class="collapse" id="performance-${item.id}">
+          <td colspan="6">${detail}</td>
+        </tr>`
+      }
+      $('#tablePerformance').html(result);
+
+
+      //- Quality
+      $('#tableQuality').empty();
+      result = '';
+      result += `<tr>
+        <th>ID</th>
+        <th>Machine</th>
+        <th>Start Time</th>
+        <th>End Time</th>
+        <th>Value</th>
+        <th>Jobs Count</th>
+        <th>Detail</th>
+      </tr>`;
+      for(i = 0; i < quality.length; i++) {
+        let item = quality[i];
+        let nodeName = item.node ? item.node.name : '';
+        let nodeId = item.node ? item.node.id : null
+        let startTime = utility_format_datetime(item.start_time);
+        let endTime = utility_format_datetime(item.end_time);
+        let jobsCount = 0
+        let detailToggle = `
+          <a class="btn btn-primary" data-toggle="collapse" href="#quality-${item.id}" role="button" aria-expanded="false" aria-controls="quality-${item.id}">Toggle detail</a>
+        `;
+
+        let qualityDetail = `
+          <div>
+          <table class="table">
+            <tr>
+              <th>PO Number</th>
+              <th>Input Quantity</th>
+              <th>Produced Quantity</th>
+            </tr>
+        `
+        if (nodeId) {
+          let jobItem = jobs[nodeId] || []
+          jobsCount = jobItem.length
+
+          for(let j = 0; j < jobItem.length; j++) {
+            qualityDetail += `
+              <tr>
+                <td>${jobItem[j].po_record ? jobItem[j].po_record.po_number : ''}</td>
+                <td>${jobItem[j].input_quantity}</td>
+                <td>${jobItem[j].produced_quantity}</td>
+              </tr>
+            `
+          }
+        }
+
+        qualityDetail += `
+          </table>
+          </div>
+        `
+
+        let qualityItemTable = ''
+        result += `<tr>
+          <td>${item.id}</td>
+          <td>${nodeName}</td>
+          <td>${startTime}</td>
+          <td>${endTime}</td>
+          <td>${roundToDecimalPoint(item.value, roundUpDecimalPoint)}</td>
+          <td>${jobsCount}</td>
+          <td>${detailToggle}</td>
+        </tr>`;
+        result += `<tr class="collapse" id="quality-${item.id}">
+          <td colspan="6">${qualityDetail}</td>
+        </tr>`
+      }
+      $('#tableQuality').html(result);
+
+      //- Capacity
+      $('#tableCapacity').empty();
+      result = '';
+      result += `<tr>
+        <th>ID</th>
+        <th>Machine</th>
+        <th>Start Time</th>
+        <th>End Time</th>
+        <th>Value</th>
+      </tr>`;
+      for(i = 0; i < capacity.length; i++) {
+        let item = capacity[i];
+        let nodeName = item.node ? item.node.name : '';
+        let startTime = utility_format_datetime(item.start_time);
+        let endTime = utility_format_datetime(item.end_time);
+        result += `<tr>
+          <td>${item.id}</td>
+          <td>${nodeName}</td>
+          <td>${startTime}</td>
+          <td>${endTime}</td>
+          <td>-</td>
+          //- NOTE: comment out has PO has not been provided
+          <!--<td>${roundToDecimalPoint(item.value, roundUpDecimalPoint)}</td>-->
+        </tr>`;
+      }
+      $('#tableCapacity').html(result);
+    }
