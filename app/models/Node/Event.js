@@ -28,8 +28,10 @@ const Event = bookshelf.model('Event', {
   },
   node() {
     return this.belongsTo(Node)
-  }
+  },
 }, {
+  RECORD_STATUS_IN_PROGRESS: 'IN_PROGRESS',
+  RECORD_STATUS_COMPLETED: 'COMPLETED',
   fillEventBeforeStartTime(event, startTime, endTime) {
     const STATUS_NO_EVENT = 'NO_EVENT'
     // case 1:

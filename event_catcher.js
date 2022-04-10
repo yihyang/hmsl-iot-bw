@@ -80,6 +80,7 @@ async function insertNewEvent(nodeId, method, status, rawData) {
     status: status,
     raw_data: rawData,
     start_time_fetch_method: method,
+    record_status: Event.RECORD_STATUS_IN_PROGRESS,
   }).save();
 }
 
@@ -90,6 +91,7 @@ async function updateEventEndTime(eventId, method) {
   event.set('duration', currentTime.diff(moment(event.attributes.start_time), 'seconds'))
   event.set('end_time', currentTime);
   event.set('end_time_fetch_method', method);
+  event.set('record_status', Event.RECORD_STATUS_COMPLETED);
   await event.save();
 }
 
