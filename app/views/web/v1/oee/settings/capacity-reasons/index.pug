@@ -6,14 +6,14 @@ include ./../../../../../shared/page_components
 block content
   .container
     .row.my-2
-      +render_back_to_link('Daily Time Input', '/oee/daily-time-inputs')
+      +render_back_to_link('Daily Time Input', '/oee/settings')
     .row.mt-3
       h2 Capacity Reasons
     .row
       include ./../../../../../shared/pagination
     .row
       .col
-        a.btn.btn-primary.my-2(href="/oee/daily-time-inputs/capacity-reasons/new")
+        a.btn.btn-primary.my-2(href="/oee/settings/capacity-reasons/new")
           i.fa.fa-plus-circle
           | &nbsp;Add New Reason
 
@@ -28,10 +28,10 @@ block content
             td= g.id
             td= g.title
             td
-              a.btn.btn-link(href=`/oee/daily-time-inputs/capacity-reasons/${g.id}/edit`)
+              a.btn.btn-link(href=`/oee/settings/capacity-reasons/${g.id}/edit`)
                 i.fa.fa-pencil-square-o
                 | &nbsp;Edit
-              form(method="POST", action=`/oee/daily-time-inputs/capacity-reasons/${g.id}/destroy`)
+              form(method="POST", action=`/oee/settings/capacity-reasons/${g.id}/destroy`)
                 button.btn.btn-link(onclick=`return confirm('Are you sure you want to delete the record ${g.id}?')`)
                   i.fa.fa-trash
                   | &nbsp;Delete

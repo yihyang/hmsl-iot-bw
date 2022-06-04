@@ -1,5 +1,6 @@
 const rootPath = './../../../../../..'
 
+const moment = require('moment')
 const {
   filterParams,
   getPaginationAttributes,
@@ -23,7 +24,7 @@ let index = async (req, res) => {
   let reasonCount = await new CapacityReason().count('*');
   let total_page = Math.ceil(parseInt(reasonCount) / paginationAttribute.items_per_page);
 
-  res.render('web/v1/oee/daily-time-inputs/capacity-reasons/index', {
+  res.render('web/v1/oee/settings/capacity-reasons/index', {
     reasons,
     ...paginationAttribute,
     total_page
@@ -32,7 +33,7 @@ let index = async (req, res) => {
 }
 
 let add = async (req, res) => {
-  res.render('web/v1/oee/daily-time-inputs/capacity-reasons/add')
+  res.render('web/v1/oee/settings/capacity-reasons/add')
 }
 
 let edit = async (req, res) => {
@@ -40,7 +41,7 @@ let edit = async (req, res) => {
 
   reason = reason.toJSON()
 
-  res.render('web/v1/oee/daily-time-inputs/capacity-reasons/edit', {reason})
+  res.render('web/v1/oee/settings/capacity-reasons/edit', {reason})
 }
 
 let update = async (req, res) => {
@@ -50,7 +51,7 @@ let update = async (req, res) => {
   reason.save({title}, {patch: true})
 
   req.flash('success', `Successfully updated reason`)
-  res.redirect('/oee/daily-time-inputs/capacity-reasons')
+  res.redirect('/oee/settings/capacity-reasons')
 }
 
 let save = async (req, res) => {
@@ -59,7 +60,7 @@ let save = async (req, res) => {
   await new CapacityReason({title}).save()
 
   req.flash('success', `Successfully created new reason`)
-  res.redirect('/oee/daily-time-inputs/capacity-reasons')
+  res.redirect('/oee/settings/capacity-reasons')
 }
 
 
@@ -69,14 +70,14 @@ let destroy = async (req, res) => {
   if (!reason) {
       req.flash('danger', 'Unable to find the reason')
       return res.redirect(
-        '/oee/daily-time-inputs/capacity-reasons',
+        '/oee/settings/capacity-reasons',
       )
   }
 
   await reason.save({deleted_at: moment()}, {patch: true})
 
   req.flash('success', `Successfully deleted reason with ID ${reason.id}`)
-  res.redirect('/oee/daily-time-inputs/capacity-reasons')
+  res.redirect('/oee/settings/capacity-reasons')
 }
 
 

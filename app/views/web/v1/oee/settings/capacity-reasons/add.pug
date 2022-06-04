@@ -6,7 +6,7 @@ include ./../../../../../shared/page_components
 block content
   .container
     .row
-      +render_back_to_link('Capacity Reason Page', '/oee/daily-time-inputs/capacity-reasons')
+      +render_back_to_link('Capacity Reason Page', '/oee/settings/capacity-reasons')
 
     .row.text-center.mt-3
       h1 Add Reason
@@ -14,7 +14,7 @@ block content
     .row
       .col-md-6.col-sm-12
         //- form
-        form(method="POST" action='/oee/daily-time-inputs/capacity-reasons')
+        form(method="POST" action='/oee/settings/capacity-reasons')
           .form-group
             label(for="title") Title
             input.form-control(type="text" name="title")

@@ -1,5 +1,6 @@
 const rootPath = './../../../../..'
 const nodeDefaultValues = require('./Setting/NodeDefaultValueController')
+const capacityReasons = require('./Setting/CapacityReasonController')
 
 
 let index = async function(req, res) {
@@ -9,4 +10,5 @@ let index = async function(req, res) {
 module.exports = {
   index,
   nodeDefaultValues,
+  capacityReasons,
 }

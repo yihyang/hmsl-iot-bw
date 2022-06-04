@@ -4,7 +4,7 @@ var Service = require('node-windows').Service;
 var svc = new Service({
   name:'HMSL IOT Service',
   description: 'HMSL IOT Service',
-  script: 'C:\\hmsl-iot\\repo\\hmsl-iot\\app.js'
+  script: 'C:\\hmsl-iot\\repo\\hmsl-iot-bw\\app.js'
 });
 
 svc.on('install',function(){
@@ -22,7 +22,7 @@ svc.on('uninstall',function(){
 var svc2 = new Service({
   name:'HMSL IOT Event Catcher',
   description: 'HMSL IOT Event Catcher',
-  script: 'C:\\hmsl-iot\\repo\\hmsl-iot\\event_catcher.js'
+  script: 'C:\\hmsl-iot\\repo\\hmsl-iot-bw\\event_catcher.js'
 });
 
 svc2.on('install',function(){
@@ -40,7 +40,7 @@ svc2.on('uninstall',function(){
 var oeeGenerator = new Service({
   name:'HMSL OEE Generator',
   description: 'HMSL OEE Generator',
-  script: 'C:\\hmsl-iot\\repo\\hmsl-iot\\oee_generator.js'
+  script: 'C:\\hmsl-iot\\repo\\hmsl-iot-bw\\oee_generator.js'
 });
 
 oeeGenerator.on('install',function(){
@@ -57,7 +57,7 @@ oeeGenerator.on('uninstall',function(){
 // var svc4 = new Service({
 //   name:'HMSL OEE Rework',
 //   description: 'HMSL OEE Rework',
-//   script: 'C:\\hmsl-iot\\repo\\hmsl-iot\\oee_rework.js'
+//   script: 'C:\\hmsl-iot\\repo\\hmsl-iot-bw\\oee_rework.js'
 // });
 
 // svc4.on('install',function(){
@@ -74,7 +74,7 @@ oeeGenerator.on('uninstall',function(){
 var oeeReworkQueue = new Service({
   name:'HMSL OEE Rework Queue',
   description: 'HMSL OEE Queue',
-  script: 'C:\\hmsl-iot\\repo\\hmsl-iot\\queue.js'
+  script: 'C:\\hmsl-iot\\repo\\hmsl-iot-bw\\queue.js'
 });
 
 oeeReworkQueue.on('install',function(){
@@ -87,10 +87,36 @@ oeeReworkQueue.on('uninstall',function(){
   console.log('The service exists: ',oeeReworkQueue.exists);
 });
 
+
+/***************
+ * HDH DB View *
+ ***************/
+let refreshHDHDatabaseView = new Service({
+  name: 'HMTM IOT - Refresh HDH Database View',
+  description: 'HMTM IOT - Refresh HDH Database View',
+  script: 'C:\\hmsl-iot\\repo\\hmsl-iot-bw\\commands\\refresh_hdh_materialized_views.js'
+})
+
+
+// Listen for the "install" event, which indicates the
+// process is available as a service.
+refreshHDHDatabaseView.on('install',function(){
+  refreshHDHDatabaseView.start();
+  console.log('installed HMTM IOT - Refresh HDH Database View Service');
+});
+
+
+// Listen for the "uninstall" event so we know when it's done.
+refreshHDHDatabaseView.on('uninstall',function(){
+  console.log('Uninstall HMTM IOT - Refresh HDH Database View Service complete.');
+  console.log('The service exists: ', refreshHDHDatabaseView.exists);
+});
+
 module.exports = {
   svc,
   svc2,
   oeeGenerator,
   // svc4,
   oeeReworkQueue,
+  refreshHDHDatabaseView,
 }

@@ -5,7 +5,7 @@ const moment = require('moment');
 const bookshelf = require(`${rootPath}/config/bookshelf`);
 const { getSiteName } = require(`${rootPath}/config/app-settings`)
 const { getDefaultMaxValue, getDefaultButtonValue } = require(`${rootPath}/app/helpers/oee/daily_time_input`)
-const capacityReasons = require(rootPath + '/app/controllers/web/v1/OEE/DailyTimeInput/CapacityReasonController')
+// const capacityReasons = require(rootPath + '/app/controllers/web/v1/OEE/DailyTimeInput/CapacityReasonController')
 const CapacityReason = require(`${rootPath}/app/models/OEE/DailyTimeInput/CapacityReason`)
 
 let index = async function(req, res) {
@@ -254,5 +254,5 @@ module.exports = {
   setDefaultValues,
   setDefaultCapacityReasons,
   setDefaultAvailabilities,
-  capacityReasons,
+  // capacityReasons,
 }

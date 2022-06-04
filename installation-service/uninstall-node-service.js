@@ -5,3 +5,4 @@ services.svc2.uninstall();
 services.oeeGenerator.uninstall();
 // services.svc4.uninstall();
 services.oeeReworkQueue.uninstall()
+services.refreshHDHDatabaseView.uninstall();

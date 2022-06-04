@@ -59,8 +59,8 @@ let refresh = async function(req, res) {
   }
 
   // NOTE: set to null as the HMSL has not issued PO
-  result['oee2'] = null
-  result['capacity_value'] = null
+  // result['oee2'] = null
+  // result['capacity_value'] = null
 
   res.json(result)
 }

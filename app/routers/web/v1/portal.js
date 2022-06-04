@@ -97,6 +97,13 @@ module.exports = (app, tmpUpload) => {
     app.get('/oee/settings/machine-default-values', web.v1.oee.settings.nodeDefaultValues.index)
     app.get('/oee/settings/machine-default-values/:area(all)', web.v1.oee.settings.nodeDefaultValues.area)
     app.put('/oee/settings/machine-default-values/:nodeId', web.v1.oee.settings.nodeDefaultValues.update)
+    // capacity reasons configuration
+    app.get('/oee/settings/capacity-reasons', web.v1.oee.settings.capacityReasons.index)
+    app.post('/oee/settings/capacity-reasons', web.v1.oee.settings.capacityReasons.save)
+    app.get('/oee/settings/capacity-reasons/new', web.v1.oee.settings.capacityReasons.add)
+    app.put('/oee/settings/capacity-reasons/:id', web.v1.oee.settings.capacityReasons.update)
+    app.get('/oee/settings/capacity-reasons/:id', web.v1.oee.settings.capacityReasons.edit)
+    app.post('/oee/settings/capacity-reasons/:id/update', web.v1.oee.settings.capacityReasons.update)
 
     app.get('/settings', web.v1.settings.index)
     app.get('/settings/users', web.v1.settings.users.index)
@@ -124,16 +131,16 @@ module.exports = (app, tmpUpload) => {
     app.post('/operators/po-end/step-2', web.v1.operators.poEnd.step2)
     app.post('/operators/po-end', web.v1.operators.poEnd.end)
 
+    // capacity reasons
+    app.get('/oee/settings/capacity-reasons', web.v1.oee.settings.capacityReasons.index)
+    app.post('/oee/settings/capacity-reasons', web.v1.oee.settings.capacityReasons.save)
+    app.get('/oee/settings/capacity-reasons/new', web.v1.oee.settings.capacityReasons.add)
+    app.get('/oee/settings/capacity-reasons/:id/edit', web.v1.oee.settings.capacityReasons.edit)
+    app.post('/oee/settings/capacity-reasons/:id/update', web.v1.oee.settings.capacityReasons.update)
+    app.post('/oee/settings/capacity-reasons/:id/destroy', web.v1.oee.settings.capacityReasons.destroy)
+
     // AM Only
     if (isAM()) {
-        // capacity reasons
-        app.get('/oee/daily-time-inputs/capacity-reasons', web.v1.oee.dailyTimeInputs.capacityReasons.index)
-        app.post('/oee/daily-time-inputs/capacity-reasons', web.v1.oee.dailyTimeInputs.capacityReasons.save)
-        app.get('/oee/daily-time-inputs/capacity-reasons/new', web.v1.oee.dailyTimeInputs.capacityReasons.add)
-        app.get('/oee/daily-time-inputs/capacity-reasons/:id/edit', web.v1.oee.dailyTimeInputs.capacityReasons.edit)
-        app.post('/oee/daily-time-inputs/capacity-reasons/:id/update', web.v1.oee.dailyTimeInputs.capacityReasons.update)
-        app.post('/oee/daily-time-inputs/capacity-reasons/:id/destroy', web.v1.oee.dailyTimeInputs.capacityReasons.destroy)
-
         // production systems
         app.get('/ps', web.v1.productionSystems.index)
         app.get('/ps/solder-wires', web.v1.productionSystems.solderWires.index)
