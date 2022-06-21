@@ -13,7 +13,8 @@ const {
   getDateRange
 } = require(`${rootPath}/app/helpers/date_helper`)
 const {
-  addRerunGwoOeeJob
+  addRerunGwoOeeJob,
+  addRunGwoItemEventsLinkJob,
 } = require(`${rootPath}/app/helpers/queue_helper`)
 
 // General Work Order
@@ -53,6 +54,16 @@ var Gwo = bookshelf.Model.extend({
         await addRerunGwoOeeJob(nodeIds, model._previousAttributes.start_time, model._previousAttributes.end_time)
         await addRerunGwoOeeJob(nodeIds, newStartTime, newEndTime)
       }
+    }),
+    this.on('updated', async (model, attrs, options) => {
+      let gwoItems = await (new GwoItem().query(qb => {
+        qb.where('gwo_id', model.id)
+      }).fetchAll())
+      gwoItems = gwoItems.toJSON()
+
+      await asyncForEach(gwoItems, async (item) => {
+        await addRunGwoItemEventsLinkJob(item.id)
+      })
     })
   },
   gwo_items() {

@@ -26,7 +26,21 @@ let addRerunGwoOeeJob = async function(nodeIds, startTime, endTime) {
   addJob('rerun_gwo_oee_calculation', {node_ids: nodeIds, start_time: startTime, end_time: endTime}, {job_key: jobKey})
 }
 
+let addRunGwoItemEventsLinkJob = async (gwoItemId) => {
+  let jobKey = 'add_run_gwo_item_events_link_job-' + gwoItemId
+  addJob(
+    'run_gwo_item_events_link',
+    {
+      'gwo_item_id': gwoItemId,
+    },
+    {
+      job_key: jobKey,
+    },
+  )
+}
+
 module.exports = {
   addRerunDailyTimeInputOeeJob,
   addRerunGwoOeeJob,
+  addRunGwoItemEventsLinkJob,
 }

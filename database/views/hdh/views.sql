@@ -59,6 +59,35 @@ LEFT OUTER JOIN node_groups ON nodes.node_group_id = node_groups.id
 ORDER BY nodes.id;
 
 
+-- hdh views: capacities
+CREATE OR REPLACE VIEW hdh_view.capacities
+AS
+SELECT
+  oee_node_daily_inputs.id AS id,
+  oee_node_daily_inputs.node_id AS device_id,
+  oee_node_daily_inputs.date AS date,
+  am_availability AS am,
+  pm_availability AS pm
+FROM oee_node_daily_inputs
+ORDER BY oee_node_daily_inputs.id;
+
+
+-- v2
+CREATE OR REPLACE VIEW hdh_view.reason_code_markers
+AS
+SELECT gwo_items.id AS id,
+min(events.start_time) AS start_time,
+max(events.end_time) AS end_time,
+gwo_items.node_id AS device_id,
+gwo_reasons.id AS reason_id,
+gwo_reasons.title AS reason_title
+FROM gwo_items
+JOIN gwo ON gwo_items.gwo_id = gwo.id
+JOIN gwo_item_event ON gwo_items.id = gwo_item_event.gwo_item_id
+JOIN events ON gwo_item_event.event_id = events.id
+JOIN gwo_reasons ON gwo.gwo_reason_id = gwo_reasons.id
+GROUP BY gwo_items.id, gwo_reasons.id
+ORDER BY gwo_items.id;
 
 # 2. Import schema
 # NOTE: run this as hdh_user on hdh_db
